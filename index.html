@@ -1500,7 +1500,7 @@
     <div class="section-page hero-container" id="heroSection">
       <button class="skip-anim-btn show" id="bannerSkipBtn">Skip 略過動畫 ✕</button>
 
-      <img src="/img/logo02.png" class="brand-logo-img" alt="洸限">
+      <img src="/img/logo02.png" class="brand-logo-img" alt="洸限" data-html2canvas-ignore="true">
 
       <div class="banner-questions-wrapper">
         <div class="ui-line-mask">
@@ -3463,7 +3463,7 @@
       }
     });
 
-    revealInputStep();
+    // 此時只展開「稱呼」欄位；至少輸入 1 個有效字元後，才進入 Step 2。
     updateGenerateState();
   }
 
@@ -3683,7 +3683,13 @@
     }
     els.downloadBtn.disabled = true;
     try {
-      const canvas = await html2canvas(els.card, { scale: 3, backgroundColor: null, useCORS: true });
+      const canvas = await html2canvas(els.card, {
+        scale: 3,
+        backgroundColor: null,
+        useCORS: true,
+        // html2canvas 會 clone 文件；明確忽略 P1 logo，避免 P5 下載時再次請求不存在的 /img/logo02.png。
+        ignoreElements: (element) => element.classList?.contains('brand-logo-img')
+      });
       const link = document.createElement('a');
       link.download = `洸限_時光小卡_${formatDate().replace(/\./g, '-')}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -3736,7 +3742,13 @@
 
   async function buildDissolveParticles() {
     if (!window.html2canvas) return [];
-    const snapshot = await html2canvas(els.card, { scale: 1, backgroundColor: null, useCORS: true });
+    const snapshot = await html2canvas(els.card, {
+      scale: 1,
+      backgroundColor: null,
+      useCORS: true,
+      // 寄出卡片時也會再次截圖做粒子化；同樣排除 P1 logo。
+      ignoreElements: (element) => element.classList?.contains('brand-logo-img')
+    });
     const sourceCtx = snapshot.getContext('2d', { willReadFrequently: true });
     const rect = els.card.getBoundingClientRect();
     const image = sourceCtx.getImageData(0, 0, snapshot.width, snapshot.height);
@@ -3982,8 +3994,20 @@
   };
 
   els.targetBtns.forEach(btn => btn.addEventListener('click', () => chooseTarget(btn)));
-  els.customTarget.addEventListener('input', updateGenerateState);
-    els.memory.addEventListener('input', updateCharCount);
+
+  els.customTarget.addEventListener('input', () => {
+    const nicknameLength = els.customTarget.value.trim().length;
+
+    // Step 2 的唯一觸發條件：
+    // 已選寄件對象，且稱呼至少有 1 個非空白字元。
+    if (selectedTarget && nicknameLength >= 1) {
+      revealInputStep();
+    }
+
+    updateGenerateState();
+  });
+
+  els.memory.addEventListener('input', updateCharCount);
   els.tagBtns.forEach(btn => btn.addEventListener('click', () => chooseTag(btn)));
   els.generateBtn.addEventListener('click', handleGenerate);
   els.skipBtn.addEventListener('click', skipP5Entrance);
