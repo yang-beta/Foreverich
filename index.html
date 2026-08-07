@@ -961,16 +961,20 @@
 }
 .p5-generate-btn {
   position: relative;
-  width: min(290px, 82%);
-  min-height: 36px;
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   border: 1px solid rgba(242,152,80,.7);
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(242,152,80,.16), rgba(242,152,80,.06));
   color: #ffd4ad;
-  font: 400 .82rem 'Noto Serif TC', serif;
-  letter-spacing: .16em;
-  padding: 8px 16px;
+  font: 400 .86rem 'Noto Serif TC', serif;
+  letter-spacing: .08em;
+  padding: 9px 16px; /* 與上方場景／情感膠囊按鈕左右距離一致 */
   cursor: pointer;
   transition: transform .3s ease, box-shadow .3s ease, background .3s ease, opacity .3s ease;
 }
@@ -2325,8 +2329,20 @@
             angle,
             targetX: brandTransitionCenter.x + Math.cos(angle) * targetRadius,
             targetY: brandTransitionCenter.y + Math.sin(angle) * targetRadius,
-            startX: Math.random() * brandTransitionCanvas.width,
-            startY: Math.random() * brandTransitionCanvas.height,
+            // 起始粒子不要均勻灑滿矩形 Canvas，否則提高亮度後會看見明顯的長方形邊界。
+            // 改成以中心為核心的橢圓形放射雲團：中心略密、外圍自然稀疏。
+            ...(() => {
+              const startAngle = Math.random() * Math.PI * 2;
+              const radial = Math.pow(Math.random(), 0.68);
+              const cloudRadiusX = brandTransitionCanvas.width * 0.31;
+              const cloudRadiusY = brandTransitionCanvas.height * 0.24;
+              const jitterX = (Math.random() - 0.5) * 34 * DPR;
+              const jitterY = (Math.random() - 0.5) * 34 * DPR;
+              return {
+                startX: brandTransitionCenter.x + Math.cos(startAngle) * cloudRadiusX * radial + jitterX,
+                startY: brandTransitionCenter.y + Math.sin(startAngle) * cloudRadiusY * radial + jitterY
+              };
+            })(),
             size: (0.9 + Math.random() * 1.3) * DPR,
             alpha: 0.35 + Math.random() * 0.55
           });
@@ -3230,13 +3246,27 @@
   function updateGenerateState() {
     const target = getResolvedTarget();
     const memoryLength = els.memory.value.trim().length;
-    const valid = Boolean(target) && memoryLength >= 10 && memoryLength <= 80 && !isGenerating;
+    const hasScene = Boolean(selectedScene);
+    const hasEmotion = Boolean(selectedEmotion);
+    const valid = Boolean(target)
+      && memoryLength >= 10
+      && memoryLength <= 80
+      && hasScene
+      && hasEmotion
+      && !isGenerating;
+
     els.generateBtn.disabled = !valid;
 
     if (memoryLength > 0 && memoryLength < 10) {
       els.validation.textContent = `再寫 ${10 - memoryLength} 個字，就能開始凝聚。`;
     } else if (selectedTarget === '自訂' && !target) {
       els.validation.textContent = '請先寫下你想寄給誰。';
+    } else if (memoryLength >= 10 && !hasScene && !hasEmotion) {
+      els.validation.textContent = '請各選擇一項「場景」與「情感」，再生成卡片。';
+    } else if (memoryLength >= 10 && !hasScene) {
+      els.validation.textContent = '請先選擇一項場景。';
+    } else if (memoryLength >= 10 && !hasEmotion) {
+      els.validation.textContent = '請先選擇一項情感。';
     } else {
       els.validation.textContent = '';
     }
@@ -3317,6 +3347,8 @@
       if (group === 'scene') selectedScene = '';
       if (group === 'emotion') selectedEmotion = '';
     }
+
+    updateGenerateState();
   }
 
   function updateCharCount() {
@@ -3348,7 +3380,14 @@
     }
 
     if (!response.ok) {
+      let serverMessage = '';
+      try {
+        const errorData = await response.json();
+        serverMessage = String(errorData?.error || errorData?.message || '').trim();
+      } catch (_) {}
+
       if (response.status === 404) throw new Error('API_ROUTE_NOT_FOUND');
+      if (serverMessage) throw new Error(`API_SERVER_${response.status}:${serverMessage}`);
       throw new Error(`API_HTTP_${response.status}`);
     }
 
@@ -3408,7 +3447,7 @@
     if (isGenerating) return;
     const target = getResolvedTarget();
     const memory = els.memory.value.trim();
-    if (!target || memory.length < 10 || memory.length > 80) {
+    if (!target || memory.length < 10 || memory.length > 80 || !selectedScene || !selectedEmotion) {
       updateGenerateState();
       return;
     }
@@ -3433,6 +3472,11 @@
         els.validation.textContent = '找不到 /api/generate。請確認 api/generate.js 已部署在網站專案的 api 資料夾。';
       } else if (error.message === 'API_NETWORK_ERROR') {
         els.validation.textContent = '無法連線 AI API，請確認目前網址與後端服務是否正常。';
+      } else if (error.message.startsWith('API_SERVER_')) {
+        const serverMessage = error.message.split(':').slice(1).join(':');
+        els.validation.textContent = `AI 後端設定錯誤：${serverMessage}`;
+      } else if (error.message.startsWith('API_HTTP_')) {
+        els.validation.textContent = `AI API 回傳 ${error.message.replace('API_HTTP_', 'HTTP ')}，請檢查 Vercel Function 設定。`;
       } else {
         els.validation.textContent = '目前時光通道較擁擠，請稍後再試一次。';
       }
