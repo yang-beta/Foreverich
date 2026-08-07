@@ -427,10 +427,14 @@
       pointer-events: none;
       border-radius: 50%;
       background:
-        repeating-radial-gradient(circle, transparent 0 24px, rgba(242,152,80,.22) 25px 26px, transparent 27px 47px),
-        repeating-conic-gradient(from 0deg, rgba(242,152,80,.14) 0deg 1deg, transparent 1deg 15deg);
-      filter: drop-shadow(0 0 26px rgba(242,152,80,.18));
-      will-change: opacity, transform;
+        repeating-radial-gradient(
+          circle at center,
+          transparent 0 28px,
+          rgba(242,152,80,.20) 29px 30px,
+          transparent 31px 56px
+        );
+      filter: drop-shadow(0 0 20px rgba(242,152,80,.14));
+      /* P4 背景固定為靜態同心圓，不做旋轉或持續動畫。 */
     }
 
     .p4-content {
@@ -1605,7 +1609,7 @@
               <div class="p5-tag-options">
                 <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🌅 微光日常">🌅 微光日常</button>
                 <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🍲 家的味道">🍲 家的味道</button>
-                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="👁️ 純粹的雙眸">👁️ 純粹的雙眸</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🐾 單純的雙眸">🐾 單純的雙眸</button>
                 <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🎒 過往與青春">🎒 過往與青春</button>
               </div>
             </div>
@@ -2314,7 +2318,7 @@
     function buildBrandTransitionParticles() {
       const points = [];
       const ringCount = 5;
-      const petalsPerRing = [18, 28, 38, 48, 60];
+      const petalsPerRing = [30, 46, 62, 78, 96];
 
       for (let ring = 0; ring < ringCount; ring += 1) {
         const radius = brandTransitionMaxRadius * ((ring + 1) / ringCount);
@@ -2329,22 +2333,25 @@
             angle,
             targetX: brandTransitionCenter.x + Math.cos(angle) * targetRadius,
             targetY: brandTransitionCenter.y + Math.sin(angle) * targetRadius,
-            // 起始粒子不要均勻灑滿矩形 Canvas，否則提高亮度後會看見明顯的長方形邊界。
-            // 改成以中心為核心的橢圓形放射雲團：中心略密、外圍自然稀疏。
+            // P3 起始粒子覆蓋整個視窗，但不直接以矩形 x/y 均勻取樣。
+            // 改用「超出視窗邊界的放射圓盤」取樣：圓盤半徑大於中心到最遠角落，
+            // 因此四角也會有粒子，同時真正的分布邊界落在螢幕外，不會看到長方形或橢圓框。
             ...(() => {
               const startAngle = Math.random() * Math.PI * 2;
-              const radial = Math.pow(Math.random(), 0.68);
-              const cloudRadiusX = brandTransitionCanvas.width * 0.31;
-              const cloudRadiusY = brandTransitionCanvas.height * 0.24;
-              const jitterX = (Math.random() - 0.5) * 34 * DPR;
-              const jitterY = (Math.random() - 0.5) * 34 * DPR;
+              const farthestX = Math.max(brandTransitionCenter.x, brandTransitionCanvas.width - brandTransitionCenter.x);
+              const farthestY = Math.max(brandTransitionCenter.y, brandTransitionCanvas.height - brandTransitionCenter.y);
+              const coverRadius = Math.hypot(farthestX, farthestY) * 1.16;
+
+              // sqrt 讓圓盤面積分布自然；額外微擾避免形成規則圓環。
+              const radial = Math.sqrt(Math.random()) * coverRadius;
+              const jitter = (Math.random() - 0.5) * 28 * DPR;
               return {
-                startX: brandTransitionCenter.x + Math.cos(startAngle) * cloudRadiusX * radial + jitterX,
-                startY: brandTransitionCenter.y + Math.sin(startAngle) * cloudRadiusY * radial + jitterY
+                startX: brandTransitionCenter.x + Math.cos(startAngle) * radial + Math.cos(startAngle + Math.PI / 2) * jitter,
+                startY: brandTransitionCenter.y + Math.sin(startAngle) * radial + Math.sin(startAngle + Math.PI / 2) * jitter
               };
             })(),
             size: (0.9 + Math.random() * 1.3) * DPR,
-            alpha: 0.35 + Math.random() * 0.55
+            alpha: 0.30 + Math.random() * 0.52
           });
         }
       }
@@ -2817,7 +2824,7 @@
 
       page4TL = gsap.timeline();
       page4TL
-        .to('#p4MandalaBackdrop', { opacity: .2, scale: .85, duration: 1.2, ease: 'power2.inOut' }, 0)
+        .set('#p4MandalaBackdrop', { opacity: .2, scale: .85 }, 0)
         .to(p4HeaderLines[0], { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 1.7)
         .to(p4HeaderLines[1], { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 3.2)
         .to(p4Cards, {
@@ -3243,7 +3250,7 @@
     return els.customTarget.value.trim();
   }
 
-  function updateGenerateState() {
+  function updateGenerateState({ preserveMessage = false } = {}) {
     const target = getResolvedTarget();
     const memoryLength = els.memory.value.trim().length;
     const hasScene = Boolean(selectedScene);
@@ -3267,7 +3274,7 @@
       els.validation.textContent = '請先選擇一項場景。';
     } else if (memoryLength >= 10 && !hasEmotion) {
       els.validation.textContent = '請先選擇一項情感。';
-    } else {
+    } else if (!preserveMessage) {
       els.validation.textContent = '';
     }
   }
@@ -3306,6 +3313,7 @@
   }
 
   function chooseTarget(button) {
+    els.validation.textContent = '';
     selectedTarget = button.dataset.target || '';
     els.targetBtns.forEach(btn => {
       const active = btn === button;
@@ -3328,6 +3336,7 @@
   }
 
   function chooseTag(button) {
+    els.validation.textContent = '';
     const group = button.dataset.tagGroup;
     const tag = button.dataset.tag;
     const sameGroupBtns = els.tagBtns.filter(btn => btn.dataset.tagGroup === group);
@@ -3352,6 +3361,7 @@
   }
 
   function updateCharCount() {
+    els.validation.textContent = '';
     const length = els.memory.value.length;
     els.charCount.textContent = String(length);
     els.charCount.parentElement.classList.toggle('is-warning', length > 70);
@@ -3443,6 +3453,26 @@
     gsap.fromTo('.p5-card-actions', { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: .55, delay: .55, ease: 'power2.out' });
   }
 
+  function showGenerateError(message) {
+    // API 失敗時不要立刻關閉 Modal，否則使用者只會看到按鈕閃一下。
+    // 保留 Modal 並直接顯示實際錯誤，直到使用者點擊畫面返回表單。
+    setModalState('loading');
+    gsap.killTweensOf([els.loadingMandala, els.loadingTitle, els.loadingText]);
+    gsap.to(els.loadingMandala, { autoAlpha: 0.22, scale: 0.9, duration: .35 });
+    els.loadingTitle.textContent = '時光通道暫時未能連線';
+    els.loadingText.textContent = message;
+    gsap.set([els.loadingTitle, els.loadingText], { autoAlpha: 1, y: 0 });
+
+    // 點擊 Loading 區即可回到表單重試；使用 once 避免累積事件。
+    els.loading.style.cursor = 'pointer';
+    els.loading.addEventListener('click', () => {
+      els.loading.style.cursor = '';
+      els.loadingTitle.textContent = '正在為你凝結時光的微光．．．';
+      els.loadingText.textContent = '你的文字正在被輕輕梳理，請稍候。';
+      closeModal(true);
+    }, { once: true });
+  }
+
   async function handleGenerate() {
     if (isGenerating) return;
     const target = getResolvedTarget();
@@ -3464,25 +3494,28 @@
       showGeneratedCard(quote);
     } catch (error) {
       console.error('P5 AI 生成失敗:', error);
-      closeModal(true);
 
+      let errorMessage = '目前時光通道較擁擠，請稍後再試一次。';
       if (error.message === 'LOCAL_PREVIEW_NO_API') {
-        els.validation.textContent = '目前是單檔本機預覽，無法呼叫 /api/generate。請用 Vercel／本機開發伺服器連同 api/generate.js 一起執行。';
+        errorMessage = '目前是單檔本機預覽，無法呼叫 /api/generate。請使用已部署 API 的網址測試。';
       } else if (error.message === 'API_ROUTE_NOT_FOUND') {
-        els.validation.textContent = '找不到 /api/generate。請確認 api/generate.js 已部署在網站專案的 api 資料夾。';
+        errorMessage = '找不到 /api/generate。請確認 api/generate.js 已部署在專案的 api 資料夾。';
       } else if (error.message === 'API_NETWORK_ERROR') {
-        els.validation.textContent = '無法連線 AI API，請確認目前網址與後端服務是否正常。';
+        errorMessage = '無法連線 AI API，請確認目前網址與後端服務是否正常。';
       } else if (error.message.startsWith('API_SERVER_')) {
         const serverMessage = error.message.split(':').slice(1).join(':');
-        els.validation.textContent = `AI 後端設定錯誤：${serverMessage}`;
+        errorMessage = `AI 後端設定錯誤：${serverMessage}`;
       } else if (error.message.startsWith('API_HTTP_')) {
-        els.validation.textContent = `AI API 回傳 ${error.message.replace('API_HTTP_', 'HTTP ')}，請檢查 Vercel Function 設定。`;
-      } else {
-        els.validation.textContent = '目前時光通道較擁擠，請稍後再試一次。';
+        errorMessage = `AI API 回傳 ${error.message.replace('API_HTTP_', 'HTTP ')}，請檢查 Vercel Function 與環境變數。`;
+      } else if (error.message) {
+        errorMessage = `AI 生成失敗：${error.message}`;
       }
+
+      els.validation.textContent = errorMessage;
+      showGenerateError(errorMessage);
     } finally {
       isGenerating = false;
-      updateGenerateState();
+      updateGenerateState({ preserveMessage: true });
     }
   }
 
