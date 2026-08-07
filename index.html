@@ -1016,7 +1016,12 @@
 
 /* ===== Modal ===== */
 .p5-card-modal {
-  position: fixed;
+  /* 重要：
+     .sections-wrapper 會用 transform 做全頁切換。
+     transformed ancestor 會改變 position:fixed 的 containing block，
+     導致 P5 Modal 實際跑到視窗外。
+     因此 Modal 應以 P5 .section-page 為基準使用 absolute。 */
+  position: absolute;
   inset: 0;
   z-index: 120;
   display: none;
@@ -1026,10 +1031,17 @@
   background: rgba(15,15,15,.96);
   backdrop-filter: blur(10px);
   overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
-.p5-card-modal.is-open { display: flex; }
+.p5-card-modal.is-open {
+  display: flex;
+  visibility: visible;
+  opacity: 1;
+}
 .p5-dissolve-canvas {
-  position: fixed;
+  /* 與 Modal 使用同一個 P5 頁面座標系，避免 transformed ancestor 造成錯位 */
+  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -3425,6 +3437,7 @@
   function openModalForLoading() {
     els.modal.classList.add('is-open');
     els.modal.setAttribute('aria-hidden', 'false');
+    gsap.set(els.modal, { autoAlpha: 1 });
     setPageAnimationLock(true);
     setModalState('loading');
     gsap.set([els.loadingMandala, els.loadingTitle, els.loadingText], { autoAlpha: 0, y: 10 });
@@ -3483,14 +3496,21 @@
     }
 
     isGenerating = true;
-    updateGenerateState();
+    els.validation.textContent = '正在開啟時光通道…';
+    updateGenerateState({ preserveMessage: true });
+
+    // 先開啟 Modal，再發 API。
+    // 即使後端失敗，使用者也會看到明確狀態，而不是只看到按鈕閃一下。
     openModalForLoading();
 
     try {
+      console.info('[P5] 生成流程開始：Modal 已開啟，準備呼叫 /api/generate');
       const [quote] = await Promise.all([
         generateAIQuote(target, memory, selectedScene, selectedEmotion),
         delay(2500)
       ]);
+      console.info('[P5] AI 回傳成功，準備顯示時光小卡');
+      els.validation.textContent = '';
       showGeneratedCard(quote);
     } catch (error) {
       console.error('P5 AI 生成失敗:', error);
