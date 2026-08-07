@@ -25,16 +25,19 @@ export default async function handler(req, res) {
     }
 
     // 🔑 自伺服器環境變數中讀取密鑰（此處映射為 Vercel 設定的 NEXT_PUBLIC_GEMINI_KEY）[cite: 32]
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_KEY;
+    const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GEMINI_KEY;
     
     // 🛡️ 安全檢查 2：若雲端平台尚未配置金鑰環境變數，立即中斷並發出明確警告，防止伺服器持續空轉[cite: 32]
     if (!apiKey) {
-        return res.status(400).json({ error: '後端未偵測到 NEXT_PUBLIC_GEMINI_KEY 環境變數，請確認 Vercel 後台已填寫。' });
+        return res.status(500).json({ error: '後端未偵測到 GROQ_API_KEY（亦相容舊名稱 NEXT_PUBLIC_GEMINI_KEY）。請至 Vercel → Project Settings → Environment Variables 設定後重新部署。' });
     }
 
     try {
         // 📥 解析前端發送過來的請求主體（Request Body），提取 userPrompt[cite: 32]
-        const { prompt } = req.body;
+        const { prompt } = req.body || {};
+        if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+            return res.status(400).json({ error: '缺少有效的 prompt。' });
+        }
         
         // 🌐 Groq 高速推理伺服器的 OpenAI 相容 API 端點[cite: 32]
         const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
@@ -92,4 +95,3 @@ export default async function handler(req, res) {
         return res.status(200).json({ text: `[通道維護報告]：${error.message}` });
     }
 }
-
