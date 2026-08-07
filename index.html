@@ -1,1 +1,3626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>洸限 - 展覽導覽</title>
 
+  <!-- 1. 字體與圖示庫 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" href="data:,">
+
+  <!-- 2. GSAP 核心動畫庫 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* =============================================================
+       0. 全域與統一元件樣式
+       ============================================================= */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: #1a1a1a !important;
+      color: #E6E6E8 !important;
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    *, *::before, *::after {
+      box-sizing: inherit;
+      margin: 0;
+      padding: 0;
+    }
+
+    #mandalaCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .sections-wrapper {
+      width: 100vw;
+      height: 100vh;
+      transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+      will-change: transform;
+    }
+
+    .section-page {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 🎯 核心：全站統一的文字遮罩與文字級距結構 */
+    .ui-line-mask {
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-bottom: 4px;
+      width: 100%;
+    }
+
+    .ui-line-content {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 1.2rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      color: #E6E6E8;
+      transform: translateY(115%);
+      opacity: 0;
+      line-height: 1.8;
+      will-change: transform, opacity;
+      text-align: center;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .skip-anim-btn {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      background: none;
+      border: 1px solid rgba(230, 230, 232, 0.25);
+      color: #E6E6E8;
+      padding: 8px 16px;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 20;
+      opacity: 0; 
+      pointer-events: none;
+      transition: opacity 0.5s ease, background-color 0.3s ease, border-color 0.3s ease;
+      border-radius: 20px;
+    }
+
+    .skip-anim-btn.show { opacity: 1; pointer-events: auto; }
+    .skip-anim-btn:hover { background-color: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.5); }
+
+    /* =============================================================
+       🎯 全站跨頁統一 v 箭頭 CSS 規範 (LP, P1, P2, 及未來所有頁面)
+       ============================================================= */
+    .scroll-arrow-btn {
+      position: absolute;
+      bottom: 15%;             /* 固定距螢幕底部 15%，確保全站跨頁一致對齊 */
+      left: 50%;
+      margin-left: -24px;     /* 寬度 48px 的一半，精準水平置中且不依賴 transform */
+      width: 48px;
+      height: 48px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      z-index: 10;
+      opacity: 0;             /* 初始隱藏，由 GSAP 依時間軸淡入 */
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 滑鼠靠近放大效果套用在內層 SVG，完全避開外層 <button> 的 GSAP translateY 衝突 */
+    .scroll-arrow-btn:hover .arrow-icon {
+      transform: scale(1.25);
+    }
+
+    .arrow-icon {
+      width: 32px;
+      height: 32px;
+      stroke: #E6E6E8;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0px 0px 6px rgba(230, 230, 232, 0.5));
+      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* =============================================================
+       1. Loading Page (LP 頁)
+       ============================================================= */
+    #openingHero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #1a1a1a;
+      z-index: 10;
+    }
+
+    #loadingCanvas {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40vh;
+      z-index: 1;
+      pointer-events: none;
+      transition: opacity 1.2s ease;
+    }
+
+    .loading-text-box {
+      position: absolute;
+      z-index: 10;
+      font-size: 1.2rem;
+      letter-spacing: 0.5em;
+      color: #E6E6E8;
+      font-weight: 300;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .char { opacity: 0; display: inline-block; transform: translateY(10px); }
+
+    .logo-container {
+      width: 500px;
+      height: 500px;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      clip-path: circle(0% at 50% 50%);
+      transform: scale(0.7);
+      filter: blur(20px);
+      opacity: 0;
+      margin-bottom: -90px;
+      margin-top: -30px;
+      will-change: clip-path, transform, filter, opacity;
+    }
+
+    .logo-container svg {
+      width: 100%;
+      height: 100%;
+      animation: goldGlowPulse 4.0s ease-in-out infinite alternate;
+    }
+
+    .st0 { fill: #f29850; }
+
+    .interactive-area {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .title-wrapper { height: 36px; }
+    .subtitle-wrapper-1 { height: 36px; margin-top: 10px; }
+    .subtitle-wrapper-2 { height: 36px; margin-top: 10px; }
+
+    .text-line { color: #E6E6E8; line-height: 1; }
+
+    /* 所有文字進場元素共用的初始狀態，由 GSAP 統一控制 */
+    .ui-animate-text {
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+    .title-part1 { font-size: 1.2rem; letter-spacing: 0.4em; font-weight: 300; }
+    .title-part2 { font-size: 1.2rem; letter-spacing: 0.4em; font-weight: 300; opacity: 0.9; }
+
+    @keyframes goldGlowPulse {
+      0% { filter: drop-shadow(0 0 8px rgba(242, 152, 80, 0.4)); }
+      50% { filter: drop-shadow(0 0 24px rgba(247, 208, 112, 0.85)); }
+      100% { filter: drop-shadow(0 0 12px rgba(242, 152, 80, 0.5)); }
+    }
+
+    /* =============================================================
+       2. Banner 頁 (P1 頁)
+       ============================================================= */
+    .hero-container {
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .brand-logo-img {
+      width: 320px;
+      max-width: 75vw;
+      height: auto;
+      opacity: 0; 
+      margin-bottom: 2.5rem;
+      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.15));
+      will-change: opacity, transform;
+    }
+
+    .banner-questions-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      width: 90%;
+      max-width: 800px;
+    }
+
+    .banner-question-part { font-size: 1.2rem; font-weight: 300; letter-spacing: 0.2rem; }
+    .bq-part:last-child { margin-left: 0.8rem; }
+
+    /* =============================================================
+       3. Page 2 (沙畫頁 P2)
+       ============================================================= */
+    .audiovisual-section {
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-color: #1a1a1a !important;
+      position: relative;
+    }
+
+    #CanvasAnime {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #text-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      width: 90%;
+      max-width: 850px;
+      pointer-events: auto;
+      user-select: text;
+    }
+
+    #text-container,
+    #text-container * {
+      user-select: text;
+    }
+
+    .sub-part, #fPart1, #fPart2, .dot-char {
+      opacity: 0;
+      display: inline-block;
+    }
+
+    .dot-char {
+      margin: 0 2px;
+    }
+
+
+
+    /* =============================================================
+       4. Page 3 品牌過渡頁（曼陀羅 ―― 情感的地圖）
+       ============================================================= */
+    .brand-transition-section {
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #1a1a1a;
+      position: relative;
+    }
+
+    #brandTransitionCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    .p3-content {
+      position: relative;
+      z-index: 3;
+      width: min(90%, 920px);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .p3-copy {
+      position: absolute;
+      left: 50%;
+      bottom: 22%;
+      transform: translateX(-50%);
+      width: min(90vw, 900px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      pointer-events: auto;
+      user-select: text;
+    }
+
+    .p3-text-line {
+      font-size: 1.05rem;
+      line-height: 1.9;
+      letter-spacing: 0.12em;
+      text-wrap: balance;
+      opacity: 0;
+      transform: translateY(20px);
+      text-shadow: 0 0 16px rgba(0, 0, 0, 0.85);
+      user-select: text;
+    }
+
+    .p3-text-1 { color: rgba(230, 230, 232, 0.88); }
+    .p3-text-2 { color: rgba(230, 230, 232, 0.94); }
+    .p3-text-3 { color: #E6E6E8; }
+
+    #brandTransitionSection .skip-anim-btn {
+      z-index: 20;
+    }
+
+    #brandTransitionSection .scroll-arrow-btn {
+      z-index: 20;
+    }
+
+
+
+    /* =============================================================
+       5. Page 4 AI 重現與感官體驗
+       ============================================================= */
+    .ai-reconstruction-section {
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #1a1a1a;
+      position: relative;
+    }
+
+    .p4-mandala-backdrop {
+      position: absolute;
+      left: 50%;
+      top: 40%;
+      width: min(62vw, 680px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%) scale(0.85);
+      opacity: 0.2;
+      pointer-events: none;
+      border-radius: 50%;
+      background:
+        repeating-radial-gradient(circle, transparent 0 24px, rgba(242,152,80,.22) 25px 26px, transparent 27px 47px),
+        repeating-conic-gradient(from 0deg, rgba(242,152,80,.14) 0deg 1deg, transparent 1deg 15deg);
+      filter: drop-shadow(0 0 26px rgba(242,152,80,.18));
+      will-change: opacity, transform;
+    }
+
+    .p4-content {
+      position: relative;
+      z-index: 3;
+      width: min(96vw, 1440px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 7vh 20px 16vh;
+    }
+
+    .p4-header-group {
+      width: min(92%, 900px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .p4-header-line,
+    .p4-footer-text {
+      width: 100%;
+      font-family: 'Noto Serif TC', serif;
+      text-align: center;
+      color: #E6E6E8;
+      letter-spacing: .12em;
+      line-height: 1.9;
+      opacity: 0;
+      transform: translateY(20px);
+      user-select: text;
+    }
+
+    .p4-header-line { font-size: 1.06rem; }
+    .p4-footer-text { font-size: .98rem; color: rgba(230,230,232,.86); }
+
+    .p4-cards {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .p4-card-item {
+      position: relative;
+      min-height: 360px;
+      height: 100%;
+      align-self: stretch;
+      overflow: hidden;
+      border: 1px solid rgba(230,230,232,.16);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+      backdrop-filter: blur(4px);
+      padding: 20px;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(35px) scale(.95);
+      transition: opacity .35s ease, border-color .35s ease, box-shadow .35s ease;
+      will-change: transform, opacity;
+      transform-origin: 50% 50%;
+      outline: none;
+    }
+
+    .p4-card-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 35%, rgba(242,152,80,.11), transparent 58%);
+      opacity: 0;
+      transition: opacity .35s ease;
+    }
+
+    .p4-cards.has-focus .p4-card-item:not(.is-active) { opacity: .55; }
+    .p4-card-item.is-active {
+      border-color: rgba(242,152,80,.48);
+      box-shadow: 0 0 20px rgba(242,152,80,.3);
+    }
+    .p4-card-item.is-active::after { opacity: 1; }
+
+
+
+    /* Card 4：歲月溫熱（觸覺） */
+    .p4-card-touch .p4-card-visual-stage {
+      isolation: isolate;
+    }
+
+    .p4-touch-glow {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 32%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(.45);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(circle,
+        rgba(247, 208, 112, .56) 0%,
+        rgba(242, 152, 80, .24) 36%,
+        rgba(242, 152, 80, .08) 58%,
+        transparent 74%);
+      filter: blur(3px);
+      transition: opacity .45s ease, transform .7s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .p4-card-touch .p4-card-canvas {
+      position: relative;
+      z-index: 1;
+      opacity: .58;
+      filter: drop-shadow(0 0 4px rgba(242,152,80,.18));
+      transition: opacity .45s ease, filter .45s ease;
+    }
+
+    .p4-card-touch.is-active .p4-touch-glow {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.9);
+    }
+
+    .p4-card-touch.is-active .p4-card-canvas {
+      opacity: 1;
+      filter: drop-shadow(0 0 10px rgba(247,208,112,.72));
+    }
+
+    .p4-card-visual-stage {
+      position: relative;
+      height: 180px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(10,10,10,.28);
+    }
+
+    .p4-card-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+
+    .p4-soundwave {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .p4-soundwave span {
+      width: 3px;
+      height: 24px;
+      border-radius: 10px;
+      background: rgba(242,152,80,.72);
+      transform: scaleY(.35);
+      transform-origin: center;
+    }
+
+    .p4-card-audio.is-active .p4-soundwave span {
+      animation: soundwave-pulse .9s ease-in-out infinite alternate;
+    }
+    .p4-card-audio.is-active .p4-soundwave span:nth-child(2n) { animation-delay: -.25s; }
+    .p4-card-audio.is-active .p4-soundwave span:nth-child(3n) { animation-delay: -.5s; }
+
+    @keyframes soundwave-pulse {
+      from { transform: scaleY(.3); opacity: .45; }
+      to { transform: scaleY(2.4); opacity: 1; }
+    }
+
+    .p4-card-title {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 1.1rem;
+      letter-spacing: .12em;
+      color: #f29850;
+      margin-bottom: 12px;
+    }
+
+    .p4-card-description {
+      font-size: .94rem;
+      line-height: 1.9;
+      letter-spacing: .08em;
+      color: rgba(230,230,232,.86);
+    }
+
+    #aiReconstructionSection .skip-anim-btn,
+    #aiReconstructionSection .scroll-arrow-btn { z-index: 20; }
+
+    /* =============================================================
+       💻 平板／窄桌機：空間不足時改為 2 × 2，桌機仍維持四卡橫排
+       ============================================================= */
+    @media (max-width: 1080px) and (min-width: 769px) {
+      .p4-content {
+        width: 94vw;
+        gap: 16px;
+        padding: 5vh 16px 12vh;
+      }
+
+      .p4-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .p4-card-item {
+        min-height: 260px;
+      }
+
+      .p4-card-visual-stage {
+        height: 120px;
+      }
+    }
+
+    /* =============================================================
+       📱 手機版 (Mobile RWD) 統一渲染規範
+       ============================================================= */
+    @media (max-width: 768px) {
+      #text-container, .banner-questions-wrapper {
+        width: 92% !important;
+        max-width: 92% !important;
+        padding: 0 10px;
+      }
+
+      .ui-line-content, 
+      .banner-question-part, 
+      .story-line {
+        font-size: 1.02rem !important;
+        letter-spacing: 0.08em !important;
+        line-height: 1.7 !important;
+      }
+
+      .banner-questions-wrapper .ui-line-mask {
+        flex-wrap: wrap !important;
+        height: auto !important;
+        overflow: visible !important;
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+
+      .bq-part:last-child {
+        margin-left: 0 !important;
+      }
+
+      .brand-logo-img {
+        width: 220px !important;
+        max-width: 65vw !important;
+        margin-bottom: 1.8rem !important;
+      }
+
+      .logo-container {
+        width: 300px !important;
+        height: 300px !important;
+        margin-bottom: -50px !important;
+      }
+
+      .skip-anim-btn {
+        top: 20px !important;
+        right: 20px !important;
+        padding: 6px 12px !important;
+        font-size: 11px !important;
+      }
+
+      .scroll-arrow-btn {
+        bottom: 5% !important;
+      }
+
+      .p3-copy {
+        bottom: 12%;
+        width: 92%;
+        gap: 8px;
+      }
+
+      .p3-text-line {
+        font-size: 0.94rem !important;
+        line-height: 1.75 !important;
+        letter-spacing: 0.06em !important;
+      }
+
+      .p4-content {
+        width: 94vw;
+        gap: 14px;
+        padding: 7vh 12px 12vh;
+      }
+
+      .p4-header-line { font-size: .92rem; line-height: 1.7; letter-spacing: .06em; }
+
+
+      .p4-cards {
+        grid-template-columns: 1fr !important;
+      }
+      .p4-footer-text { font-size: .86rem; line-height: 1.7; letter-spacing: .05em; }
+
+      .p4-cards {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        max-height: 59vh;
+        overflow-y: auto;
+        padding: 2px 4px;
+      }
+
+      .p4-card-item {
+        min-height: 178px;
+        padding: 15px;
+      }
+
+      .p4-card-visual-stage {
+        height: 76px;
+        margin-bottom: 12px;
+      }
+
+      .p4-card-title { font-size: .98rem; margin-bottom: 7px; }
+      .p4-card-description { font-size: .84rem; line-height: 1.65; }
+
+    }
+
+/* =============================================================
+   Page 5｜留言板與寄語小卡
+   規則：僅處理 P5 視覺；共用文字、Skip、頁面生命週期沿用主站。
+   ============================================================= */
+.p5-message-section {
+  --p5-gold: #f29850;
+  --p5-gold-soft: rgba(242, 152, 80, .28);
+  --p5-text: #E6E6E8;
+  --p5-muted: rgba(230, 230, 232, .62);
+  --p5-panel: rgba(29, 29, 29, .78);
+  --p5-line: rgba(230, 230, 232, .16);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(242, 152, 80, .08), transparent 35%),
+    #1a1a1a;
+  color: var(--p5-text);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.p5-message-section::-webkit-scrollbar { display: none; }
+.p5-message-section .skip-anim-btn { z-index: 30; }
+
+.p5-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 226, 180, .13) 0%, rgba(242, 152, 80, .045) 26%, transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.018), transparent 45%);
+  z-index: 0;
+}
+
+.p5-shell {
+  position: relative;
+  z-index: 2;
+  width: min(980px, 92vw);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(68px, 8vh, 100px) 0 clamp(56px, 8vh, 90px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.p5-header {
+  width: min(900px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: clamp(26px, 4vh, 46px);
+}
+.p5-header .ui-line-content {
+  font-size: clamp(1rem, 1.45vw, 1.25rem);
+  letter-spacing: .12em;
+  line-height: 1.9;
+}
+
+.p5-form-container {
+  width: min(820px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.p5-form-step {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  padding: 0;
+  opacity: 0;
+  transform: translateY(24px);
+}
+.p5-form-step.is-open {
+  padding: 20px 24px;
+  background: linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+  border-color: var(--p5-line);
+  box-shadow: 0 12px 40px rgba(0,0,0,.16);
+}
+
+.p5-step-kicker {
+  margin-bottom: 7px;
+  color: rgba(242, 152, 80, .78);
+  font-size: .72rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.p5-step-title {
+  font-family: 'Noto Serif TC', serif;
+  color: var(--p5-text);
+  font-size: clamp(1rem, 1.5vw, 1.16rem);
+  font-weight: 400;
+  letter-spacing: .12em;
+  line-height: 1.65;
+}
+.p5-field-note {
+  margin-top: 9px;
+  color: var(--p5-muted);
+  font-size: .78rem;
+  letter-spacing: .08em;
+  line-height: 1.6;
+}
+
+.p5-target-options,
+.p5-tag-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.p5-pill {
+  appearance: none;
+  border: 1px solid rgba(230,230,232,.2);
+  border-radius: 999px;
+  background: rgba(255,255,255,.025);
+  color: rgba(230,230,232,.72);
+  font: 400 .86rem 'Noto Sans TC', sans-serif;
+  letter-spacing: .08em;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: border-color .25s ease, color .25s ease, background .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.p5-pill:hover,
+.p5-pill:focus-visible {
+  border-color: rgba(242,152,80,.65);
+  color: #ffd0a4;
+  outline: none;
+  transform: translateY(-1px);
+}
+.p5-pill.is-selected {
+  color: #ffe0bd;
+  border-color: rgba(242,152,80,.9);
+  background: rgba(242,152,80,.11);
+  box-shadow: 0 0 20px rgba(242,152,80,.12), inset 0 0 14px rgba(242,152,80,.05);
+}
+
+.p5-custom-target-wrap {
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  margin-top: 0;
+}
+.p5-custom-target-wrap label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--p5-muted);
+  font-size: .8rem;
+  letter-spacing: .08em;
+}
+.p5-custom-target-wrap input,
+.p5-textarea-wrap textarea {
+  width: 100%;
+  border: 1px solid rgba(230,230,232,.18);
+  border-radius: 12px;
+  background: rgba(7,7,7,.28);
+  color: var(--p5-text);
+  font: 300 .94rem 'Noto Sans TC', sans-serif;
+  letter-spacing: .07em;
+  outline: none;
+  transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+}
+.p5-custom-target-wrap input { padding: 12px 14px; }
+.p5-textarea-wrap textarea {
+  min-height: 104px;
+  margin-top: 14px;
+  padding: 15px 16px 30px;
+  resize: vertical;
+  line-height: 1.8;
+}
+.p5-custom-target-wrap input:focus,
+.p5-textarea-wrap textarea:focus {
+  border-color: rgba(242,152,80,.58);
+  background: rgba(7,7,7,.42);
+  box-shadow: 0 0 0 3px rgba(242,152,80,.055);
+}
+.p5-textarea-wrap { position: relative; }
+.p5-char-count {
+  position: absolute;
+  right: 13px;
+  bottom: 9px;
+  color: rgba(230,230,232,.42);
+  font-size: .72rem;
+  letter-spacing: .04em;
+  pointer-events: none;
+}
+.p5-char-count.is-warning { color: #f5ae73; }
+
+.p5-tag-group { margin-top: 15px; }
+.p5-tag-group + .p5-tag-group { margin-top: 18px; }
+.p5-tag-group-label {
+  display: block;
+  color: rgba(230,230,232,.5);
+  font-size: .72rem;
+  letter-spacing: .18em;
+}
+
+.step-submit { text-align: center; }
+.p5-generate-btn {
+  position: relative;
+  width: min(440px, 100%);
+  min-height: 50px;
+  overflow: hidden;
+  border: 1px solid rgba(242,152,80,.7);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(242,152,80,.16), rgba(242,152,80,.06));
+  color: #ffd4ad;
+  font: 400 .95rem 'Noto Serif TC', serif;
+  letter-spacing: .2em;
+  cursor: pointer;
+  transition: transform .3s ease, box-shadow .3s ease, background .3s ease, opacity .3s ease;
+}
+.p5-generate-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, rgba(242,152,80,.24), rgba(242,152,80,.09));
+  box-shadow: 0 0 28px rgba(242,152,80,.2), inset 0 0 16px rgba(242,152,80,.06);
+}
+.p5-generate-btn:disabled { opacity: .38; cursor: not-allowed; }
+.p5-button-particles,
+.p5-button-particles::before,
+.p5-button-particles::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 8% 55%, rgba(255,194,125,.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 27% 20%, rgba(242,152,80,.55) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 72% 70%, rgba(255,194,125,.64) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 92% 35%, rgba(242,152,80,.58) 0 1px, transparent 1.5px);
+  opacity: .55;
+  animation: p5ButtonDust 4s ease-in-out infinite alternate;
+}
+.p5-button-particles::before { transform: translateX(20px); animation-delay: -1.4s; }
+.p5-button-particles::after { transform: translateX(-16px); animation-delay: -2.8s; }
+@keyframes p5ButtonDust { from { opacity: .25; transform: translateY(2px); } to { opacity: .72; transform: translateY(-2px); } }
+.p5-validation-message {
+  min-height: 20px;
+  margin-top: 10px;
+  color: #f2a264;
+  font-size: .78rem;
+  letter-spacing: .08em;
+}
+
+/* ===== Modal ===== */
+.p5-card-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15,15,15,.96);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+.p5-card-modal.is-open { display: flex; }
+.p5-dissolve-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 125;
+  pointer-events: none;
+}
+
+.p5-ai-loading {
+  position: relative;
+  z-index: 123;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.p5-ai-loading h2,
+.p5-ai-loading p {
+  opacity: 0;
+  color: var(--p5-text);
+}
+.p5-ai-loading h2 {
+  margin-top: 30px;
+  font: 400 1.05rem 'Noto Serif TC', serif;
+  letter-spacing: .18em;
+}
+.p5-ai-loading p {
+  margin-top: 12px;
+  color: rgba(230,230,232,.55);
+  font-size: .8rem;
+  letter-spacing: .1em;
+}
+.p5-loading-mandala {
+  position: relative;
+  width: 116px;
+  height: 116px;
+  opacity: 0;
+}
+.p5-loading-mandala span {
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(242,152,80,.5);
+  border-radius: 46% 54% 48% 52%;
+  animation: p5MandalaSpin 5s linear infinite;
+  box-shadow: 0 0 14px rgba(242,152,80,.08);
+}
+.p5-loading-mandala span:nth-child(2) { inset: 22px; animation-direction: reverse; animation-duration: 4s; border-radius: 54% 46% 52% 48%; }
+.p5-loading-mandala span:nth-child(3) { inset: 34px; animation-duration: 3.2s; }
+.p5-loading-mandala span:nth-child(4) { inset: 48px; border-radius: 50%; background: rgba(242,152,80,.3); box-shadow: 0 0 18px rgba(242,152,80,.3); }
+@keyframes p5MandalaSpin { to { transform: rotate(360deg); } }
+
+.p5-card-ready {
+  position: relative;
+  z-index: 123;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: min(620px, 96vw);
+}
+.p5-modal-close {
+  position: absolute;
+  top: -8px;
+  right: 0;
+  z-index: 5;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(230,230,232,.2);
+  border-radius: 50%;
+  background: rgba(20,20,20,.8);
+  color: var(--p5-text);
+  cursor: pointer;
+}
+.p5-time-card {
+  position: relative;
+  width: min(430px, 84vw);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  padding: clamp(30px, 5vw, 46px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(242,152,80,.28);
+  border-radius: 5px;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255,255,255,.045) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 78% 72%, rgba(255,255,255,.035) 0 1px, transparent 1.4px),
+    linear-gradient(145deg, #23201d, #171717 55%, #1d1a18);
+  box-shadow: 0 28px 80px rgba(0,0,0,.58), inset 0 0 70px rgba(242,152,80,.025);
+  color: #f3ece5;
+  transform-origin: center;
+}
+.p5-time-card::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(242,152,80,.1);
+  pointer-events: none;
+}
+.p5-card-mandala {
+  position: absolute;
+  width: 330px;
+  height: 330px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  opacity: .08;
+  background:
+    repeating-radial-gradient(circle, transparent 0 21px, rgba(242,152,80,.72) 22px 23px, transparent 24px 35px),
+    repeating-conic-gradient(from 12deg, rgba(242,152,80,.65) 0 1deg, transparent 1deg 14deg);
+  mask-image: radial-gradient(circle, #000 0 62%, transparent 76%);
+  pointer-events: none;
+}
+.p5-card-topline,
+.p5-card-copy,
+.p5-card-bottomline { position: relative; z-index: 2; }
+.p5-card-tags {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  color: rgba(242,185,129,.78);
+  font-size: .68rem;
+  letter-spacing: .12em;
+}
+.p5-card-copy {
+  margin: auto 0;
+  border: 0;
+  font: 400 clamp(1rem, 2.4vw, 1.18rem) 'Noto Serif TC', serif;
+  line-height: 2.15;
+  letter-spacing: .1em;
+  text-align: left;
+  white-space: pre-wrap;
+}
+.p5-card-bottomline {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  color: rgba(230,230,232,.56);
+  font-size: .7rem;
+  letter-spacing: .12em;
+}
+.p5-card-stamp {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  border: 1px solid rgba(242,152,80,.55);
+  border-radius: 50%;
+  color: rgba(242,185,129,.82);
+  font: 600 .86rem 'Noto Serif TC', serif;
+  letter-spacing: .16em;
+  transform: rotate(-8deg);
+}
+.p5-card-stamp small { margin-top: 2px; font: 400 .38rem 'Noto Sans TC', sans-serif; letter-spacing: .06em; }
+
+.p5-card-actions,
+.p5-outro-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.p5-card-action,
+.p5-outro-btn {
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid rgba(230,230,232,.22);
+  border-radius: 999px;
+  background: rgba(255,255,255,.035);
+  color: var(--p5-text);
+  font: 400 .8rem 'Noto Sans TC', sans-serif;
+  letter-spacing: .08em;
+  cursor: pointer;
+  transition: border-color .25s ease, background .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.p5-card-action:hover,
+.p5-outro-btn:hover { transform: translateY(-1px); border-color: rgba(242,152,80,.62); }
+.p5-card-action-primary,
+.p5-outro-btn-primary {
+  border-color: rgba(242,152,80,.6);
+  background: rgba(242,152,80,.12);
+  color: #ffd8b5;
+}
+.p5-card-action:disabled { opacity: .45; cursor: wait; }
+.p5-send-status { min-height: 18px; color: rgba(230,230,232,.54); font-size: .72rem; letter-spacing: .08em; text-align: center; }
+
+.p5-outro {
+  position: relative;
+  z-index: 130;
+  display: none;
+  width: min(900px, 92vw);
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.p5-outro .ui-line-content {
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  letter-spacing: .16em;
+  line-height: 2;
+}
+.p5-outro-actions { margin-top: 34px; opacity: 0; }
+
+@media (max-width: 768px) {
+  .p5-shell { width: 92vw; padding-top: 72px; padding-bottom: 54px; }
+  .p5-header { margin-bottom: 24px; }
+  .p5-header .ui-line-content { font-size: .96rem !important; letter-spacing: .08em !important; line-height: 1.75 !important; }
+  .p5-form-container { gap: 12px; }
+  .p5-form-step.is-open { padding: 16px; border-radius: 14px; }
+  .p5-target-options, .p5-tag-options { gap: 8px; }
+  .p5-pill { font-size: .78rem; padding: 8px 12px; }
+  .p5-card-modal { padding: 14px; overflow-y: auto; }
+  .p5-card-ready { min-height: 100%; justify-content: center; padding: 48px 0 24px; }
+  .p5-time-card { width: min(360px, 88vw); aspect-ratio: 9 / 14; padding: 30px 28px; }
+  .p5-card-copy { font-size: .98rem; line-height: 2; }
+  .p5-modal-close { top: 8px; right: 4px; }
+  .p5-card-actions { width: min(360px, 88vw); }
+  .p5-card-action { flex: 1 1 100%; }
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- 0. 全頁背景 Canvas (波浪光束) -->
+  <canvas id="mandalaCanvas"></canvas>
+
+  <div class="sections-wrapper" id="sectionsWrapper">
+
+    <!-- Page 0. Loading Page (LP) -->
+    <div class="section-page" id="openingHero">
+      <button class="skip-anim-btn" id="loadingSkipBtn">Skip 略過動畫 ✕</button>
+
+      <canvas id="loadingCanvas"></canvas>
+
+      <div class="loading-text-box" id="loadingText">
+        <span class="char">載</span><span class="char">入</span><span class="char">中</span>
+        <span class="char">．</span><span class="char">．</span><span class="char">．</span>
+      </div>
+
+      <div class="logo-container" id="logoBox">
+        <svg id="_圖層_1" data-name="圖層_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 841.89 595.28">
+          <defs><style>.st0 { fill: #f29850; }</style></defs>
+          <circle class="st0" cx="420.88" cy="297.44" r="14.4"/>
+          <g>
+            <g>
+              <rect class="st0" x="366.79" y="217.79" width="3.06" height="78.87" transform="translate(-59.96 392.87) rotate(-52.5)"/>
+              <rect class="st0" x="361.25" y="226.27" width="3.06" height="78.87" transform="translate(-44.56 456.19) rotate(-61.28)"/>
+              <rect class="st0" x="357.08" y="235.49" width="3.06" height="78.88" transform="translate(-22.12 518.31) rotate(-70.06)"/>
+              <rect class="st0" x="354.38" y="245.24" width="3.06" height="78.89" transform="translate(7.74 578.78) rotate(-78.84)"/>
+              <rect class="st0" x="353.19" y="255.3" width="3.06" height="78.89" transform="translate(45.53 636.94) rotate(-87.62)"/>
+              <rect class="st0" x="315.63" y="303.33" width="78.92" height="3.06" transform="translate(-31.72 41.41) rotate(-6.39)"/>
+              <rect class="st0" x="317.52" y="313.27" width="78.94" height="3.06" transform="translate(-69.96 104.44) rotate(-15.18)"/>
+              <rect class="st0" x="320.91" y="322.81" width="78.95" height="3.06" transform="translate(-100.6 174.12) rotate(-23.94)"/>
+              <rect class="st0" x="325.72" y="331.71" width="78.98" height="3.06" transform="translate(-122.23 250.61) rotate(-32.76)"/>
+              <rect class="st0" x="331.83" y="339.77" width="79" height="3.06" transform="translate(-132.94 332.21) rotate(-41.55)"/>
+              <rect class="st0" x="339.09" y="346.8" width="79.03" height="3.06" transform="translate(-131.23 417.2) rotate(-50.31)"/>
+              <polygon class="st0" points="367.88 388.84 366.56 388.07 365.3 387.2 405.86 319.46 408.48 321.03 367.88 388.84"/>
+              <polygon class="st0" points="382.45 395.84 379.62 394.67 409.39 321.47 412.22 322.62 382.45 395.84"/>
+              <polygon class="st0" points="397.91 400.52 394.91 399.91 413.19 322.91 416.17 323.62 397.91 400.52"/>
+              <polygon class="st0" points="413.91 402.79 410.85 402.67 417.16 323.74 420.21 323.99 413.91 402.79"/>
+              <polygon class="st0" points="427.02 402.87 421.21 323.97 424.26 323.75 430.07 402.59 428.55 402.78 427.02 402.87"/>
+              <polygon class="st0" points="443.03 400.64 425.25 323.58 428.23 322.9 446.01 399.94 444.53 400.36 443.03 400.64"/>
+              <polygon class="st0" points="458.52 396.06 429.17 322.59 432.01 321.45 461.35 394.88 459.96 395.54 458.52 396.06"/>
+              <polygon class="st0" points="473.16 389.21 432.91 321.01 435.54 319.45 475.73 387.55 473.16 389.21"/>
+              <polygon class="st0" points="486.54 380.13 436.35 318.88 438.71 316.94 488.83 378.1 486.54 380.13"/>
+              <polygon class="st0" points="498.39 369.13 439.43 316.25 441.47 313.97 500.34 366.77 498.39 369.13"/>
+              <polygon class="st0" points="508.4 356.43 442.07 313.18 443.75 310.62 509.99 353.81 509.24 355.15 508.4 356.43"/>
+              <polygon class="st0" points="516.34 342.35 444.23 309.76 445.48 306.97 517.55 339.54 517 340.97 516.34 342.35"/>
+              <polygon class="st0" points="522.08 327.24 445.83 306.04 446.65 303.09 522.83 324.28 522.51 325.78 522.08 327.24"/>
+              <polygon class="st0" points="525.49 311.44 446.85 302.12 447.21 299.08 525.74 308.4 525.49 311.44"/>
+              <polygon class="st0" points="447.27 298.08 447.16 295.03 526.18 292.25 526.43 295.29 447.27 298.08"/>
+              <polygon class="st0" points="447.06 294.03 446.49 291.03 524.15 276.22 524.82 279.2 447.06 294.03"/>
+              <polygon class="st0" points="446.24 290.06 445.22 287.18 519.71 260.68 520.27 262.1 520.74 263.56 446.24 290.06"/>
+              <polygon class="st0" points="448.84 286.25 443.39 283.56 512.95 246.01 514.51 248.64 444.84 286.25"/>
+              <polygon class="st0" points="442.86 282.69 441.01 280.26 504.02 232.54 505.89 234.96 442.86 282.69"/>
+              <polygon class="st0" points="440.35 279.49 438.16 277.36 493.14 220.59 494.19 221.61 495.45 222.59 495.34 222.72 440.35 279.49"/>
+              <rect class="st0" x="419.47" y="242.03" width="79.03" height="3.06" transform="translate(-5.11 477.25) rotate(-54.68)"/>
+              <rect class="st0" x="410.8" y="236.83" width="79" height="3.06" transform="translate(36.05 534.98) rotate(-63.5)"/>
+              <rect class="st0" x="401.45" y="233" width="78.98" height="3.06" transform="translate(83.23 583.06) rotate(-72.26)"/>
+              <rect class="st0" x="391.62" y="230.65" width="78.96" height="3.06" transform="translate(134.41 621.71) rotate(-81.01)"/>
+              <rect class="st0" x="381.53" y="229.84" width="78.94" height="3.06" transform="translate(188.4 651.69) rotate(-89.83)"/>
+              <rect class="st0" x="409.38" y="192.65" width="3.06" height="78.92" transform="translate(-30.09 64.07) rotate(-8.6)"/>
+              <rect class="st0" x="399.51" y="194.92" width="3.06" height="78.89" transform="translate(-51.7 130.52) rotate(-17.38)"/>
+              <rect class="st0" x="390.1" y="198.68" width="3.06" height="78.89" transform="translate(-64.87 197.08) rotate(-26.16)"/>
+              <polygon class="st0" points="404.25 276.47 384.26 247.88 384.27 247.87 359.07 211.81 361.58 210.06 387.93 247.78 387.93 247.78 406.75 274.71 404.25 276.47"/>
+              <rect class="st0" x="373.55" y="210.25" width="3.06" height="78.87" transform="translate(-68.56 328.46) rotate(-43.72)"/>
+            </g>
+            <g>
+              <path class="st0" d="M329.25,244.97l-2.57,4.77,21.71,11.72c1.1-1.46,2.21-2.92,3.33-4.36l-22.47-12.12Z"/>
+              <path class="st0" d="M344.03,267.29l-21.72-7.72-1.82,5.11,20.19,7.18c1.1-1.51,2.22-3.04,3.35-4.56Z"/>
+              <path class="st0" d="M336.18,278.59l-18.51-3.53-1.01,5.32,17.29,3.29c.83-2.13,1.62-3.85,2.23-5.08Z"/>
+              <path class="st0" d="M331.39,291.64l-15.93-.56-.19,5.42,14.94.53c.33-1.9.73-3.7,1.17-5.39Z"/>
+              <path class="st0" d="M329.22,305.64l-13.5,1.6.64,5.38,12.82-1.52c-.06-1.87-.05-3.69.04-5.46Z"/>
+              <path class="st0" d="M331.05,323.2c-.19-.55-.48-1.07-.6-1.64-.11-.55-.22-1.09-.32-1.63l-11.69,3.25,1.46,5.22,11.81-3.29c-.3-.82-.51-1.47-.66-1.92Z"/>
+              <path class="st0" d="M335.13,333.3l-11.57,5.23,2.23,4.94,11.78-5.33c-.92-1.7-1.73-3.33-2.45-4.84Z"/>
+              <path class="st0" d="M342.04,345.67l-11.07,7.23,2.96,4.54,11.2-7.3c-1.1-1.5-2.13-2.99-3.09-4.46Z"/>
+              <path class="st0" d="M350.59,356.91l-10.11,9.07,3.62,4.03,10.21-9.16c-1.31-1.29-2.54-2.6-3.72-3.94Z"/>
+              <path class="st0" d="M360.76,366.61l-8.88,10.83,4.19,3.43,9.04-11.03c-1.51-1.04-2.96-2.11-4.35-3.23Z"/>
+              <path class="st0" d="M372.42,374.28l-7.53,12.76,4.67,2.76,7.76-13.16c-1.69-.73-3.32-1.52-4.9-2.36Z"/>
+              <path class="st0" d="M385.21,379.53l-5.99,15.01,5.04,2.01,6.25-15.64c-1.82-.4-3.58-.86-5.29-1.38Z"/>
+              <path class="st0" d="M398.56,382.23l-4.04,17.53,5.28,1.22,4.23-18.33c-1.87-.08-3.69-.22-5.47-.42Z"/>
+              <path class="st0" d="M411.91,382.64l-1.47,19.95,5.4.4,1.52-20.77c-1.86.19-3.67.33-5.46.42Z"/>
+              <path class="st0" d="M424.87,381.17l1.74,21.78,5.41-.43-1.79-22.43c-1.82.41-3.6.77-5.35,1.08Z"/>
+              <path class="st0" d="M437.28,378.28l5.36,22.56,5.27-1.25-5.43-22.9c-1.76.58-3.49,1.11-5.19,1.59Z"/>
+              <path class="st0" d="M449.21,374.31l8.95,22,5.02-2.04-8.93-21.96c-1.7.71-3.38,1.38-5.04,2.01Z"/>
+              <path class="st0" d="M460.8,369.4l12.01,20.06,4.65-2.79-11.87-19.82c-1.56.91-3.16,1.76-4.79,2.55Z"/>
+              <path class="st0" d="M486.24,380.46l4.17-3.46-14.46-17.42c-1.38,1.16-2.8,2.27-4.27,3.33l14.57,17.55Z"/>
+              <path class="st0" d="M498.14,369.51l3.59-4.06-16.78-14.86c-1.16,1.38-2.38,2.72-3.64,4.01l16.84,14.9Z"/>
+              <path class="st0" d="M508.23,356.87l2.93-4.55-18.89-12.15c-.9,1.56-1.87,3.09-2.88,4.59l18.84,12.11Z"/>
+              <path class="st0" d="M428.84,262.97l5.04-33.34c-.8-.35-1.63-.69-2.49-1.01-.87-.34-1.77-.66-2.69-.97l-5.21,34.53-.12-35.98c-.86-.19-1.73-.35-2.62-.49-.92-.14-1.86-.26-2.81-.35l.12,36.85-5.83-36.95c-.87.05-1.74.15-2.62.27-.92.13-1.83.3-2.74.51l5.83,37-11.28-35.24c-.8.34-1.6.73-2.39,1.16-.82.44-1.65.93-2.46,1.46l10.97,34.29-15.41-30.85c-.67.61-1.33,1.25-1.99,1.94-.67.7-1.33,1.44-1.98,2.23l14.52,29.09-17.64-24.9c-.52.78-1.04,1.6-1.54,2.44-.51.84-1.01,1.72-1.5,2.64l16.27,22.98-18.29-18.88c-.39.86-.78,1.74-1.16,2.65h0c-.37.91-.74,1.85-1.1,2.81l16.65,17.19-17.94-13.58c-.2.61-.4,1.23-.6,1.86,0,0-.11.28-.29.84-.2.61-.51,1.53-.89,2.75l16.47,12.46-17.39-9.38c-.24.83-.49,1.72-.75,2.67-.23.84-.47,1.75-.71,2.69l16.24,8.76-16.92-6.01c-.21.86-.42,1.74-.63,2.67-.19.86-.39,1.74-.59,2.65l16.35,5.81-16.9-3.22c-.18.87-.36,1.77-.53,2.69-.16.86-.33,1.74-.49,2.63l16.92,3.23-17.37-.61c-.15.9-.29,1.81-.44,2.74-.13.87-.25,1.76-.38,2.65l17.97.63-18.35,2.18c-.12.93-.23,1.87-.34,2.83-.1.89-.2,1.79-.29,2.7l19.64-2.33-19.94,5.55c-.08.97-.16,1.96-.23,2.95-.07.92-.13,1.85-.18,2.78l21.79-6.06-21.96,9.93c-.04,1.03-.07,2.07-.09,3.11-.02.97-.03,1.93-.04,2.9l24.35-11.01-24.25,15.82c.07.76.2,1.81.47,3.05.17.82.39,1.72.7,2.67l26.04-16.98-24.05,21.57c.45.81.97,1.6,1.56,2.38.51.68,1.08,1.34,1.7,1.98l24.4-21.89-20.46,24.98c.79.47,1.65.91,2.57,1.3.82.34,1.69.65,2.61.92l19.48-23.77-14.58,24.7c1.01.1,2.06.16,3.17.17.98.01,2.01-.01,3.07-.07l13.01-22.06-8.61,21.58c1.05-.16,2.14-.35,3.26-.59,1-.21,2.03-.45,3.09-.71l7.3-18.27-4.01,17.37c1.02-.3,2.05-.63,3.12-.98.95-.32,1.92-.66,2.91-1.02l3.27-14.14-.97,13.28c.95-.37,1.91-.76,2.9-1.18.88-.37,1.78-.75,2.7-1.16l.77-10.54.79,9.83c.82-.37,1.65-.75,2.49-1.16,0,0,.07-.03.21-.08.38-.14,1.26-.47,2.56-.98l-.65-8.05,1.8,7.59c.77-.31,1.65-.66,2.62-1.05.76-.31,1.59-.66,2.46-1.02l-1.61-6.79,2.59,6.38c.82-.34,1.67-.71,2.55-1.1.78-.34,1.59-.7,2.42-1.07l-2.54-6.25,3.49,5.83c.82-.37,1.66-.76,2.52-1.15.79-.37,1.6-.75,2.42-1.14l-3.77-6.29,4.81,5.79c.84-.4,1.69-.81,2.54-1.24.81-.4,1.63-.82,2.45-1.24l-5.65-6.81,6.94,6.15c.86-.45,1.72-.9,2.58-1.37.84-.45,1.67-.91,2.5-1.38l-8.42-7.46,10.11,6.49c.88-.5,1.76-1.02,2.62-1.53.86-.52,1.71-1.05,2.55-1.58l-12.35-7.94,14.59,6.49c.89-.59,1.76-1.19,2.6-1.8.86-.61,1.7-1.23,2.51-1.86l-17.5-7.78,20.29,5.51c.83-.71,1.62-1.42,2.36-2.14.77-.75,1.49-1.5,2.15-2.25l-23.37-6.34,26.01,2.92c.09-.13.17-.26.25-.38,0,0,.55-.73,1.22-2.14.34-.71.71-1.6,1.06-2.65l-27.94-3.14,28.99-1.2c.14-.84.24-1.73.3-2.67.06-.88.09-1.8.06-2.77l-29.58,1.23,29.18-5.76c-.13-.84-.3-1.71-.49-2.6-.2-.88-.42-1.77-.7-2.69l-29.04,5.74,27.55-10c-.32-.79-.66-1.6-1.05-2.41-.38-.83-.79-1.67-1.24-2.52l-27.09,9.82,24.92-13.65c-.44-.73-.92-1.47-1.42-2.22-.5-.76-1.03-1.54-1.59-2.31l-24.52,13.43,21.94-16.84c-.53-.67-1.08-1.34-1.65-2.03-.59-.7-1.2-1.41-1.84-2.12l-21.76,16.7,18.91-19.78c-.59-.62-1.2-1.24-1.82-1.87-.65-.65-1.33-1.31-2.01-1.97l-19,19.88,15.91-22.78c-.64-.57-1.29-1.16-1.96-1.74-.69-.61-1.41-1.23-2.14-1.85l-16.25,23.26,12.82-26.09c-.68-.55-1.38-1.1-2.09-1.66-.74-.58-1.5-1.17-2.28-1.76l-13.31,27.1,9.36-29.91c-.65-.42-1.41-.89-2.29-1.4-.75-.44-1.59-.91-2.51-1.4l-9.73,31.08ZM432.69,273.7c.25.13.51.26.76.4.95.51,1.86,1.08,2.72,1.69,1.12.78,2.16,1.65,3.13,2.58.98.95,1.88,1.97,2.69,3.04.82,1.08,1.55,2.22,2.19,3.41.65,1.18,1.2,2.43,1.65,3.69.45,1.27.81,2.58,1.07,3.9.26,1.32.41,2.67.46,4.02.06,1.34.01,2.69-.15,4.04-.15,1.33-.4,2.66-.77,3.97-.36,1.29-.8,2.55-1.36,3.8-.28.61-.57,1.22-.9,1.82s-.67,1.18-1.02,1.74c-.74,1.16-1.55,2.22-2.43,3.23-.9,1.02-1.87,1.96-2.9,2.82-1.05.87-2.15,1.65-3.3,2.35-1.16.7-2.37,1.3-3.61,1.82-1.25.51-2.54.93-3.85,1.25-1.31.32-2.65.54-4,.65-1.34.12-2.7.13-4.05.04-1.34-.09-2.69-.29-4.02-.58-1.31-.3-2.61-.69-3.88-1.2-.99-.39-1.95-.83-2.91-1.35-.26-.14-.5-.28-.75-.42-1.19-.7-2.31-1.46-3.35-2.31-1.07-.86-2.06-1.8-2.96-2.8-.92-1.01-1.75-2.09-2.5-3.22-.76-1.14-1.41-2.33-1.98-3.57-.56-1.24-1.03-2.52-1.41-3.83s-.64-2.65-.81-4c-.16-1.35-.23-2.72-.18-4.09.04-1.36.18-2.71.44-4.06.25-1.33.6-2.65,1.07-3.94.45-1.27,1-2.51,1.66-3.74s1.4-2.37,2.21-3.44c.83-1.1,1.74-2.13,2.71-3.06.98-.95,2.04-1.82,3.15-2.6,1.12-.79,2.3-1.49,3.51-2.09,1.23-.6,2.49-1.11,3.79-1.52s2.63-.72,3.97-.93c1.34-.21,2.7-.31,4.07-.31,1.35,0,2.71.11,4.06.32,1.33.2,2.65.52,3.97.94,1.28.4,2.53.92,3.77,1.53Z"/>
+              <path class="st0" d="M495.6,333.66l20.67,9.18,2.19-4.95-20.82-9.26c-.61,1.71-1.29,3.38-2.04,5.03Z"/>
+              <path class="st0" d="M499.77,321.7l22.3,6.05,1.42-5.23-22.59-6.13c-.31,1.8-.68,3.56-1.13,5.31Z"/>
+              <path class="st0" d="M501.86,309.3l23.65,2.65.6-5.39-23.87-2.68c-.08,1.84-.2,3.64-.38,5.41Z"/>
+              <path class="st0" d="M502.28,296.82l24.21-1.01-.23-5.42-24.31,1.01c.16,1.83.27,3.64.32,5.41Z"/>
+              <path class="st0" d="M501.07,284.43l23.92-4.72-1.05-5.32-23.9,4.72c.4,1.79.75,3.57,1.03,5.32Z"/>
+              <path class="st0" d="M498.26,272.3l22.8-8.27-1.85-5.09-22.65,8.22c.63,1.72,1.19,3.44,1.69,5.15Z"/>
+              <path class="st0" d="M493.92,260.56l20.86-11.43-2.61-4.76-20.58,11.27c.83,1.64,1.61,3.28,2.32,4.91Z"/>
+              <path class="st0" d="M488.14,249.3l18.16-13.93-3.3-4.3-17.72,13.6c1.01,1.55,1.96,3.1,2.87,4.63Z"/>
+              <path class="st0" d="M481.01,238.53l14.8-15.48-3.92-3.75-14.22,14.88c1.17,1.45,2.28,2.89,3.34,4.34Z"/>
+              <path class="st0" d="M472.59,228.2l10.98-15.71-4.44-3.11-10.31,14.76c1.31,1.34,2.57,2.7,3.78,4.06Z"/>
+              <path class="st0" d="M462.66,218.05c.06.05.12.11.17.16l7.02-14.3-4.87-2.39-6.41,13.05c1.41,1.08,2.77,2.25,4.08,3.48Z"/>
+              <path class="st0" d="M451.19,209.72l3.81-12.18-5.17-1.62-3.57,11.41c1.68.71,3.32,1.51,4.93,2.39Z"/>
+              <path class="st0" d="M437.69,204.45l1.65-10.95-5.36-.81-1.62,10.71c1.79.26,3.57.62,5.33,1.06Z"/>
+              <path class="st0" d="M423.29,202.8l-.04-10.9-5.42.02.04,11.24c1.8-.2,3.61-.32,5.42-.36Z"/>
+              <path class="st0" d="M404.36,206.5c1.54-.59,3.1-1.12,4.67-1.57l-1.92-12.15-5.35.85,2.07,13.09c.18-.07.36-.15.54-.22Z"/>
+              <path class="st0" d="M396.02,210.92l-4.74-14.81-5.16,1.65,5.27,16.47c1.57-1.2,3.11-2.31,4.63-3.3Z"/>
+              <path class="st0" d="M385.01,219.57l-8.86-17.75-4.85,2.42,9.58,19.19c1.38-1.35,2.76-2.64,4.12-3.86Z"/>
+              <path class="st0" d="M375.56,228.8l-13.49-19.04-4.42,3.13,14.14,19.96c1.26-1.38,2.52-2.74,3.77-4.05Z"/>
+              <path class="st0" d="M349.37,219.77l-3.89,3.77,18.12,18.71c1.18-1.4,2.35-2.78,3.53-4.14l-17.76-18.34Z"/>
+              <path class="st0" d="M338.34,231.6l-3.27,4.32,20.84,15.78c1.13-1.42,2.26-2.84,3.39-4.24l-20.96-15.87Z"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="interactive-area">
+        <div class="ui-line-mask title-wrapper"><div class="text-line title-part1 ui-animate-text" id="line1">回憶</div></div>
+        <div class="ui-line-mask subtitle-wrapper-1"><div class="text-line title-part2 ui-animate-text" id="line2">從這裡</div></div>
+        <div class="ui-line-mask subtitle-wrapper-2"><div class="text-line title-part2 ui-animate-text" id="line3">開始</div></div>
+      </div>
+
+      <!-- LP 箭頭：全站統一 CSS 類別 .scroll-arrow-btn -->
+      <button class="scroll-arrow-btn" id="lpArrowBtn">
+        <svg class="arrow-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+
+    <!-- Page 1. Banner 頁 (P1) -->
+    <div class="section-page hero-container" id="heroSection">
+      <button class="skip-anim-btn show" id="bannerSkipBtn">Skip 略過動畫 ✕</button>
+
+      <img src="/img/logo02.png" class="brand-logo-img" alt="洸限">
+
+      <div class="banner-questions-wrapper">
+        <div class="ui-line-mask">
+          <div class="ui-line-content banner-question-part bq-part ui-animate-text">你的生命中，有沒有一個人 ――</div>
+          <div class="ui-line-content banner-question-part bq-part ui-animate-text">讓你，成就了今天的自己？</div>
+        </div>
+        <div class="ui-line-mask">
+          <div class="ui-line-content banner-question-part bq-part ui-animate-text">某一段回憶，每當想起 ――</div>
+          <div class="ui-line-content banner-question-part bq-part ui-animate-text">都會，默默地露出微笑？</div>
+        </div>
+        <div class="ui-line-mask">
+          <div class="ui-line-content banner-question-part bq-part ui-animate-text">有沒有一份陪伴，即使過了很久 ――</div>
+          <div class="ui-line-content banner-question-part bq-part ui-animate-text">依然，溫暖著你？</div>
+        </div>
+      </div>
+
+      <!-- P1 箭頭：全站統一 CSS 類別 .scroll-arrow-btn -->
+      <button class="scroll-arrow-btn" id="p1ArrowBtn">
+        <svg class="arrow-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+
+    <!-- Page 2. 沙畫頁 (P2) -->
+    <div class="section-page audiovisual-section" id="audiovisualSection">
+      <canvas id="CanvasAnime"></canvas>
+
+      <button class="skip-anim-btn" id="p2SkipBtn">Skip 略過動畫 ✕</button>
+
+      <div id="text-container">
+        <!-- 故事 1 -->
+        <div class="ui-line-mask">
+          <div class="ui-line-content story-line ui-animate-text">
+            <span class="sub-part ui-animate-text">也許，是那位一直遞上肩膀，</span>
+            <span class="sub-part ui-animate-text">比你還相信你自己的――摯友！</span>
+          </div>
+        </div>
+
+        <!-- 故事 2 -->
+        <div class="ui-line-mask">
+          <div class="ui-line-content story-line ui-animate-text">
+            <span class="sub-part ui-animate-text">或是，無論你飛多高，</span>
+            <span class="sub-part ui-animate-text">只在乎你累不累的――家人！</span>
+          </div>
+        </div>
+
+        <!-- 故事 3 -->
+        <div class="ui-line-mask">
+          <div class="ui-line-content story-line ui-animate-text">
+            <span class="sub-part ui-animate-text">也可能是，怕你吃不飽、</span>
+            <span class="sub-part ui-animate-text">過不好的――長輩嘮叨！</span>
+          </div>
+        </div>
+
+        <!-- 故事 4 -->
+        <div class="ui-line-mask">
+          <div class="ui-line-content story-line ui-animate-text">
+            <span class="sub-part ui-animate-text">還有那，無論多晚，總在門口等待、</span>
+            <span class="sub-part ui-animate-text">把你當作全世界的毛孩！</span>
+          </div>
+        </div>
+        
+        <!-- 結尾金句 -->
+        <div class="ui-line-mask">
+          <div class="ui-line-content story-line ui-animate-text" id="goldenLine">
+            <span class="ui-animate-text" id="fPart1">回憶，雖然會慢慢消逝</span>
+            <span class="dot-char ui-animate-text" id="dot1">..</span>
+            <span class="dot-char ui-animate-text" id="dot2">..</span>
+            <span class="dot-char ui-animate-text" id="dot3">..</span>
+            <span class="ui-animate-text" id="fPart2">卻也會沉澱在心靈中某個深處</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- P2 箭頭：全站統一 CSS 類別 .scroll-arrow-btn，為未來第四頁做準備 -->
+      <button class="scroll-arrow-btn" id="p2ArrowBtn">
+        <svg class="arrow-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+
+
+    <!-- Page 3. 品牌過渡頁（曼陀羅 ―― 情感的地圖） -->
+    <div class="section-page brand-transition-section" id="brandTransitionSection">
+      <canvas id="brandTransitionCanvas" aria-label="互動式曼陀羅情感地圖"></canvas>
+
+      <button class="skip-anim-btn" id="brandTransitionSkipBtn">Skip 略過動畫 ✕</button>
+
+      <div class="p3-content">
+        <div class="p3-copy" id="brandTransitionText">
+          <div class="ui-line-mask">
+            <div class="ui-line-content p3-text-line p3-text-1">那些沉澱在心底的回憶，從未散去 ――</div>
+          </div>
+          <div class="ui-line-mask">
+            <div class="ui-line-content p3-text-line p3-text-2">中心，是你自己；向外則是父母、伴侶、摯友與毛孩延伸的紋理。</div>
+          </div>
+          <div class="ui-line-mask">
+            <div class="ui-line-content p3-text-line p3-text-3">這延伸的痕跡，是你的情感地圖。他們圍繞著你，就像一朵綻放的曼陀羅。</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="scroll-arrow-btn" id="p3ArrowBtn" aria-label="前往下一頁">
+        <svg class="arrow-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+
+
+    <!-- Page 4. AI 重現與感官體驗（讓時光重現 ―― 感官的召喚） -->
+    <div class="section-page ai-reconstruction-section" id="aiReconstructionSection">
+      <div class="p4-mandala-backdrop" id="p4MandalaBackdrop" aria-hidden="true"></div>
+
+      <button class="skip-anim-btn" id="aiReconstructionSkipBtn">Skip 略過動畫 ✕</button>
+
+      <div class="p4-content">
+        <div class="p4-header-group" id="p4HeaderGroup">
+          <div class="ui-line-mask">
+            <div class="ui-line-content p4-header-line">如果思念有形狀，你希望再次看見、聽見或感受什麼？</div>
+          </div>
+          <div class="ui-line-mask">
+            <div class="ui-line-content p4-header-line">透過科技的微光，我們試著捕捉時光的餘溫 ――</div>
+          </div>
+        </div>
+
+        <div class="p4-cards" id="p4Cards">
+          <article class="p4-card-item p4-card-visual" tabindex="0" data-p4-card="visual">
+            <div class="p4-card-visual-stage">
+              <canvas class="p4-card-canvas" id="p4VisualCanvas" aria-label="沙線重繪輪廓動畫"></canvas>
+            </div>
+            <h3 class="p4-card-title">✦ 歲月輪廓（視覺）</h3>
+            <p class="p4-card-description">將一張泛黃的照片，化為沙畫與曼陀羅的光束流轉。</p>
+          </article>
+
+          <article class="p4-card-item p4-card-audio" tabindex="0" data-p4-card="audio">
+            <div class="p4-card-visual-stage">
+              <div class="p4-soundwave" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+            <h3 class="p4-card-title">✦ 記憶餘音（聲音）</h3>
+            <p class="p4-card-description">擷取熟悉的語氣與聲線，輕聲說出那句未竟的問候。</p>
+          </article>
+
+          <article class="p4-card-item p4-card-memory" tabindex="0" data-p4-card="memory">
+            <div class="p4-card-visual-stage">
+              <canvas class="p4-card-canvas" id="p4MemoryCanvas" aria-label="記憶金沙粒子互動"></canvas>
+            </div>
+            <h3 class="p4-card-title">✦ 時光留香（記憶）</h3>
+            <p class="p4-card-description">描述記憶裡的味道與畫面（如阿嬤的粽香），勾勒出溫暖的歲月景象。</p>
+          </article>
+
+          <article class="p4-card-item p4-card-touch" tabindex="0" data-p4-card="touch">
+            <div class="p4-card-visual-stage">
+              <div class="p4-touch-glow" aria-hidden="true"></div>
+              <canvas class="p4-card-canvas" id="p4TouchCanvas" aria-label="兩個相交的金沙粒子圓形"></canvas>
+            </div>
+            <h3 class="p4-card-title">✦ 歲月溫熱（觸覺）</h3>
+            <p class="p4-card-description">描述掌心裡殘留的溫度，重現那雙曾緊握過你的手、與溫暖的擁抱。</p>
+          </article>
+        </div>
+
+        <div class="ui-line-mask">
+          <div class="ui-line-content p4-footer-text">讓記憶裡的影像、聲音與溫度，再次為你溫柔重現。</div>
+        </div>
+      </div>
+
+      <button class="scroll-arrow-btn" id="p4ArrowBtn" aria-label="前往下一頁">
+        <svg class="arrow-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+    </div>
+
+    <!-- Page 5. 留言板與寄語小卡（寄語 ―― 寫給時光的信） -->
+    <div class="section-page p5-message-section" id="messageCardSection">
+      <div class="p5-spotlight" aria-hidden="true"></div>
+      <button class="skip-anim-btn" id="p5SkipBtn">Skip 略過動畫 ✕</button>
+
+      <div class="p5-shell">
+        <header class="p5-header" id="p5Header">
+          <div class="ui-line-mask">
+            <div class="ui-line-content p5-header-line">把那些來不及說的話、忘不掉的情景，留在這裡吧。</div>
+          </div>
+          <div class="ui-line-mask">
+            <div class="ui-line-content p5-header-line">寫下你的思念碎片，我們為你梳理成一封寄往時光的信。</div>
+          </div>
+        </header>
+
+        <div class="p5-form-container" id="p5FormContainer">
+          <section class="p5-form-step step-target" id="p5StepTarget" aria-labelledby="p5TargetQuestion">
+            <p class="p5-step-kicker">01 / 寄件對象</p>
+            <h2 class="p5-step-title" id="p5TargetQuestion">這封信，你想寄給誰？</h2>
+            <div class="p5-target-options" id="p5TargetOptions">
+              <button type="button" class="p5-pill p5-target-btn" data-target="摯友">摯友</button>
+              <button type="button" class="p5-pill p5-target-btn" data-target="家人">家人</button>
+              <button type="button" class="p5-pill p5-target-btn" data-target="長輩">長輩</button>
+              <button type="button" class="p5-pill p5-target-btn" data-target="毛孩">毛孩</button>
+              <button type="button" class="p5-pill p5-target-btn" data-target="過去的自己">過去的自己</button>
+              <button type="button" class="p5-pill p5-target-btn" data-target="自訂">自訂</button>
+            </div>
+            <div class="p5-custom-target-wrap" id="p5CustomTargetWrap" aria-hidden="true">
+              <label for="p5CustomTarget">你想怎麼稱呼這個對象？</label>
+              <input id="p5CustomTarget" type="text" maxlength="24" autocomplete="off" placeholder="例如：阿嬤、小宇、咪咪……">
+            </div>
+          </section>
+
+          <section class="p5-form-step step-input" id="p5StepInput" aria-labelledby="p5MemoryQuestion" aria-hidden="true">
+            <p class="p5-step-kicker">02 / 思念碎片</p>
+            <h2 class="p5-step-title" id="p5MemoryQuestion">寫下你的思念碎片……</h2>
+            <div class="p5-textarea-wrap">
+              <textarea id="p5MemoryInput" rows="4" minlength="10" maxlength="150" placeholder="例如：想念阿嬤包的粽子香、想念那次一起看海的晚風，或是想對你說聲謝謝……"></textarea>
+              <div class="p5-char-count"><span id="p5CharCount">0</span> / 150</div>
+            </div>
+            <p class="p5-field-note">10–150 字即可。不需要完整，只要是真實浮現的片段。</p>
+          </section>
+
+          <section class="p5-form-step step-tags" id="p5StepTags" aria-labelledby="p5TagsQuestion" aria-hidden="true">
+            <p class="p5-step-kicker">03 / 情感定調</p>
+            <h2 class="p5-step-title" id="p5TagsQuestion">為這段記憶錨定一種情感定調</h2>
+            <p class="p5-field-note">可選 1–2 項；場景與情感各最多一項。</p>
+
+            <div class="p5-tag-group">
+              <span class="p5-tag-group-label">場景</span>
+              <div class="p5-tag-options">
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🌅 日常微光">🌅 日常微光</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🍲 家的味道">🍲 家的味道</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🐾 無聲陪伴">🐾 無聲陪伴</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🎒 遠方與青春">🎒 遠方與青春</button>
+              </div>
+            </div>
+
+            <div class="p5-tag-group">
+              <span class="p5-tag-group-label">情感</span>
+              <div class="p5-tag-options">
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="emotion" data-tag="💌 未竟的感謝">💌 未竟的感謝</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="emotion" data-tag="🌾 溫柔的釋懷">🌾 溫柔的釋懷</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="emotion" data-tag="🌙 純粹的想念">🌙 純粹的想念</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="emotion" data-tag="☀️ 帶給我的勇氣">☀️ 帶給我的勇氣</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="p5-form-step step-submit" id="p5StepSubmit" aria-hidden="true">
+            <button type="button" class="p5-generate-btn" id="p5GenerateBtn" disabled>
+              <span class="p5-button-particles" aria-hidden="true"></span>
+              <span>凝聚思念 ‧ 生成卡片</span>
+            </button>
+            <p class="p5-validation-message" id="p5ValidationMessage" aria-live="polite"></p>
+          </section>
+        </div>
+      </div>
+
+      <!-- AI 梳理／時光小卡／終章 共用滿版 Modal -->
+      <div class="p5-card-modal" id="p5CardModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="p5ModalTitle">
+        <canvas class="p5-dissolve-canvas" id="p5DissolveCanvas" aria-hidden="true"></canvas>
+
+        <div class="p5-ai-loading" id="p5AiLoading">
+          <div class="p5-loading-mandala" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <h2 id="p5ModalTitle">正在為你凝結時光的微光．．．</h2>
+          <p>你的文字正在被輕輕梳理，請稍候。</p>
+        </div>
+
+        <div class="p5-card-ready" id="p5CardReady" aria-hidden="true">
+          <button type="button" class="p5-modal-close" id="p5ModalCloseBtn" aria-label="關閉時光小卡">✕</button>
+
+          <article class="p5-time-card" id="p5PrintableCard">
+            <div class="p5-card-mandala" aria-hidden="true"></div>
+            <div class="p5-card-topline">
+              <div class="p5-card-tags">
+                <span id="p5CardTarget">寄給 / —</span>
+                <span id="p5CardScene">場景 / —</span>
+                <span id="p5CardEmotion">情感 / —</span>
+              </div>
+            </div>
+            <blockquote class="p5-card-copy" id="p5CardText">文字會在這裡凝結成光。</blockquote>
+            <div class="p5-card-bottomline">
+              <time id="p5CardDate"></time>
+              <span class="p5-card-stamp">洸限<br><small>TIME LETTER</small></span>
+            </div>
+          </article>
+
+          <div class="p5-card-actions">
+            <button type="button" class="p5-card-action" id="p5DownloadBtn"><i class="fa-solid fa-download"></i> 下載時光小卡</button>
+            <button type="button" class="p5-card-action p5-card-action-primary" id="p5ReleaseBtn"><i class="fa-solid fa-wind"></i> 寄出思念（隨沙而去）</button>
+          </div>
+          <p class="p5-send-status" id="p5SendStatus" aria-live="polite"></p>
+        </div>
+
+        <div class="p5-outro" id="p5Outro" aria-hidden="true">
+          <div class="ui-line-mask"><div class="ui-line-content p5-outro-line">消逝，不是遺忘，而是將這份愛永遠安放於心。</div></div>
+          <div class="ui-line-mask"><div class="ui-line-content p5-outro-line">帶著這份溫暖，繼續走向明天的旅程。</div></div>
+          <div class="p5-outro-actions">
+            <button type="button" class="p5-outro-btn" id="p5RestartBtn">重新體驗</button>
+            <button type="button" class="p5-outro-btn p5-outro-btn-primary" id="p5HomeBtn">返回首頁</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+  <script>
+    const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    gsap.config({ force3D: true });
+
+    // 各 Canvas 的 requestAnimationFrame 控制代號
+    let loadingRafId = null;
+    let backgroundRafId = null;
+    let sandRafId = null;
+    let brandTransitionRafId = null;
+    let p4VisualRafId = null;
+    let p4MemoryRafId = null;
+    let resizeRafId = null;
+
+    // =============================================================
+    // 🌊 1. 開場水波紋 Canvas (LP)
+    // =============================================================
+    const lCanvas = document.getElementById('loadingCanvas');
+    const lCtx = lCanvas.getContext('2d');
+
+    function resizeLoadingCanvas() {
+      lCanvas.width = window.innerWidth * DPR;
+      lCanvas.height = (window.innerHeight * 0.4) * DPR;
+    }
+
+    let step = 0;
+    let isWaveActive = true;
+    const waveParams = Array.from({ length: 20 }, () => ({
+      phaseOffset: Math.random() * Math.PI * 2,
+      speed: 0.015 + Math.random() * 0.01,
+      frequency1: 0.003 + Math.random() * 0.002,
+      frequency2: 0.007 + Math.random() * 0.003,
+      amplitude: 12 + Math.random() * 8
+    }));
+
+    function drawWaveLandscape() {
+      if (!isWaveActive || loadingRafId !== null) return;
+
+      const renderLoadingFrame = () => {
+        if (!isWaveActive) {
+          loadingRafId = null;
+          return;
+        }
+      lCtx.clearRect(0, 0, lCanvas.width, lCanvas.height);
+      const W = lCanvas.width, H = lCanvas.height;
+
+      waveParams.forEach((p, i) => {
+        lCtx.beginPath();
+        lCtx.strokeStyle = `rgba(180, 150, 120, ${0.05 + (i / 20) * 0.25})`;
+        lCtx.lineWidth = 1.2 * DPR;
+        const baseY = H * 0.2 + (i * 8 * DPR);
+
+        for (let x = 0; x <= W; x += 16 * DPR) {
+          const wave1 = Math.sin((x * p.frequency1) + (step * p.speed) + p.phaseOffset);
+          const wave2 = Math.cos((x * p.frequency2) - (step * p.speed * 0.8) + p.phaseOffset);
+          const y = baseY + (wave1 * p.amplitude * DPR) + (wave2 * (p.amplitude * 0.5 * DPR));
+          
+          if (x === 0) lCtx.moveTo(x, y);
+          else lCtx.lineTo(x, y);
+        }
+        lCtx.stroke();
+      });
+        step += 1;
+        loadingRafId = requestAnimationFrame(renderLoadingFrame);
+      };
+
+      renderLoadingFrame();
+    }
+
+    function startLoadingCanvas() {
+      isWaveActive = true;
+      drawWaveLandscape();
+    }
+
+    function stopLoadingCanvas() {
+      isWaveActive = false;
+      if (loadingRafId !== null) {
+        cancelAnimationFrame(loadingRafId);
+        loadingRafId = null;
+      }
+    }
+
+    // =============================================================
+    // 🌌 2. 全頁背景 Canvas ( Banner 光束 )
+    // =============================================================
+    const bgCanvas = document.getElementById('mandalaCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let isBgCanvasRendering = true;
+
+    function resizeBgCanvas() {
+      bgCanvas.width = window.innerWidth * DPR;
+      bgCanvas.height = window.innerHeight * DPR;
+    }
+
+    let animationParams = { beamDownProgress: 0, horizonSpreadProgress: 0, particleGlowProgress: 0 };
+    const goldParticles = Array.from({ length: 50 }, () => ({
+      x: Math.random() * window.innerWidth * DPR,
+      y: Math.random() * window.innerHeight * DPR,
+      size: (Math.random() * 2.5 + 0.8) * DPR,
+      alpha: Math.random() * 0.6 + 0.2,
+      speedY: (Math.random() - 0.5) * 0.8 * DPR,
+      speedX: (Math.random() - 0.5) * 0.5 * DPR,
+      pulse: Math.random() * Math.PI
+    }));
+
+    const diagParams = Array.from({ length: 28 }, (_, i) => ({
+      isTopStart: i % 2 === 0,
+      startPosRatio: (i / 27) * 0.15,
+      endPosRatio: 0.7 + (i / 27) * 0.5,
+      speed: 0.015 + Math.random() * 0.015,
+      phase: Math.random() * Math.PI * 2,
+      frequency1: 0.003 + Math.random() * 0.002,
+      frequency2: 0.006 + Math.random() * 0.003,
+      amplitude1: (18 + Math.random() * 15) * DPR,
+      amplitude2: (10 + Math.random() * 8) * DPR,
+      alpha: 0.08 + Math.random() * 0.18,
+      width: (Math.random() * 1.5 + 0.8) * DPR
+    }));
+
+    let globalTime = 0;
+
+    function drawLightBeams() {
+      const progress = animationParams.beamDownProgress;
+      if (progress <= 0) return;
+      const W = bgCanvas.width, H = bgCanvas.height, margin = 120 * DPR;
+
+      bgCtx.save();
+      diagParams.forEach(p => {
+        let startX = p.isTopStart ? (p.startPosRatio * W) - margin : -margin;
+        let startY = p.isTopStart ? -margin : (p.startPosRatio * H) - margin;
+        const endX = W + margin + (p.endPosRatio * 0.2 * W);
+        const endY = H + margin + (p.endPosRatio * 0.2 * H);
+
+        const targetLen = Math.hypot(endX - startX, endY - startY);
+        const currentLen = targetLen * progress;
+        const dirX = (endX - startX) / targetLen, dirY = (endY - startY) / targetLen;
+        const nx = -dirY, ny = dirX;
+
+        bgCtx.beginPath();
+        bgCtx.strokeStyle = `rgba(210, 190, 155, ${p.alpha * progress})`;
+        bgCtx.lineWidth = p.width;
+
+        let isFirstPoint = true;
+        for (let dist = 0; dist <= currentLen; dist += 20 * DPR) {
+          const baseX = startX + dirX * dist, baseY = startY + dirY * dist;
+          const wave1 = Math.sin(dist * p.frequency1 + globalTime * p.speed + p.phase) * p.amplitude1;
+          const wave2 = Math.cos(dist * p.frequency2 - globalTime * p.speed * 0.8 + p.phase) * p.amplitude2;
+          const px = baseX + nx * (wave1 + wave2), py = baseY + ny * (wave1 + wave2);
+
+          if (isFirstPoint) { bgCtx.moveTo(px, py); isFirstPoint = false; }
+          else bgCtx.lineTo(px, py);
+        }
+        bgCtx.stroke();
+      });
+      bgCtx.restore();
+    }
+
+    function drawGoldParticles() {
+      if (animationParams.particleGlowProgress <= 0) return;
+      goldParticles.forEach(p => {
+        p.x = (p.x + p.speedX + bgCanvas.width) % bgCanvas.width;
+        p.y = (p.y + p.speedY + bgCanvas.height) % bgCanvas.height;
+        p.pulse += 0.02;
+
+        bgCtx.save();
+        bgCtx.fillStyle = `rgba(235, 195, 100, ${Math.max(0, (Math.sin(p.pulse) * 0.2 + p.alpha) * animationParams.particleGlowProgress)})`;
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        bgCtx.fill();
+        bgCtx.restore();
+      });
+    }
+
+    function renderBg() {
+      if (!isBgCanvasRendering || backgroundRafId !== null) return;
+
+      const renderBackgroundFrame = () => {
+        if (!isBgCanvasRendering) {
+          backgroundRafId = null;
+          return;
+        }
+      globalTime += 1;
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      bgCtx.fillStyle = 'rgba(26, 26, 26, 1)';
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+        drawLightBeams();
+        drawGoldParticles();
+        backgroundRafId = requestAnimationFrame(renderBackgroundFrame);
+      };
+
+      renderBackgroundFrame();
+    }
+
+    function startBackgroundCanvas() {
+      isBgCanvasRendering = true;
+      renderBg();
+    }
+
+    function stopBackgroundCanvas() {
+      isBgCanvasRendering = false;
+      if (backgroundRafId !== null) {
+        cancelAnimationFrame(backgroundRafId);
+        backgroundRafId = null;
+      }
+    }
+
+    // =============================================================
+    // ⏳ 3. 沙畫動畫與語序時間軸
+    // =============================================================
+    const sandCanvas = document.getElementById('CanvasAnime');
+    const sandCtx = sandCanvas.getContext('2d');
+
+    function resizeSandCanvas() {
+      sandCanvas.width = window.innerWidth * DPR;
+      sandCanvas.height = window.innerHeight * DPR;
+    }
+
+    // P2 沙畫圖片順序固定；四張圖片仍使用隨機位置配置。
+    const P2_IMAGE_SEQUENCE = [
+      '/img/lovers-l.png',
+      '/img/fistBump.png',
+      '/img/grandmom-l.png',
+      '/img/dog-l.png'
+    ];
+
+    // 四張圖分別與四組故事文字同步開始。
+    const P2_IMAGE_START_TIMES = [1.5, 7.1, 12.7, 18.3];
+
+    const PLUM_POSITIONS = [
+      { xRatio: 0.25, yRatio: 0.30 },
+      { xRatio: 0.75, yRatio: 0.30 },
+      { xRatio: 0.25, yRatio: 0.70 },
+      { xRatio: 0.75, yRatio: 0.70 },
+      { xRatio: 0.50, yRatio: 0.50 }
+    ];
+
+    let floatingDustParticles = [];
+    let sandImageParticleGroups = [];
+    let sandGlobalProgress = { t: 0 };
+    let totalAnimationDuration = 26.3;
+    let isSandAssetsReady = false;
+    let sandAssetsPromise = null;
+    let p2TextTimeline = null;
+    let p2SandTimeline = null;
+    let isP2Completed = false;
+    let p2PlayToken = 0;
+
+    class FloatingDust {
+      constructor() {
+        this.x = Math.random() * sandCanvas.width;
+        this.y = Math.random() * sandCanvas.height;
+        this.size = (Math.random() * 2.2 + 0.8) * DPR;
+        this.vx = (Math.random() - 0.5) * 0.8 * DPR;
+        this.vy = (Math.random() - 0.5) * 0.8 * DPR;
+        this.baseAlpha = Math.random() * 0.6 + 0.3;
+        this.pulseSpeed = Math.random() * 0.02 + 0.005;
+      }
+      update() {
+        this.x = (this.x + this.vx + sandCanvas.width) % sandCanvas.width;
+        this.y = (this.y + this.vy + sandCanvas.height) % sandCanvas.height;
+      }
+      draw() {
+        sandCtx.save();
+        sandCtx.fillStyle = `rgba(240, 195, 110, ${this.baseAlpha + Math.sin(Date.now() * this.pulseSpeed) * 0.2})`;
+        sandCtx.beginPath();
+        sandCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        sandCtx.fill();
+        sandCtx.restore();
+      }
+    }
+
+    class SandParticle {
+      constructor(targetX, targetY, delay) {
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.delay = delay;
+        this.startX = -Math.random() * sandCanvas.width * 0.4 - 50;
+        this.startY = targetY + (Math.random() - 0.5) * 200 * DPR;
+        this.endX = sandCanvas.width + Math.random() * sandCanvas.width * 0.4 + 50;
+        this.endY = targetY + (Math.random() - 0.5) * 200 * DPR;
+        this.x = this.startX;
+        this.y = this.startY;
+        this.size = (Math.random() * 1.0 + 0.8) * DPR;
+        this.baseAlpha = Math.random() * 0.65 + 0.35;
+        this.alpha = 0;
+        this.noiseX = (Math.random() - 0.5) * 1.8 * DPR;
+        this.noiseY = (Math.random() - 0.5) * 1.8 * DPR;
+      }
+      update(totalElapsedSec) {
+        const localTime = totalElapsedSec - this.delay;
+        if (localTime < 0 || localTime > 7.5) { this.alpha = 0; return; }
+        const progress = localTime / 7.5;
+
+        if (progress < 0.25) {
+          const p = progress / 0.25;
+          this.x = this.startX + (this.targetX - this.startX) * (1 - Math.pow(1 - p, 2));
+          this.y = this.startY + (this.targetY - this.startY) * (1 - Math.pow(1 - p, 2));
+          this.alpha = Math.min(1, p * 1.5) * this.baseAlpha;
+        } else if (progress <= 0.70) {
+          this.x = this.targetX + Math.sin(Date.now() * 0.003 + this.targetY) * this.noiseX;
+          this.y = this.targetY + Math.cos(Date.now() * 0.003 + this.targetX) * this.noiseY;
+          this.alpha = this.baseAlpha;
+        } else {
+          const p = (progress - 0.70) / 0.30;
+          this.x = this.targetX + (this.endX - this.targetX) * (p * p);
+          this.y = this.targetY + (this.endY - this.targetY) * (p * p);
+          this.alpha = this.baseAlpha * (1 - p);
+        }
+      }
+      draw() {
+        if (this.alpha <= 0) return;
+        sandCtx.fillStyle = `rgba(240, 195, 110, ${this.alpha})`;
+        sandCtx.beginPath();
+        sandCtx.arc(this.x | 0, this.y | 0, this.size, 0, Math.PI * 2);
+        sandCtx.fill();
+      }
+    }
+
+    // =============================================================
+    // ✨ 共用文字動畫工具
+    // =============================================================
+    function createSequentialTextAnimation({
+      timeline = gsap.timeline(),
+      elements,
+      fromY = "115%",
+      enterDuration = 1.0,
+      enterEase = "power2.out",
+      gap = 0,
+      firstPosition,
+      onComplete
+    }) {
+      const items = gsap.utils.toArray(elements);
+      gsap.set(items, { y: fromY, opacity: 0 });
+
+      items.forEach((item, index) => {
+        const position = index === 0 ? firstPosition : `+=${gap}`;
+        timeline.to(item, {
+          y: "0%",
+          opacity: 1,
+          duration: enterDuration,
+          ease: enterEase
+        }, position);
+      });
+
+      if (onComplete) timeline.call(onComplete);
+      return timeline;
+    }
+
+    function createGroupedStoryAnimation({
+      timeline = gsap.timeline(),
+      groups,
+      startDelay = 0,
+      onComplete
+    }) {
+      if (startDelay > 0) timeline.to({}, { duration: startDelay });
+
+      groups.forEach(({ line, parts, keepVisible = false }) => {
+        gsap.set(line, { y: "115%", opacity: 0 });
+        gsap.set(parts, { opacity: 0 });
+
+        timeline.to(line, {
+          y: "0%",
+          opacity: 1,
+          duration: 1.0,
+          ease: "power2.out"
+        });
+
+        parts.forEach((part, index) => {
+          timeline.to(part, {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power1.out"
+          }, index === 0 ? "<" : "+=1.5");
+        });
+
+        if (!keepVisible) {
+          timeline.to(line, {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.inOut"
+          }, "+=1.0").to({}, { duration: 0.5 });
+        }
+      });
+
+      if (onComplete) timeline.call(onComplete);
+      return timeline;
+    }
+
+    function resetP2VisualState() {
+      const section = document.getElementById('audiovisualSection');
+      const arrow = section.querySelector('.scroll-arrow-btn');
+      const skipBtn = document.getElementById('p2SkipBtn');
+      const storyLines = section.querySelectorAll('.story-line');
+      const animatedParts = section.querySelectorAll('.sub-part, #fPart1, #fPart2, .dot-char');
+
+      p2TextTimeline?.kill();
+      p2SandTimeline?.kill();
+      p2TextTimeline = null;
+      p2SandTimeline = null;
+      gsap.killTweensOf([storyLines, animatedParts, arrow, skipBtn]);
+
+      gsap.set(storyLines, { y: '115%', opacity: 0 });
+      gsap.set(animatedParts, { opacity: 0 });
+      gsap.set(arrow, { opacity: 0, y: 0 });
+      arrow.dataset.animated = 'false';
+      gsap.set(skipBtn, { opacity: 1, pointerEvents: 'auto' });
+      skipBtn.classList.add('show');
+
+      sandGlobalProgress.t = 0;
+      isP2Completed = false;
+      sandCtx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
+    }
+
+    function playTextAnimationSequence() {
+      const storyLines = gsap.utils.toArray('#text-container .story-line:not(#goldenLine)');
+      const storyGroups = storyLines.map((line) => ({
+        line,
+        parts: gsap.utils.toArray(line.querySelectorAll('.sub-part'))
+      }));
+
+      p2TextTimeline = gsap.timeline();
+      createGroupedStoryAnimation({
+        timeline: p2TextTimeline,
+        groups: storyGroups,
+        startDelay: 1.5
+      });
+
+      const goldenLine = document.getElementById('goldenLine');
+      gsap.set(goldenLine, { y: '115%', opacity: 0 });
+      gsap.set(goldenLine.querySelectorAll('.ui-animate-text'), { opacity: 0 });
+
+      p2TextTimeline
+        .to(goldenLine, { y: '0%', opacity: 1, duration: 1.5, ease: 'power2.out' })
+        .to('#fPart1', { opacity: 1, duration: 1.2, ease: 'power1.out' }, '-=1.2')
+        .to('#dot1', { opacity: 1, duration: 0.3 }, '+=0.4')
+        .to('#dot2', { opacity: 1, duration: 0.3 }, '+=0.3')
+        .to('#dot3', { opacity: 1, duration: 0.3 }, '+=0.3')
+        .to('#fPart2', { opacity: 1, duration: 1.5, ease: 'power1.out' }, '+=0.5')
+        .call(completeP2Animation);
+    }
+
+    function shuffleP2Positions() {
+      return [...PLUM_POSITIONS]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, P2_IMAGE_SEQUENCE.length);
+    }
+
+    async function prepareSandArtAssets() {
+      if (sandAssetsPromise) return sandAssetsPromise;
+
+      sandAssetsPromise = (async () => {
+        floatingDustParticles = Array.from({ length: 45 }, () => new FloatingDust());
+        const positions = shuffleP2Positions();
+
+        const loadPromises = P2_IMAGE_SEQUENCE.map((src, index) => new Promise((resolve) => {
+          const img = new Image();
+          img.src = src;
+          img.onload = () => {
+            const isMobile = window.innerWidth <= 768;
+            const targetWidth = (isMobile ? 260 : 420) * DPR;
+            const scale = targetWidth / img.width;
+            const imgW = img.width * scale;
+            const imgH = img.height * scale;
+            const finalX = positions[index].xRatio * sandCanvas.width;
+            const finalY = positions[index].yRatio * sandCanvas.height;
+
+            const offscreen = document.createElement('canvas');
+            offscreen.width = sandCanvas.width;
+            offscreen.height = sandCanvas.height;
+            const offCtx = offscreen.getContext('2d');
+            offCtx.drawImage(img, finalX - imgW / 2, finalY - imgH / 2, imgW, imgH);
+
+            const data = offCtx.getImageData(0, 0, sandCanvas.width, sandCanvas.height).data;
+            const particles = [];
+            const gap = Math.round(3 * DPR);
+
+            for (let y = 0; y < sandCanvas.height; y += gap) {
+              for (let x = 0; x < sandCanvas.width; x += gap) {
+                const pixelIndex = (y * sandCanvas.width + x) * 4;
+                const alpha = data[pixelIndex + 3];
+                const brightness = (data[pixelIndex] + data[pixelIndex + 1] + data[pixelIndex + 2]) / 3;
+                if (alpha > 50 && brightness < 230) {
+                  particles.push(new SandParticle(x, y, P2_IMAGE_START_TIMES[index]));
+                }
+              }
+            }
+            resolve(particles);
+          };
+          img.onerror = () => {
+            console.error(`P2 沙畫圖片載入失敗：${src}`);
+            resolve([]);
+          };
+        }));
+
+        sandImageParticleGroups = await Promise.all(loadPromises);
+        isSandAssetsReady = true;
+      })();
+
+      return sandAssetsPromise;
+    }
+
+    async function playP2Animation() {
+      const playToken = ++p2PlayToken;
+      resetP2VisualState();
+      await prepareSandArtAssets();
+
+      // 使用者在圖片載入完成前已離開 P2 時，不啟動背景動畫。
+      if (playToken !== p2PlayToken || isP2Completed ||
+          currentPageIndex !== pageElements.indexOf(document.getElementById('audiovisualSection'))) return;
+
+      playTextAnimationSequence();
+      p2SandTimeline = gsap.to(sandGlobalProgress, {
+        t: totalAnimationDuration,
+        duration: totalAnimationDuration,
+        ease: 'none'
+      });
+      animateSand();
+    }
+
+    function completeP2Animation() {
+      if (isP2Completed) return;
+      isP2Completed = true;
+      animateArrow(document.getElementById('audiovisualSection'));
+      gsap.to('#p2SkipBtn', { opacity: 0, pointerEvents: 'none', duration: 0.4 });
+    }
+
+    function skipP2Animation() {
+      p2PlayToken += 1;
+      p2TextTimeline?.kill();
+      p2SandTimeline?.kill();
+      sandGlobalProgress.t = totalAnimationDuration;
+
+      const storyLines = gsap.utils.toArray('#text-container .story-line:not(#goldenLine)');
+      gsap.set(storyLines, { opacity: 0, y: '115%' });
+      gsap.set(storyLines.flatMap(line => gsap.utils.toArray(line.querySelectorAll('.sub-part'))), { opacity: 0 });
+      gsap.set('#goldenLine', { opacity: 1, y: '0%' });
+      gsap.set('#fPart1, #dot1, #dot2, #dot3, #fPart2', { opacity: 1 });
+
+      completeP2Animation();
+      animateSand();
+    }
+
+    function animateSand() {
+      if (sandRafId !== null || !isSandAssetsReady) return;
+
+      const p2Index = pageElements.indexOf(document.getElementById('audiovisualSection'));
+      const renderSandFrame = () => {
+        if (currentPageIndex !== p2Index) {
+          sandRafId = null;
+          return;
+        }
+
+        sandCtx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
+        floatingDustParticles.forEach((dust) => { dust.update(); dust.draw(); });
+        sandImageParticleGroups.forEach((group) => {
+          group.forEach((particle) => { particle.update(sandGlobalProgress.t); particle.draw(); });
+        });
+        sandRafId = requestAnimationFrame(renderSandFrame);
+      };
+
+      renderSandFrame();
+    }
+
+    function stopSandCanvas() {
+      p2PlayToken += 1;
+      p2TextTimeline?.pause();
+      p2SandTimeline?.pause();
+      if (sandRafId !== null) {
+        cancelAnimationFrame(sandRafId);
+        sandRafId = null;
+      }
+    }
+
+
+
+    // =============================================================
+    // 🌸 4. Page 3 品牌過渡 Canvas（曼陀羅 ―― 情感的地圖）
+    // =============================================================
+    const brandTransitionCanvas = document.getElementById('brandTransitionCanvas');
+    const brandTransitionCtx = brandTransitionCanvas.getContext('2d');
+    const brandTransitionState = {
+      implode: 0,
+      drawProgress: 0,
+      rotation: 0,
+      pulse: 0,
+      opacity: 1,
+      scale: 1
+    };
+
+    let brandTransitionTL = null;
+    let brandTransitionPulseTween = null;
+    let brandTransitionParticles = [];
+    let brandTransitionHoverRing = -1;
+    let isBrandTransitionInteractive = false;
+    let brandTransitionCenter = { x: 0, y: 0 };
+    let brandTransitionMaxRadius = 0;
+
+    function resizeBrandTransitionCanvas() {
+      brandTransitionCanvas.width = window.innerWidth * DPR;
+      brandTransitionCanvas.height = window.innerHeight * DPR;
+      brandTransitionCenter.x = brandTransitionCanvas.width * 0.5;
+      brandTransitionCenter.y = brandTransitionCanvas.height * 0.4;
+      brandTransitionMaxRadius = Math.min(brandTransitionCanvas.width, brandTransitionCanvas.height) * 0.25;
+      buildBrandTransitionParticles();
+    }
+
+    function buildBrandTransitionParticles() {
+      const points = [];
+      const ringCount = 5;
+      const petalsPerRing = [18, 28, 38, 48, 60];
+
+      for (let ring = 0; ring < ringCount; ring += 1) {
+        const radius = brandTransitionMaxRadius * ((ring + 1) / ringCount);
+        const count = petalsPerRing[ring];
+
+        for (let i = 0; i < count; i += 1) {
+          const angle = (i / count) * Math.PI * 2;
+          const wave = Math.sin(angle * (ring + 3)) * radius * 0.09;
+          const targetRadius = radius + wave;
+          points.push({
+            ring,
+            angle,
+            targetX: brandTransitionCenter.x + Math.cos(angle) * targetRadius,
+            targetY: brandTransitionCenter.y + Math.sin(angle) * targetRadius,
+            startX: Math.random() * brandTransitionCanvas.width,
+            startY: Math.random() * brandTransitionCanvas.height,
+            size: (0.9 + Math.random() * 1.3) * DPR,
+            alpha: 0.35 + Math.random() * 0.55
+          });
+        }
+      }
+
+      brandTransitionParticles = points;
+    }
+
+    function drawBrandTransitionFrame() {
+      const ctx = brandTransitionCtx;
+      const canvas = brandTransitionCanvas;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const pulseScale = 1 + Math.sin(brandTransitionState.pulse) * 0.018;
+      const finalScale = brandTransitionState.scale * pulseScale;
+
+      ctx.save();
+      ctx.globalAlpha = brandTransitionState.opacity;
+      ctx.translate(brandTransitionCenter.x, brandTransitionCenter.y);
+      ctx.scale(finalScale, finalScale);
+      ctx.rotate(brandTransitionState.rotation);
+      ctx.translate(-brandTransitionCenter.x, -brandTransitionCenter.y);
+
+      brandTransitionParticles.forEach((particle) => {
+        const ringRevealStart = particle.ring / 5;
+        const ringReveal = gsap.utils.clamp(0, 1, (brandTransitionState.drawProgress - ringRevealStart) * 5);
+        const collapseX = particle.startX + (brandTransitionCenter.x - particle.startX) * brandTransitionState.implode;
+        const collapseY = particle.startY + (brandTransitionCenter.y - particle.startY) * brandTransitionState.implode;
+        const x = collapseX + (particle.targetX - collapseX) * ringReveal;
+        const y = collapseY + (particle.targetY - collapseY) * ringReveal;
+        const highlighted = isBrandTransitionInteractive && brandTransitionHoverRing === particle.ring;
+
+        ctx.beginPath();
+        ctx.fillStyle = highlighted
+          ? `rgba(255, 214, 128, ${Math.min(1, particle.alpha + 0.35)})`
+          : `rgba(196, 159, 85, ${particle.alpha * Math.max(0.15, ringReveal)})`;
+        ctx.shadowColor = highlighted ? 'rgba(255, 214, 128, 0.95)' : 'rgba(196, 159, 85, 0.45)';
+        ctx.shadowBlur = (highlighted ? 12 : 5) * DPR;
+        ctx.arc(x, y, particle.size * (highlighted ? 1.5 : 1), 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      const coreGlow = ctx.createRadialGradient(
+        brandTransitionCenter.x, brandTransitionCenter.y, 0,
+        brandTransitionCenter.x, brandTransitionCenter.y, 26 * DPR
+      );
+      coreGlow.addColorStop(0, 'rgba(255, 225, 160, 0.95)');
+      coreGlow.addColorStop(0.35, 'rgba(196, 159, 85, 0.65)');
+      coreGlow.addColorStop(1, 'rgba(196, 159, 85, 0)');
+      ctx.fillStyle = coreGlow;
+      ctx.beginPath();
+      ctx.arc(brandTransitionCenter.x, brandTransitionCenter.y, 26 * DPR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function animateBrandTransitionCanvas() {
+      if (brandTransitionRafId !== null) return;
+
+      const renderBrandTransitionFrame = () => {
+        if (currentPageIndex !== pageElements.indexOf(document.getElementById('brandTransitionSection'))) {
+          brandTransitionRafId = null;
+          return;
+        }
+        drawBrandTransitionFrame();
+        brandTransitionRafId = requestAnimationFrame(renderBrandTransitionFrame);
+      };
+
+      renderBrandTransitionFrame();
+    }
+
+    function stopBrandTransitionCanvas() {
+      if (brandTransitionRafId !== null) {
+        cancelAnimationFrame(brandTransitionRafId);
+        brandTransitionRafId = null;
+      }
+    }
+
+    function updateBrandTransitionHover(clientX, clientY) {
+      if (!isBrandTransitionInteractive) return;
+      const rect = brandTransitionCanvas.getBoundingClientRect();
+      const x = (clientX - rect.left) * DPR;
+      const y = (clientY - rect.top) * DPR;
+      const distance = Math.hypot(x - brandTransitionCenter.x, y - brandTransitionCenter.y);
+      const ringWidth = brandTransitionMaxRadius / 5;
+      brandTransitionHoverRing = distance <= brandTransitionMaxRadius
+        ? Math.min(4, Math.floor(distance / ringWidth))
+        : -1;
+    }
+
+    brandTransitionCanvas.addEventListener('pointermove', (event) => {
+      updateBrandTransitionHover(event.clientX, event.clientY);
+    }, { passive: true });
+
+    brandTransitionCanvas.addEventListener('pointerleave', () => {
+      brandTransitionHoverRing = -1;
+    }, { passive: true });
+
+    function resetBrandTransitionPage() {
+      brandTransitionTL?.kill();
+      brandTransitionPulseTween?.kill();
+      brandTransitionPulseTween = null;
+      gsap.killTweensOf(brandTransitionState);
+      gsap.killTweensOf('#brandTransitionSection .p3-text-line');
+      gsap.killTweensOf('#brandTransitionSkipBtn');
+
+      Object.assign(brandTransitionState, {
+        implode: 0,
+        drawProgress: 0,
+        rotation: 0,
+        pulse: 0,
+        opacity: 1,
+        scale: 1
+      });
+
+      isBrandTransitionInteractive = false;
+      brandTransitionHoverRing = -1;
+      gsap.set('#brandTransitionSection .p3-text-line', { opacity: 0, y: 20 });
+      gsap.set('#brandTransitionSkipBtn', { opacity: 1, pointerEvents: 'auto' });
+      document.getElementById('brandTransitionSkipBtn').classList.add('show');
+
+      const arrow = document.getElementById('p3ArrowBtn');
+      gsap.killTweensOf(arrow);
+      arrow.dataset.animated = 'false';
+      gsap.set(arrow, { opacity: 0, y: 0 });
+    }
+
+    function playBrandTransitionAnimation() {
+      resetBrandTransitionPage();
+      setPageAnimationLock(true);
+      animateBrandTransitionCanvas();
+
+      brandTransitionTL = gsap.timeline();
+
+      brandTransitionTL
+        .to(brandTransitionState, { implode: 1, duration: 1.5, ease: 'power3.in' }, 0)
+        .to(brandTransitionState, { rotation: Math.PI * 0.35, drawProgress: 0.4, duration: 1.5, ease: 'power2.out' }, 1.5)
+        .to('.p3-text-1', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 1.5)
+        .to(brandTransitionState, { rotation: Math.PI * 0.7, drawProgress: 0.8, duration: 1.5, ease: 'power2.out' }, 3.0)
+        .to('.p3-text-2', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 3.0)
+        .to(brandTransitionState, { rotation: Math.PI, drawProgress: 1, duration: 1.5, ease: 'power2.out' }, 4.5)
+        .to('.p3-text-3', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 4.5)
+        .call(() => {
+          isBrandTransitionInteractive = true;
+          setPageAnimationLock(false);
+          brandTransitionPulseTween = gsap.to(brandTransitionState, {
+            pulse: Math.PI * 2,
+            duration: 2.8,
+            repeat: -1,
+            ease: 'none'
+          });
+          animateArrow(document.getElementById('brandTransitionSection'));
+          gsap.to('#brandTransitionSkipBtn', { opacity: 0, pointerEvents: 'none', duration: 0.4 });
+        }, null, 6.0);
+    }
+
+    function skipBrandTransitionAnimation() {
+      if (!brandTransitionTL) return;
+      brandTransitionTL.pause();
+      gsap.set(brandTransitionState, { implode: 1, drawProgress: 1, rotation: Math.PI, opacity: 1, scale: 1 });
+      gsap.set('#brandTransitionSection .p3-text-line', { opacity: 1, y: 0 });
+      isBrandTransitionInteractive = true;
+      setPageAnimationLock(false);
+      brandTransitionPulseTween?.kill();
+      brandTransitionPulseTween = gsap.to(brandTransitionState, {
+        pulse: Math.PI * 2,
+        duration: 2.8,
+        repeat: -1,
+        ease: 'none'
+      });
+      animateArrow(document.getElementById('brandTransitionSection'));
+      gsap.to('#brandTransitionSkipBtn', { opacity: 0, pointerEvents: 'none', duration: 0.4 });
+    }
+
+    function leaveBrandTransitionPage() {
+      setPageAnimationLock(false);
+      isBrandTransitionInteractive = false;
+      brandTransitionTL?.kill();
+      brandTransitionPulseTween?.kill();
+      brandTransitionPulseTween = null;
+      gsap.to(brandTransitionState, {
+        scale: 1.08,
+        opacity: 0.25,
+        duration: 0.8,
+        ease: 'power2.inOut',
+        onComplete: stopBrandTransitionCanvas
+      });
+    }
+
+
+    // =============================================================
+    // ✦ 5. Page 4 AI 重現與感官體驗
+    // =============================================================
+    const aiReconstructionSection = document.getElementById('aiReconstructionSection');
+    const p4CardsContainer = document.getElementById('p4Cards');
+    const p4Cards = gsap.utils.toArray('#aiReconstructionSection .p4-card-item');
+    const p4VisualCanvas = document.getElementById('p4VisualCanvas');
+    const p4VisualCtx = p4VisualCanvas.getContext('2d');
+    const p4MemoryCanvas = document.getElementById('p4MemoryCanvas');
+    const p4MemoryCtx = p4MemoryCanvas.getContext('2d');
+    const p4TouchCanvas = document.getElementById('p4TouchCanvas');
+    const p4TouchCtx = p4TouchCanvas.getContext('2d');
+
+    let page4TL = null;
+    let isP4Interactive = false;
+    let activeP4Card = null;
+    let p4VisualTime = 0;
+    let p4MemoryPointer = { x: 0.5, y: 0.5 };
+    let p4MemoryParticles = [];
+
+    function resizeP4Canvases() {
+      [p4VisualCanvas, p4MemoryCanvas, p4TouchCanvas].forEach((canvas) => {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = Math.max(1, Math.round(rect.width * DPR));
+        canvas.height = Math.max(1, Math.round(rect.height * DPR));
+      });
+      buildP4MemoryParticles();
+      drawP4VisualFrame();
+      drawP4MemoryFrame();
+      drawP4TouchFrame();
+    }
+
+    function buildP4MemoryParticles() {
+      const count = window.innerWidth <= 768 ? 45 : 78;
+      p4MemoryParticles = Array.from({ length: count }, () => ({
+        x: Math.random(), y: Math.random(),
+        baseX: Math.random(), baseY: Math.random(),
+        size: 0.7 + Math.random() * 1.8,
+        phase: Math.random() * Math.PI * 2
+      }));
+    }
+
+    function drawP4VisualFrame() {
+      const ctx = p4VisualCtx;
+      const w = p4VisualCanvas.width;
+      const h = p4VisualCanvas.height;
+      if (!w || !h) return;
+      ctx.clearRect(0, 0, w, h);
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      ctx.strokeStyle = 'rgba(242, 152, 80, .72)';
+      ctx.lineWidth = Math.max(1, DPR);
+      ctx.shadowColor = 'rgba(242, 152, 80, .45)';
+      ctx.shadowBlur = 8 * DPR;
+      for (let ring = 0; ring < 5; ring += 1) {
+        ctx.beginPath();
+        const radius = Math.min(w, h) * (0.12 + ring * 0.07);
+        for (let i = 0; i <= 120; i += 1) {
+          const angle = (i / 120) * Math.PI * 2;
+          const wave = Math.sin(angle * (ring + 3) + p4VisualTime) * radius * .12;
+          const r = radius + wave;
+          const x = Math.cos(angle) * r;
+          const y = Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawP4TouchFrame() {
+      const ctx = p4TouchCtx;
+      const w = p4TouchCanvas.width;
+      const h = p4TouchCanvas.height;
+      if (!w || !h) return;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+
+      const isMobile = window.innerWidth <= 768;
+      const particleCount = isMobile ? 92 : 140;
+      const radius = Math.min(w * .235, h * .34);
+      const centerOffset = radius * .58;
+
+      [-centerOffset, centerOffset].forEach((centerX, circleIndex) => {
+        for (let i = 0; i < particleCount; i += 1) {
+          const angle = (i / particleCount) * Math.PI * 2;
+          const shimmer = Math.sin(i * 1.83 + circleIndex * 2.4) * 1.15 * DPR;
+          const x = centerX + Math.cos(angle) * (radius + shimmer);
+          const y = Math.sin(angle) * (radius + shimmer * .55);
+          const nearIntersection = Math.abs(x) < radius * .22;
+          const alpha = nearIntersection
+            ? .72 + .18 * Math.sin(i * .65)
+            : .34 + .28 * (Math.sin(i * .47 + circleIndex) + 1) / 2;
+          const dotRadius = (nearIntersection ? 1.2 : .82) * DPR + (i % 5) * .08 * DPR;
+
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(242, 152, 80, ${Math.max(.22, alpha)})`;
+          ctx.shadowColor = nearIntersection
+            ? 'rgba(247, 208, 112, .78)'
+            : 'rgba(242, 152, 80, .42)';
+          ctx.shadowBlur = (nearIntersection ? 6 : 3) * DPR;
+          ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      /* 交集中心微光，對應兩個掌心／擁抱交會的溫度 */
+      const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, radius * .42);
+      glow.addColorStop(0, 'rgba(247, 208, 112, .28)');
+      glow.addColorStop(.45, 'rgba(242, 152, 80, .10)');
+      glow.addColorStop(1, 'rgba(242, 152, 80, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * .42, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function renderP4Visual() {
+      if (p4VisualRafId !== null) return;
+      const frame = () => {
+        if (currentPageIndex !== pageElements.indexOf(aiReconstructionSection) || activeP4Card !== 'visual') {
+          p4VisualRafId = null;
+          return;
+        }
+        p4VisualTime += .025;
+        drawP4VisualFrame();
+        p4VisualRafId = requestAnimationFrame(frame);
+      };
+      p4VisualRafId = requestAnimationFrame(frame);
+    }
+
+    function stopP4Visual() {
+      if (p4VisualRafId !== null) cancelAnimationFrame(p4VisualRafId);
+      p4VisualRafId = null;
+    }
+
+    function drawP4MemoryFrame() {
+      const ctx = p4MemoryCtx;
+      const w = p4MemoryCanvas.width;
+      const h = p4MemoryCanvas.height;
+      if (!w || !h) return;
+      ctx.clearRect(0, 0, w, h);
+      p4MemoryParticles.forEach((particle) => {
+        const px = particle.x * w;
+        const py = particle.y * h;
+        const dx = px - p4MemoryPointer.x * w;
+        const dy = py - p4MemoryPointer.y * h;
+        const distance = Math.max(20 * DPR, Math.hypot(dx, dy));
+        const force = Math.min(28 * DPR, 900 * DPR / distance);
+        const targetX = particle.baseX * w + (dx / distance) * force;
+        const targetY = particle.baseY * h + (dy / distance) * force;
+        particle.x += (targetX / w - particle.x) * .045;
+        particle.y += (targetY / h - particle.y) * .045;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(242, 152, 80, ${0.28 + (Math.sin(particle.phase) + 1) * .22})`;
+        ctx.arc(particle.x * w, particle.y * h, particle.size * DPR, 0, Math.PI * 2);
+        ctx.fill();
+        particle.phase += .035;
+      });
+    }
+
+    function renderP4Memory() {
+      if (p4MemoryRafId !== null) return;
+      const frame = () => {
+        if (currentPageIndex !== pageElements.indexOf(aiReconstructionSection) || activeP4Card !== 'memory') {
+          p4MemoryRafId = null;
+          return;
+        }
+        drawP4MemoryFrame();
+        p4MemoryRafId = requestAnimationFrame(frame);
+      };
+      p4MemoryRafId = requestAnimationFrame(frame);
+    }
+
+    function stopP4Memory() {
+      if (p4MemoryRafId !== null) cancelAnimationFrame(p4MemoryRafId);
+      p4MemoryRafId = null;
+    }
+
+    function stopP4Canvases() {
+      stopP4Visual();
+      stopP4Memory();
+    }
+
+    function focusP4Card(card) {
+      if (!isP4Interactive || !card) return;
+      activeP4Card = card.dataset.p4Card;
+      p4CardsContainer.classList.add('has-focus');
+      p4Cards.forEach((item) => item.classList.toggle('is-active', item === card));
+      gsap.to(card, { scale: 1.03, duration: .35, ease: 'power2.out', overwrite: true });
+      p4Cards.filter((item) => item !== card).forEach((item) => gsap.to(item, { scale: 1, duration: .3, overwrite: true }));
+      stopP4Canvases();
+      if (activeP4Card === 'visual') renderP4Visual();
+      if (activeP4Card === 'memory') renderP4Memory();
+    }
+
+    function clearP4CardFocus() {
+      activeP4Card = null;
+      p4CardsContainer.classList.remove('has-focus');
+      p4Cards.forEach((item) => {
+        item.classList.remove('is-active');
+        gsap.to(item, { scale: 1, duration: .3, overwrite: true });
+      });
+      stopP4Canvases();
+    }
+
+    p4Cards.forEach((card) => {
+      card.addEventListener('mouseenter', () => focusP4Card(card));
+      card.addEventListener('focus', () => focusP4Card(card));
+      card.addEventListener('click', () => focusP4Card(card));
+      card.addEventListener('mouseleave', () => {
+        if (!card.matches(':focus')) clearP4CardFocus();
+      });
+      card.addEventListener('blur', clearP4CardFocus);
+    });
+
+    p4MemoryCanvas.closest('.p4-card-item').addEventListener('pointermove', (event) => {
+      const rect = p4MemoryCanvas.getBoundingClientRect();
+      p4MemoryPointer.x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      p4MemoryPointer.y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+    });
+
+    function resetP4State() {
+      page4TL?.kill();
+      stopP4Canvases();
+      clearP4CardFocus();
+      isP4Interactive = false;
+      gsap.killTweensOf('#aiReconstructionSection *');
+      gsap.set('#p4MandalaBackdrop', { opacity: .2, scale: .85, xPercent: -50, yPercent: -50 });
+      gsap.set('#aiReconstructionSection .p4-header-line', { autoAlpha: 0, y: 20 });
+      gsap.set(p4Cards, { autoAlpha: 0, y: 35, scale: .95 });
+      gsap.set('#aiReconstructionSection .p4-footer-text', { opacity: 0, y: 20 });
+      const arrow = document.getElementById('p4ArrowBtn');
+      gsap.killTweensOf(arrow);
+      arrow.dataset.animated = 'false';
+      gsap.set(arrow, { opacity: 0, y: 0 });
+      gsap.set('#aiReconstructionSkipBtn', { opacity: 1, pointerEvents: 'auto' });
+    }
+
+    function enableP4Interaction() {
+      isP4Interactive = true;
+      setPageAnimationLock(false);
+      gsap.to('#aiReconstructionSkipBtn', { opacity: 0, pointerEvents: 'none', duration: .4 });
+    }
+
+    function playP4Animation() {
+      resetP4State();
+      setPageAnimationLock(true);
+      const p4HeaderLines = gsap.utils.toArray('#aiReconstructionSection .p4-header-line');
+
+      page4TL = gsap.timeline();
+      page4TL
+        .to('#p4MandalaBackdrop', { opacity: .2, scale: .85, duration: 1.2, ease: 'power2.inOut' }, 0)
+        .to(p4HeaderLines[0], { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 1.7)
+        .to(p4HeaderLines[1], { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 3.2)
+        .to(p4Cards, {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: .8,
+          stagger: .22,
+          ease: 'power2.out'
+        }, 4.4)
+        .to('#aiReconstructionSection .p4-footer-text', { opacity: 1, y: 0, duration: .8, ease: 'power2.out' }, 6.15)
+        .call(enableP4Interaction, null, 7.0)
+        .call(() => animateArrow(aiReconstructionSection), null, 7.3);
+    }
+
+    function skipP4Animation() {
+      page4TL?.pause();
+      gsap.set('#p4MandalaBackdrop', { opacity: .2, scale: .85, xPercent: -50, yPercent: -50 });
+      gsap.set('#aiReconstructionSection .p4-header-line, #aiReconstructionSection .p4-footer-text', { autoAlpha: 1, y: 0 });
+      gsap.set(p4Cards, { autoAlpha: 1, y: 0, scale: 1 });
+      enableP4Interaction();
+      animateArrow(aiReconstructionSection);
+    }
+
+    function leaveP4Page() {
+      setPageAnimationLock(false);
+      page4TL?.kill();
+      isP4Interactive = false;
+      clearP4CardFocus();
+      stopP4Canvases();
+      gsap.to('#aiReconstructionSection .p4-card-item', {
+        opacity: 0,
+        y: 20,
+        duration: .6,
+        stagger: .08,
+        ease: 'power2.inOut'
+      });
+    }
+
+
+    // =============================================================
+    // 🎯 通用 GSAP 箭頭動畫控制函式（依頁面自動尋找箭頭）
+    // =============================================================
+    function animateArrow(pageOrArrow) {
+      const element = pageOrArrow?.matches?.('.scroll-arrow-btn')
+        ? pageOrArrow
+        : pageOrArrow?.querySelector?.('.scroll-arrow-btn');
+      if (!element || element.dataset.animated === 'true') return;
+
+      element.dataset.animated = 'true';
+      gsap.killTweensOf(element);
+      gsap.set(element, { y: 0 });
+
+      gsap.to(element, {
+        opacity: 1,
+        duration: 0.8,
+        onComplete: () => {
+          gsap.to(element, {
+            y: 8,
+            duration: 1.0,
+            repeat: -1,
+            yoyo: true,
+            ease: "power1.inOut"
+          });
+        }
+      });
+    }
+
+    document.querySelectorAll('.scroll-arrow-btn').forEach((button) => {
+      button.addEventListener('click', nextPage);
+    });
+
+    document.getElementById('loadingSkipBtn').addEventListener('click', skipLoadingToBanner);
+    document.getElementById('bannerSkipBtn').addEventListener('click', scrollToContent);
+    document.getElementById('p2SkipBtn').addEventListener('click', skipP2Animation);
+    document.getElementById('brandTransitionSkipBtn').addEventListener('click', skipBrandTransitionAnimation);
+    document.getElementById('aiReconstructionSkipBtn').addEventListener('click', skipP4Animation);
+
+    // =============================================================
+    // 🎬 4. GSAP 開場與 Banner 時間軸控制
+    // =============================================================
+    const mainTl = gsap.timeline();
+    const openingTextItems = [
+      { element: '#line1', duration: 1.5 },
+      { element: '#line2', duration: 1.2 },
+      { element: '#line3', duration: 1.0 }
+    ];
+    gsap.set(openingTextItems.map(item => item.element), { y: "200%", opacity: 0 });
+
+    mainTl.to(".loading-text-box .char", { opacity: 1, y: 0, duration: 0.6, stagger: 0.7, ease: "power2.out" })
+    .call(() => { document.getElementById('loadingSkipBtn').classList.add('show'); })
+    .to({}, { duration: 0.8 })
+    .to("#loadingText", { opacity: 0, duration: 1.0, ease: "power2.inOut" })
+    .to("#logoBox", { clipPath: "circle(70% at 50% 50%)", scale: 1, filter: "blur(0px)", opacity: 1, duration: 3.5, ease: "power1.inOut" }, "-=0.5")
+    .to({}, { duration: 1.5 });
+
+    openingTextItems.forEach((item, index) => {
+      mainTl.to(item.element, {
+        y: "0%",
+        opacity: 1,
+        duration: item.duration,
+        ease: "power2.out"
+      }, index === 0 ? undefined : "+=0.2");
+    });
+
+    mainTl.call(() => animateArrow(document.getElementById('openingHero')));
+
+    let bannerTimeline = null;
+    let isBeamAnimated = false;
+
+    function playBannerBeamAnimation() {
+      if (isBeamAnimated) return;
+      isBeamAnimated = true;
+
+      bannerTimeline = gsap.timeline();
+      bannerTimeline.to(animationParams, { beamDownProgress: 1, duration: 1.6, ease: "power2.inOut" })
+      .to(animationParams, { horizonSpreadProgress: 1, duration: 1.4, ease: "power2.out" }, "-=0.2")
+      .to(".brand-logo-img", { opacity: 1, duration: 1.4, ease: "power1.out" }, "-=1.0")
+      .to(animationParams, { particleGlowProgress: 1, duration: 1.2, ease: "power1.out" }, "-=0.4");
+      
+      const bqParts = gsap.utils.toArray('.bq-part');
+      gsap.set(bqParts, { y: "115%", opacity: 0 });
+
+      bqParts.forEach((part, index) => {
+        bannerTimeline.to(part, {
+          y: "0%",
+          opacity: 1,
+          duration: 1.4,
+          ease: "power2.out"
+        }, index === 0 ? "-=0.4" : "+=1.5");
+      });
+
+      bannerTimeline.call(() => animateArrow(document.getElementById('heroSection')));
+    }
+
+    function skipLoadingToBanner() {
+      mainTl.progress(1);
+      goToPage(1);
+    }
+
+    function scrollToContent() {
+      if (bannerTimeline) {
+        bannerTimeline.progress(1);
+      } else {
+        animationParams.beamDownProgress = 1;
+        animationParams.horizonSpreadProgress = 1;
+        animationParams.particleGlowProgress = 1;
+        gsap.set(".brand-logo-img", { opacity: 1 });
+        gsap.set(".bq-part", { y: "0%", opacity: 1 });
+        animateArrow(document.getElementById('heroSection'));
+      }
+      gsap.to("#bannerSkipBtn", { opacity: 0, pointerEvents: "none", duration: 0.4 });
+    }
+
+    // =============================================================
+    // 🎯 5. 全頁生命週期與 Snap 滾動控制
+    // =============================================================
+    const sectionsWrapper = document.getElementById('sectionsWrapper');
+    const pageElements = gsap.utils.toArray('.section-page');
+    const totalPages = pageElements.length;
+    let currentPageIndex = 0;
+    let isTransitionLocked = false;
+    let isPageAnimationLocked = false;
+
+    function setPageAnimationLock(isLocked) {
+      isPageAnimationLocked = isLocked;
+    }
+
+    function isNavigationLocked() {
+      return isTransitionLocked || isPageAnimationLocked;
+    }
+
+    const pageLifecycle = new Map([
+      ['openingHero', {
+        enter() {
+          lCanvas.style.opacity = '1';
+          startLoadingCanvas();
+          startBackgroundCanvas();
+          stopSandCanvas();
+        },
+        leave() {
+          stopLoadingCanvas();
+        }
+      }],
+      ['heroSection', {
+        enter() {
+          lCanvas.style.opacity = '0';
+          stopLoadingCanvas();
+          startBackgroundCanvas();
+          stopSandCanvas();
+          playBannerBeamAnimation();
+        },
+        leave() {}
+      }],
+      ['audiovisualSection', {
+        enter() {
+          lCanvas.style.opacity = '0';
+          stopLoadingCanvas();
+          stopBackgroundCanvas();
+          stopBrandTransitionCanvas();
+          playBannerBeamAnimation();
+          playP2Animation();
+        },
+        leave() {
+          stopSandCanvas();
+        }
+      }],
+      ['brandTransitionSection', {
+        enter() {
+          lCanvas.style.opacity = '0';
+          stopLoadingCanvas();
+          stopBackgroundCanvas();
+          stopSandCanvas();
+          stopP4Canvases();
+          playBrandTransitionAnimation();
+        },
+        leave() {
+          leaveBrandTransitionPage();
+        }
+      }],
+      ['aiReconstructionSection', {
+        enter() {
+          lCanvas.style.opacity = '0';
+          stopLoadingCanvas();
+          stopBackgroundCanvas();
+          stopSandCanvas();
+          stopBrandTransitionCanvas();
+          playP4Animation();
+        },
+        leave() {
+          leaveP4Page();
+        }
+      }],
+      ['messageCardSection', {
+        enter() {
+          lCanvas.style.opacity = '0';
+          stopLoadingCanvas();
+          stopBackgroundCanvas();
+          stopSandCanvas();
+          stopBrandTransitionCanvas();
+          stopP4Canvases();
+          window.enterP5Page?.();
+        },
+        leave() {
+          window.leaveP5Page?.();
+        }
+      }]
+    ]);
+
+    function runPageLifecycle(page, phase) {
+      const lifecycle = pageLifecycle.get(page.id);
+      lifecycle?.[phase]?.(page);
+    }
+
+    function goToPage(index) {
+      if (index < 0 || index >= totalPages || isNavigationLocked() || index === currentPageIndex) return;
+
+      isTransitionLocked = true;
+      const previousPage = pageElements[currentPageIndex];
+      const nextPageElement = pageElements[index];
+
+      runPageLifecycle(previousPage, 'leave');
+      currentPageIndex = index;
+      sectionsWrapper.style.transform = `translateY(-${currentPageIndex * 100}vh)`;
+      runPageLifecycle(nextPageElement, 'enter');
+
+      setTimeout(() => { isTransitionLocked = false; }, 850);
+    }
+
+    function nextPage() {
+      goToPage(currentPageIndex + 1);
+    }
+
+    function resizeAllCanvases() {
+      resizeLoadingCanvas();
+      resizeBgCanvas();
+      resizeSandCanvas();
+      resizeBrandTransitionCanvas();
+      resizeP4Canvases();
+      window.resizeP5Canvases?.();
+    }
+
+    function handleResize() {
+      if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
+      resizeRafId = requestAnimationFrame(() => {
+        resizeAllCanvases();
+        resizeRafId = null;
+      });
+    }
+
+    window.addEventListener('resize', handleResize, { passive: true });
+    resizeAllCanvases();
+    runPageLifecycle(pageElements[currentPageIndex], 'enter');
+
+    window.addEventListener('wheel', (e) => {
+      if (isNavigationLocked()) return;
+      if (e.deltaY > 20) nextPage();
+      else if (e.deltaY < -20) goToPage(currentPageIndex - 1);
+    }, { passive: true });
+
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+    window.addEventListener('touchend', (e) => {
+      if (isNavigationLocked()) return;
+      const deltaY = touchStartY - e.changedTouches[0].clientY;
+      if (deltaY > 50) nextPage();
+      else if (deltaY < -50) goToPage(currentPageIndex - 1);
+    }, { passive: true });
+
+/* =============================================================
+   Page 5｜留言板與寄語小卡
+   - 頁面入場／離場由主站 pageLifecycle 呼叫
+   - 不建立新的 resize listener；由主站 handleResize 呼叫 resizeP5Canvases()
+   - Canvas RAF 僅在卡片消逝期間執行，完成或離頁立即停止
+   ============================================================= */
+(() => {
+  'use strict';
+
+  const P5_API_ENDPOINT = '/api/generate';
+  const P5_SUPABASE_URL = 'https://cwlxcsdqoigkutbeemvf.supabase.co';
+  const P5_SUPABASE_ANON_KEY = 'sb_publishable_L52BGOl7tE2hBgLnqxnGoA_u6RQ3yrd';
+
+  const page = document.getElementById('messageCardSection');
+  if (!page) return;
+
+  const els = {
+    spotlight: page.querySelector('.p5-spotlight'),
+    headerLines: gsap.utils.toArray('#messageCardSection .p5-header-line'),
+    stepTarget: document.getElementById('p5StepTarget'),
+    targetBtns: gsap.utils.toArray('#messageCardSection .p5-target-btn'),
+    customWrap: document.getElementById('p5CustomTargetWrap'),
+    customTarget: document.getElementById('p5CustomTarget'),
+    stepInput: document.getElementById('p5StepInput'),
+    memory: document.getElementById('p5MemoryInput'),
+    charCount: document.getElementById('p5CharCount'),
+    stepTags: document.getElementById('p5StepTags'),
+    tagBtns: gsap.utils.toArray('#messageCardSection .p5-tag-btn'),
+    stepSubmit: document.getElementById('p5StepSubmit'),
+    generateBtn: document.getElementById('p5GenerateBtn'),
+    validation: document.getElementById('p5ValidationMessage'),
+    skipBtn: document.getElementById('p5SkipBtn'),
+    modal: document.getElementById('p5CardModal'),
+    loading: document.getElementById('p5AiLoading'),
+    loadingMandala: page.querySelector('.p5-loading-mandala'),
+    loadingTitle: page.querySelector('.p5-ai-loading h2'),
+    loadingText: page.querySelector('.p5-ai-loading p'),
+    ready: document.getElementById('p5CardReady'),
+    closeBtn: document.getElementById('p5ModalCloseBtn'),
+    card: document.getElementById('p5PrintableCard'),
+    cardTarget: document.getElementById('p5CardTarget'),
+    cardScene: document.getElementById('p5CardScene'),
+    cardEmotion: document.getElementById('p5CardEmotion'),
+    cardText: document.getElementById('p5CardText'),
+    cardDate: document.getElementById('p5CardDate'),
+    downloadBtn: document.getElementById('p5DownloadBtn'),
+    releaseBtn: document.getElementById('p5ReleaseBtn'),
+    sendStatus: document.getElementById('p5SendStatus'),
+    dissolveCanvas: document.getElementById('p5DissolveCanvas'),
+    outro: document.getElementById('p5Outro'),
+    outroLines: gsap.utils.toArray('#messageCardSection .p5-outro-line'),
+    outroActions: page.querySelector('.p5-outro-actions'),
+    restartBtn: document.getElementById('p5RestartBtn'),
+    homeBtn: document.getElementById('p5HomeBtn')
+  };
+
+  const dissolveCtx = els.dissolveCanvas.getContext('2d');
+  let page5TL = null;
+  let p5DissolveRafId = null;
+  let p5DissolveParticles = [];
+  let selectedTarget = '';
+  let selectedScene = '';
+  let selectedEmotion = '';
+  let lastGeneratedQuote = '';
+  let isGenerating = false;
+  let isReleasing = false;
+  let formAdvancedToInput = false;
+  let formAdvancedToTags = false;
+  let supabaseClient = null;
+
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function formatDate() {
+    return new Date().toLocaleDateString('zh-TW', {
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).replace(/\//g, '.');
+  }
+
+  function getResolvedTarget() {
+    if (selectedTarget !== '自訂') return selectedTarget;
+    return els.customTarget.value.trim();
+  }
+
+  function updateGenerateState() {
+    const target = getResolvedTarget();
+    const memoryLength = els.memory.value.trim().length;
+    const valid = Boolean(target) && memoryLength >= 10 && memoryLength <= 150 && !isGenerating;
+    els.generateBtn.disabled = !valid;
+
+    if (memoryLength > 0 && memoryLength < 10) {
+      els.validation.textContent = `再寫 ${10 - memoryLength} 個字，就能開始凝聚。`;
+    } else if (selectedTarget === '自訂' && !target) {
+      els.validation.textContent = '請先寫下你想寄給誰。';
+    } else {
+      els.validation.textContent = '';
+    }
+  }
+
+  function revealStep(element, { duration = .6 } = {}) {
+    if (!element || element.classList.contains('is-open')) return;
+    element.classList.add('is-open');
+    element.setAttribute('aria-hidden', 'false');
+    gsap.fromTo(element,
+      { autoAlpha: 0, y: 22, height: 0 },
+      { autoAlpha: 1, y: 0, height: 'auto', duration, ease: 'power2.out', clearProps: 'height' }
+    );
+  }
+
+  function revealInputStep() {
+    if (formAdvancedToInput) return;
+    formAdvancedToInput = true;
+    revealStep(els.stepInput);
+  }
+
+  function revealTagsAndSubmit() {
+    if (formAdvancedToTags) return;
+    formAdvancedToTags = true;
+    revealStep(els.stepTags);
+    gsap.delayedCall(.15, () => revealStep(els.stepSubmit));
+  }
+
+  function chooseTarget(button) {
+    selectedTarget = button.dataset.target || '';
+    els.targetBtns.forEach(btn => {
+      const active = btn === button;
+      btn.classList.toggle('is-selected', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+
+    if (selectedTarget === '自訂') {
+      els.customWrap.setAttribute('aria-hidden', 'false');
+      gsap.to(els.customWrap, {
+        height: 'auto', autoAlpha: 1, marginTop: 14, duration: .45, ease: 'power2.out',
+        onComplete: () => els.customTarget.focus()
+      });
+    } else {
+      gsap.to(els.customWrap, { height: 0, autoAlpha: 0, marginTop: 0, duration: .3, ease: 'power2.inOut' });
+    }
+
+    revealInputStep();
+    updateGenerateState();
+  }
+
+  function chooseTag(button) {
+    const group = button.dataset.tagGroup;
+    const tag = button.dataset.tag;
+    const sameGroupBtns = els.tagBtns.filter(btn => btn.dataset.tagGroup === group);
+    const wasSelected = button.classList.contains('is-selected');
+
+    sameGroupBtns.forEach(btn => {
+      btn.classList.remove('is-selected');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+
+    if (!wasSelected) {
+      button.classList.add('is-selected');
+      button.setAttribute('aria-pressed', 'true');
+      if (group === 'scene') selectedScene = tag;
+      if (group === 'emotion') selectedEmotion = tag;
+    } else {
+      if (group === 'scene') selectedScene = '';
+      if (group === 'emotion') selectedEmotion = '';
+    }
+  }
+
+  function updateCharCount() {
+    const length = els.memory.value.length;
+    els.charCount.textContent = String(length);
+    els.charCount.parentElement.classList.toggle('is-warning', length > 140);
+    if (length > 0) revealTagsAndSubmit();
+    updateGenerateState();
+  }
+
+  function buildPrompt(target, userInput, sceneTag, emotionTag) {
+    return `[System Instructions]\n你是一位溫柔的時光傾聽者。請根據使用者提供的「思念對象」、「自由隨筆」以及「情境與情感標籤」，為使用者潤飾並生成一段適合印在「時光小卡」上的溫暖短文。\n\n[文案生成規範]\n1. 字數限制：繁體中文 60 ~ 100 字之間，分為 2~3 個短句。\n2. 口吻風格：溫柔、治癒、微光感，句式帶有散文詩的停頓與留白。\n3. 合併邏輯：\n- 核心情節：以使用者的「自由隨筆」為故事主軸。\n- 視覺與氣氛：融合成對應「場景標籤」的意象（如香氣、晚風、光影）。\n- 情感昇華：結尾必須呼應「情感標籤」的意涵，並溫柔提到「思念對象」。\n4. 嚴禁事項：不要出現「這是一段文案：」等開頭，直接輸出可印製在卡片上的詩意本文。\n\n[Input Data]\n- 思念對象：${target}\n- 使用者隨筆：${userInput}\n- 場景標籤：${sceneTag || '未指定'}\n- 情感標籤：${emotionTag || '未指定'}\n\n[Output Format]\n直接輸出潤飾後的短文段落。`;
+  }
+
+  async function generateAIQuote(target, userInput, sceneTag, emotionTag) {
+    const response = await fetch(P5_API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: buildPrompt(target, userInput, sceneTag, emotionTag) })
+    });
+
+    if (!response.ok) throw new Error(`API HTTP ${response.status}`);
+    const data = await response.json();
+    const text = String(data?.text || '').trim();
+    if (!text || /^\[(系統通道調整中|通道維護報告)\]/.test(text)) {
+      throw new Error(text || 'AI 回傳內容為空');
+    }
+    return text;
+  }
+
+  function setModalState(state) {
+    const isLoading = state === 'loading';
+    const isReady = state === 'ready';
+    const isOutro = state === 'outro';
+
+    els.loading.style.display = isLoading ? 'flex' : 'none';
+    els.ready.style.display = isReady ? 'flex' : 'none';
+    els.outro.style.display = isOutro ? 'flex' : 'none';
+    els.loading.setAttribute('aria-hidden', String(!isLoading));
+    els.ready.setAttribute('aria-hidden', String(!isReady));
+    els.outro.setAttribute('aria-hidden', String(!isOutro));
+  }
+
+  function openModalForLoading() {
+    els.modal.classList.add('is-open');
+    els.modal.setAttribute('aria-hidden', 'false');
+    setPageAnimationLock(true);
+    setModalState('loading');
+    gsap.set([els.loadingMandala, els.loadingTitle, els.loadingText], { autoAlpha: 0, y: 10 });
+    gsap.timeline()
+      .to(els.loadingMandala, { autoAlpha: 1, y: 0, duration: .7, ease: 'power2.out' })
+      .to(els.loadingTitle, { autoAlpha: 1, y: 0, duration: .6, ease: 'power2.out' }, '-=.25')
+      .to(els.loadingText, { autoAlpha: 1, y: 0, duration: .5, ease: 'power2.out' }, '-=.2');
+  }
+
+  function showGeneratedCard(quote) {
+    const target = getResolvedTarget();
+    lastGeneratedQuote = quote;
+    els.cardTarget.textContent = `寄給 / ${target}`;
+    els.cardScene.textContent = `場景 / ${selectedScene || '未指定'}`;
+    els.cardEmotion.textContent = `情感 / ${selectedEmotion || '未指定'}`;
+    els.cardText.textContent = quote;
+    els.cardDate.textContent = formatDate();
+    els.sendStatus.textContent = '';
+
+    setModalState('ready');
+    gsap.fromTo(els.ready, { autoAlpha: 0 }, { autoAlpha: 1, duration: .35 });
+    gsap.fromTo(els.card,
+      { autoAlpha: 0, scale: .86, y: 24, filter: 'blur(8px)' },
+      { autoAlpha: 1, scale: 1, y: 0, filter: 'blur(0px)', duration: .9, ease: 'power3.out' }
+    );
+    gsap.fromTo('.p5-card-actions', { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: .55, delay: .55, ease: 'power2.out' });
+  }
+
+  async function handleGenerate() {
+    if (isGenerating) return;
+    const target = getResolvedTarget();
+    const memory = els.memory.value.trim();
+    if (!target || memory.length < 10 || memory.length > 150) {
+      updateGenerateState();
+      return;
+    }
+
+    isGenerating = true;
+    updateGenerateState();
+    openModalForLoading();
+
+    try {
+      const [quote] = await Promise.all([
+        generateAIQuote(target, memory, selectedScene, selectedEmotion),
+        delay(2500)
+      ]);
+      showGeneratedCard(quote);
+    } catch (error) {
+      console.error('P5 AI 生成失敗:', error);
+      closeModal(true);
+      els.validation.textContent = '目前時光通道較擁擠，請稍後再試一次。';
+    } finally {
+      isGenerating = false;
+      updateGenerateState();
+    }
+  }
+
+  async function downloadCard() {
+    if (!window.html2canvas) {
+      els.sendStatus.textContent = '下載元件尚未載入，請重新整理後再試。';
+      return;
+    }
+    els.downloadBtn.disabled = true;
+    try {
+      const canvas = await html2canvas(els.card, { scale: 3, backgroundColor: null, useCORS: true });
+      const link = document.createElement('a');
+      link.download = `洸限_時光小卡_${formatDate().replace(/\./g, '-')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('P5 卡片下載失敗:', error);
+      els.sendStatus.textContent = '卡片輸出失敗，請再試一次。';
+    } finally {
+      els.downloadBtn.disabled = false;
+    }
+  }
+
+  function getSupabaseClient() {
+    if (supabaseClient) return supabaseClient;
+    if (!window.supabase?.createClient) return null;
+    supabaseClient = window.supabase.createClient(P5_SUPABASE_URL, P5_SUPABASE_ANON_KEY);
+    return supabaseClient;
+  }
+
+  async function persistCard() {
+    const client = getSupabaseClient();
+    if (!client) return { skipped: true };
+    const target = getResolvedTarget();
+    const meta = [selectedScene, selectedEmotion].filter(Boolean).join(' / ');
+    const fullText = `[${target}] ${lastGeneratedQuote}${meta ? ` (${meta})` : ''}`;
+    const { error } = await client.from('remembrance-db').insert([{ text: fullText }]);
+    if (error) throw error;
+    return { skipped: false };
+  }
+
+  function resizeP5Canvases() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    els.dissolveCanvas.width = Math.round(window.innerWidth * dpr);
+    els.dissolveCanvas.height = Math.round(window.innerHeight * dpr);
+    els.dissolveCanvas.style.width = `${window.innerWidth}px`;
+    els.dissolveCanvas.style.height = `${window.innerHeight}px`;
+    dissolveCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.resizeP5Canvases = resizeP5Canvases;
+
+  function stopP5DissolveCanvas() {
+    if (p5DissolveRafId !== null) {
+      cancelAnimationFrame(p5DissolveRafId);
+      p5DissolveRafId = null;
+    }
+    p5DissolveParticles = [];
+    dissolveCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  }
+  window.stopP5DissolveCanvas = stopP5DissolveCanvas;
+
+  async function buildDissolveParticles() {
+    if (!window.html2canvas) return [];
+    const snapshot = await html2canvas(els.card, { scale: 1, backgroundColor: null, useCORS: true });
+    const sourceCtx = snapshot.getContext('2d', { willReadFrequently: true });
+    const rect = els.card.getBoundingClientRect();
+    const image = sourceCtx.getImageData(0, 0, snapshot.width, snapshot.height);
+    const particles = [];
+    const step = window.innerWidth <= 768 ? 9 : 7;
+
+    for (let y = 0; y < snapshot.height; y += step) {
+      for (let x = 0; x < snapshot.width; x += step) {
+        const i = (y * snapshot.width + x) * 4;
+        const a = image.data[i + 3];
+        if (a < 55 || Math.random() > .72) continue;
+        particles.push({
+          x: rect.left + (x / snapshot.width) * rect.width,
+          y: rect.top + (y / snapshot.height) * rect.height,
+          vx: 55 + Math.random() * 120,
+          vy: -75 - Math.random() * 150,
+          drift: (Math.random() - .28) * 55,
+          size: .8 + Math.random() * 1.8,
+          alpha: .35 + Math.random() * .65,
+          life: 0,
+          maxLife: 2.4 + Math.random() * .8,
+          r: image.data[i],
+          g: Math.max(image.data[i + 1], 125),
+          b: Math.min(image.data[i + 2] + 20, 190)
+        });
+      }
+    }
+    return particles;
+  }
+
+  function runDissolveCanvas(particles) {
+    stopP5DissolveCanvas();
+    p5DissolveParticles = particles;
+    let previous = performance.now();
+
+    const render = (now) => {
+      const dt = Math.min((now - previous) / 1000, .034);
+      previous = now;
+      dissolveCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      let alive = 0;
+
+      p5DissolveParticles.forEach(p => {
+        if (p.life >= p.maxLife) return;
+        alive += 1;
+        p.life += dt;
+        p.x += (p.vx + p.drift * Math.sin(p.life * 4)) * dt;
+        p.y += p.vy * dt;
+        p.vy -= 8 * dt;
+        const remain = Math.max(0, 1 - p.life / p.maxLife);
+        dissolveCtx.beginPath();
+        dissolveCtx.fillStyle = `rgba(${Math.max(p.r, 190)}, ${Math.max(p.g, 130)}, ${Math.max(p.b, 70)}, ${p.alpha * remain})`;
+        dissolveCtx.arc(p.x, p.y, p.size * (0.6 + remain), 0, Math.PI * 2);
+        dissolveCtx.fill();
+      });
+
+      if (alive > 0) {
+        p5DissolveRafId = requestAnimationFrame(render);
+      } else {
+        p5DissolveRafId = null;
+        dissolveCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      }
+    };
+
+    if (p5DissolveRafId === null) p5DissolveRafId = requestAnimationFrame(render);
+  }
+
+  async function releaseCard() {
+    if (isReleasing || !lastGeneratedQuote) return;
+    isReleasing = true;
+    els.releaseBtn.disabled = true;
+    els.downloadBtn.disabled = true;
+    els.closeBtn.disabled = true;
+    els.sendStatus.textContent = '正在把這份思念寄往時光……';
+
+    try {
+      try {
+        await persistCard();
+        els.sendStatus.textContent = '思念已被收下，正在化作微光。';
+      } catch (saveError) {
+        console.error('P5 Supabase 儲存失敗:', saveError);
+        els.sendStatus.textContent = '雲端暫時沒有回應；仍為你完成這段告別。';
+      }
+
+      const particles = await buildDissolveParticles();
+      runDissolveCanvas(particles);
+      gsap.to(els.card, {
+        autoAlpha: 0,
+        x: 80,
+        y: -55,
+        scale: .9,
+        filter: 'blur(7px)',
+        duration: 3,
+        ease: 'power2.inOut'
+      });
+      gsap.to('.p5-card-actions, .p5-send-status, .p5-modal-close', { autoAlpha: 0, duration: .45 });
+
+      await delay(3000);
+      setModalState('outro');
+      gsap.set(els.outroLines, { y: '115%', autoAlpha: 0 });
+      gsap.set(els.outroActions, { autoAlpha: 0, y: 12 });
+      gsap.timeline()
+        .to(els.outroLines[0], { y: '0%', autoAlpha: 1, duration: 1, ease: 'power2.out' })
+        .to(els.outroLines[1], { y: '0%', autoAlpha: 1, duration: 1, ease: 'power2.out' }, '+=.55')
+        .to(els.outroActions, { autoAlpha: 1, y: 0, duration: .6, ease: 'power2.out' }, '+=.6');
+    } finally {
+      isReleasing = false;
+    }
+  }
+
+  function closeModal(force = false) {
+    if (isReleasing && !force) return;
+    stopP5DissolveCanvas();
+    els.modal.classList.remove('is-open');
+    els.modal.setAttribute('aria-hidden', 'true');
+    setModalState('loading');
+    gsap.set(els.card, { clearProps: 'all' });
+    gsap.set('.p5-card-actions, .p5-send-status, .p5-modal-close', { clearProps: 'all' });
+    els.closeBtn.disabled = false;
+    els.releaseBtn.disabled = false;
+    els.downloadBtn.disabled = false;
+    setPageAnimationLock(false);
+  }
+
+  function resetP5Form({ keepPage = true } = {}) {
+    selectedTarget = '';
+    selectedScene = '';
+    selectedEmotion = '';
+    lastGeneratedQuote = '';
+    formAdvancedToInput = false;
+    formAdvancedToTags = false;
+    isGenerating = false;
+    isReleasing = false;
+
+    els.memory.value = '';
+    els.customTarget.value = '';
+    els.charCount.textContent = '0';
+    els.validation.textContent = '';
+    els.targetBtns.forEach(btn => { btn.classList.remove('is-selected'); btn.setAttribute('aria-pressed', 'false'); });
+    els.tagBtns.forEach(btn => { btn.classList.remove('is-selected'); btn.setAttribute('aria-pressed', 'false'); });
+    gsap.set(els.customWrap, { height: 0, autoAlpha: 0, marginTop: 0 });
+    els.customWrap.setAttribute('aria-hidden', 'true');
+
+    [els.stepInput, els.stepTags, els.stepSubmit].forEach(step => {
+      step.classList.remove('is-open');
+      step.setAttribute('aria-hidden', 'true');
+      gsap.set(step, { autoAlpha: 0, y: 24, height: 0, paddingTop: 0, paddingBottom: 0 });
+    });
+    updateGenerateState();
+    if (keepPage) page.scrollTop = 0;
+  }
+
+  function resetP5Entrance() {
+    if (page5TL) { page5TL.kill(); page5TL = null; }
+    gsap.killTweensOf([els.spotlight, ...els.headerLines, els.stepTarget, ...els.targetBtns]);
+    gsap.set(els.spotlight, { autoAlpha: 0 });
+    gsap.set(els.headerLines, { y: '115%', autoAlpha: 0 });
+    els.stepTarget.classList.add('is-open');
+    els.stepTarget.setAttribute('aria-hidden', 'false');
+    gsap.set(els.stepTarget, { autoAlpha: 0, y: 20 });
+    gsap.set(els.targetBtns, { autoAlpha: 0, y: 12 });
+    gsap.set(els.skipBtn, { autoAlpha: 0, pointerEvents: 'none' });
+  }
+
+  function playP5Entrance() {
+    resetP5Entrance();
+    setPageAnimationLock(true);
+    page5TL = gsap.timeline({
+      onComplete: () => {
+        setPageAnimationLock(false);
+        gsap.to(els.skipBtn, { autoAlpha: 0, pointerEvents: 'none', duration: .35 });
+      }
+    });
+    page5TL
+      .to(els.skipBtn, { autoAlpha: 1, pointerEvents: 'auto', duration: .4 }, .15)
+      .to(els.spotlight, { autoAlpha: 1, duration: 1.1, ease: 'power2.out' }, 0)
+      .to(els.headerLines[0], { y: '0%', autoAlpha: 1, duration: .9, ease: 'power2.out' }, .15)
+      .to(els.headerLines[1], { y: '0%', autoAlpha: 1, duration: .9, ease: 'power2.out' }, .78)
+      .to(els.stepTarget, { autoAlpha: 1, y: 0, duration: .65, ease: 'power2.out' }, 1.2)
+      .to(els.targetBtns, { autoAlpha: 1, y: 0, duration: .45, stagger: .1, ease: 'power2.out' }, 1.35);
+  }
+
+  function skipP5Entrance() {
+    if (page5TL) page5TL.progress(1);
+    else {
+      gsap.set([els.spotlight, ...els.headerLines, els.stepTarget, ...els.targetBtns], { autoAlpha: 1, y: 0 });
+      setPageAnimationLock(false);
+    }
+    gsap.to(els.skipBtn, { autoAlpha: 0, pointerEvents: 'none', duration: .25 });
+  }
+
+  window.enterP5Page = function enterP5Page() {
+    stopP5DissolveCanvas();
+    closeModal(true);
+    resetP5Form();
+    playP5Entrance();
+  };
+
+  window.leaveP5Page = function leaveP5Page() {
+    if (page5TL) { page5TL.kill(); page5TL = null; }
+    stopP5DissolveCanvas();
+    if (els.modal.classList.contains('is-open')) closeModal(true);
+    gsap.killTweensOf('#messageCardSection *');
+    setPageAnimationLock(false);
+  };
+
+  els.targetBtns.forEach(btn => btn.addEventListener('click', () => chooseTarget(btn)));
+  els.customTarget.addEventListener('input', updateGenerateState);
+  els.memory.addEventListener('focus', revealTagsAndSubmit);
+  els.memory.addEventListener('input', updateCharCount);
+  els.tagBtns.forEach(btn => btn.addEventListener('click', () => chooseTag(btn)));
+  els.generateBtn.addEventListener('click', handleGenerate);
+  els.skipBtn.addEventListener('click', skipP5Entrance);
+  els.closeBtn.addEventListener('click', () => closeModal(false));
+  els.downloadBtn.addEventListener('click', downloadCard);
+  els.releaseBtn.addEventListener('click', releaseCard);
+
+  els.restartBtn.addEventListener('click', () => {
+    closeModal(true);
+    resetP5Form();
+    playP5Entrance();
+  });
+
+  els.homeBtn.addEventListener('click', () => {
+    closeModal(true);
+    resetP5Form({ keepPage: false });
+    goToPage(0);
+  });
+
+  // P5 內容在手機可能高於一個 viewport；內部捲動時不要讓 window 的 Snap handler 誤判切頁。
+  page.addEventListener('wheel', (event) => {
+    if (page.scrollHeight <= page.clientHeight + 2) return;
+    const atTop = page.scrollTop <= 1;
+    const atBottom = page.scrollTop + page.clientHeight >= page.scrollHeight - 1;
+    if ((event.deltaY > 0 && !atBottom) || (event.deltaY < 0 && !atTop)) event.stopPropagation();
+  }, { passive: true });
+  page.addEventListener('touchend', (event) => {
+    if (page.scrollHeight > page.clientHeight + 2 && page.scrollTop > 1) event.stopPropagation();
+  }, { passive: true });
+
+  resizeP5Canvases();
+  resetP5Form({ keepPage: false });
+  resetP5Entrance();
+})();
+
+  </script>
+</body>
+</html>
