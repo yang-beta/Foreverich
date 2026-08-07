@@ -843,6 +843,11 @@
   letter-spacing: .12em;
   line-height: 1.65;
 }
+.step-input .p5-step-kicker,
+.step-tags .p5-step-kicker {
+  margin-top: 0;
+}
+
 .p5-field-note {
   margin-top: 9px;
   color: var(--p5-muted);
@@ -911,11 +916,13 @@
 }
 .p5-custom-target-wrap input { padding: 12px 14px; }
 .p5-textarea-wrap textarea {
-  min-height: 104px;
+  height: 92px;
+  min-height: 92px;
+  max-height: 92px;
   margin-top: 14px;
-  padding: 15px 16px 30px;
-  resize: vertical;
-  line-height: 1.8;
+  padding: 12px 16px 26px;
+  resize: none;
+  line-height: 1.55;
 }
 .p5-custom-target-wrap input:focus,
 .p5-textarea-wrap textarea:focus {
@@ -945,17 +952,25 @@
 }
 
 .step-submit { text-align: center; }
+.p5-form-step.step-submit.is-open {
+  padding: 8px 0 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
 .p5-generate-btn {
   position: relative;
-  width: min(440px, 100%);
-  min-height: 50px;
+  width: min(290px, 82%);
+  min-height: 36px;
   overflow: hidden;
   border: 1px solid rgba(242,152,80,.7);
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(242,152,80,.16), rgba(242,152,80,.06));
   color: #ffd4ad;
-  font: 400 .95rem 'Noto Serif TC', serif;
-  letter-spacing: .2em;
+  font: 400 .82rem 'Noto Serif TC', serif;
+  letter-spacing: .16em;
+  padding: 8px 16px;
   cursor: pointer;
   transition: transform .3s ease, box-shadow .3s ease, background .3s ease, opacity .3s ease;
 }
@@ -1218,6 +1233,7 @@
   .p5-header .ui-line-content { font-size: .96rem !important; letter-spacing: .08em !important; line-height: 1.75 !important; }
   .p5-form-container { gap: 12px; }
   .p5-form-step.is-open { padding: 16px; border-radius: 14px; }
+  .p5-form-step.step-submit.is-open { padding: 6px 0 0; border-radius: 0; }
   .p5-target-options, .p5-tag-options { gap: 8px; }
   .p5-pill { font-size: .78rem; padding: 8px 12px; }
   .p5-card-modal { padding: 14px; overflow-y: auto; }
@@ -1543,14 +1559,14 @@
             <div class="ui-line-content p5-header-line">把那些來不及說的話、忘不掉的情景，留在這裡吧。</div>
           </div>
           <div class="ui-line-mask">
-            <div class="ui-line-content p5-header-line">寫下你的思念碎片，我們為你梳理成一封寄往時光的信。</div>
+            <div class="ui-line-content p5-header-line">寫下你的思念碎片，我們為你梳理成一張寄往時光的卡片。</div>
           </div>
         </header>
 
         <div class="p5-form-container" id="p5FormContainer">
           <section class="p5-form-step step-target" id="p5StepTarget" aria-labelledby="p5TargetQuestion">
             <p class="p5-step-kicker">01 / 寄件對象</p>
-            <h2 class="p5-step-title" id="p5TargetQuestion">這封信，你想寄給誰？</h2>
+            <h2 class="p5-step-title" id="p5TargetQuestion">這張卡片，你想寄給誰？</h2>
             <div class="p5-target-options" id="p5TargetOptions">
               <button type="button" class="p5-pill p5-target-btn" data-target="摯友">摯友</button>
               <button type="button" class="p5-pill p5-target-btn" data-target="家人">家人</button>
@@ -1569,24 +1585,24 @@
             <p class="p5-step-kicker">02 / 思念碎片</p>
             <h2 class="p5-step-title" id="p5MemoryQuestion">寫下你的思念碎片……</h2>
             <div class="p5-textarea-wrap">
-              <textarea id="p5MemoryInput" rows="4" minlength="10" maxlength="150" placeholder="例如：想念阿嬤包的粽子香、想念那次一起看海的晚風，或是想對你說聲謝謝……"></textarea>
-              <div class="p5-char-count"><span id="p5CharCount">0</span> / 150</div>
+              <textarea id="p5MemoryInput" rows="3" minlength="10" maxlength="80" placeholder="例如：想念阿嬤包的粽子香、想念那次一起看海的晚風，或是想對你說聲謝謝……"></textarea>
+              <div class="p5-char-count"><span id="p5CharCount">0</span> / 80</div>
             </div>
-            <p class="p5-field-note">10–150 字即可。不需要完整，只要是真實浮現的片段。</p>
+            <p class="p5-field-note">10–80 字即可。不需要完整，只要是真實浮現的片段。</p>
           </section>
 
           <section class="p5-form-step step-tags" id="p5StepTags" aria-labelledby="p5TagsQuestion" aria-hidden="true">
-            <p class="p5-step-kicker">03 / 情感定調</p>
-            <h2 class="p5-step-title" id="p5TagsQuestion">為這段記憶錨定一種情感定調</h2>
-            <p class="p5-field-note">可選 1–2 項；場景與情感各最多一項。</p>
+            <p class="p5-step-kicker">03 / 情感錨定</p>
+            <h2 class="p5-step-title" id="p5TagsQuestion">為這段記憶錨定一種情感基調</h2>
+            <p class="p5-field-note">場景與情感最多各一項。</p>
 
             <div class="p5-tag-group">
               <span class="p5-tag-group-label">場景</span>
               <div class="p5-tag-options">
-                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🌅 日常微光">🌅 日常微光</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🌅 微光日常">🌅 微光日常</button>
                 <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🍲 家的味道">🍲 家的味道</button>
-                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🐾 無聲陪伴">🐾 無聲陪伴</button>
-                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🎒 遠方與青春">🎒 遠方與青春</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="👁️ 純粹的雙眸">👁️ 純粹的雙眸</button>
+                <button type="button" class="p5-pill p5-tag-btn" data-tag-group="scene" data-tag="🎒 過往與青春">🎒 過往與青春</button>
               </div>
             </div>
 
@@ -3057,7 +3073,7 @@
 (() => {
   'use strict';
 
-  const P5_API_ENDPOINT = '/api/generate';
+  const P5_API_ENDPOINT = window.P5_API_ENDPOINT || '/api/generate';
   const P5_SUPABASE_URL = 'https://cwlxcsdqoigkutbeemvf.supabase.co';
   const P5_SUPABASE_ANON_KEY = 'sb_publishable_L52BGOl7tE2hBgLnqxnGoA_u6RQ3yrd';
 
@@ -3136,7 +3152,7 @@
   function updateGenerateState() {
     const target = getResolvedTarget();
     const memoryLength = els.memory.value.trim().length;
-    const valid = Boolean(target) && memoryLength >= 10 && memoryLength <= 150 && !isGenerating;
+    const valid = Boolean(target) && memoryLength >= 10 && memoryLength <= 80 && !isGenerating;
     els.generateBtn.disabled = !valid;
 
     if (memoryLength > 0 && memoryLength < 10) {
@@ -3152,9 +3168,19 @@
     if (!element || element.classList.contains('is-open')) return;
     element.classList.add('is-open');
     element.setAttribute('aria-hidden', 'false');
+    const isSubmitStep = element.classList.contains('step-submit');
     gsap.fromTo(element,
-      { autoAlpha: 0, y: 22, height: 0 },
-      { autoAlpha: 1, y: 0, height: 'auto', duration, ease: 'power2.out', clearProps: 'height' }
+      { autoAlpha: 0, y: 22, height: 0, paddingTop: 0, paddingBottom: 0 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        height: 'auto',
+        paddingTop: isSubmitStep ? 8 : 20,
+        paddingBottom: isSubmitStep ? 0 : 20,
+        duration,
+        ease: 'power2.out',
+        clearProps: 'height,paddingTop,paddingBottom'
+      }
     );
   }
 
@@ -3218,8 +3244,8 @@
   function updateCharCount() {
     const length = els.memory.value.length;
     els.charCount.textContent = String(length);
-    els.charCount.parentElement.classList.toggle('is-warning', length > 140);
-    if (length > 0) revealTagsAndSubmit();
+    els.charCount.parentElement.classList.toggle('is-warning', length > 70);
+    if (els.memory.value.trim().length >= 10) revealTagsAndSubmit();
     updateGenerateState();
   }
 
@@ -3228,13 +3254,26 @@
   }
 
   async function generateAIQuote(target, userInput, sceneTag, emotionTag) {
-    const response = await fetch(P5_API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: buildPrompt(target, userInput, sceneTag, emotionTag) })
-    });
+    if (window.location.protocol === 'file:') {
+      throw new Error('LOCAL_PREVIEW_NO_API');
+    }
 
-    if (!response.ok) throw new Error(`API HTTP ${response.status}`);
+    let response;
+    try {
+      response = await fetch(P5_API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: buildPrompt(target, userInput, sceneTag, emotionTag) })
+      });
+    } catch (networkError) {
+      throw new Error('API_NETWORK_ERROR');
+    }
+
+    if (!response.ok) {
+      if (response.status === 404) throw new Error('API_ROUTE_NOT_FOUND');
+      throw new Error(`API_HTTP_${response.status}`);
+    }
+
     const data = await response.json();
     const text = String(data?.text || '').trim();
     if (!text || /^\[(系統通道調整中|通道維護報告)\]/.test(text)) {
@@ -3291,7 +3330,7 @@
     if (isGenerating) return;
     const target = getResolvedTarget();
     const memory = els.memory.value.trim();
-    if (!target || memory.length < 10 || memory.length > 150) {
+    if (!target || memory.length < 10 || memory.length > 80) {
       updateGenerateState();
       return;
     }
@@ -3309,7 +3348,16 @@
     } catch (error) {
       console.error('P5 AI 生成失敗:', error);
       closeModal(true);
-      els.validation.textContent = '目前時光通道較擁擠，請稍後再試一次。';
+
+      if (error.message === 'LOCAL_PREVIEW_NO_API') {
+        els.validation.textContent = '目前是單檔本機預覽，無法呼叫 /api/generate。請用 Vercel／本機開發伺服器連同 api/generate.js 一起執行。';
+      } else if (error.message === 'API_ROUTE_NOT_FOUND') {
+        els.validation.textContent = '找不到 /api/generate。請確認 api/generate.js 已部署在網站專案的 api 資料夾。';
+      } else if (error.message === 'API_NETWORK_ERROR') {
+        els.validation.textContent = '無法連線 AI API，請確認目前網址與後端服務是否正常。';
+      } else {
+        els.validation.textContent = '目前時光通道較擁擠，請稍後再試一次。';
+      }
     } finally {
       isGenerating = false;
       updateGenerateState();
@@ -3584,8 +3632,7 @@
 
   els.targetBtns.forEach(btn => btn.addEventListener('click', () => chooseTarget(btn)));
   els.customTarget.addEventListener('input', updateGenerateState);
-  els.memory.addEventListener('focus', revealTagsAndSubmit);
-  els.memory.addEventListener('input', updateCharCount);
+    els.memory.addEventListener('input', updateCharCount);
   els.tagBtns.forEach(btn => btn.addEventListener('click', () => chooseTag(btn)));
   els.generateBtn.addEventListener('click', handleGenerate);
   els.skipBtn.addEventListener('click', skipP5Entrance);
