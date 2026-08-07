@@ -775,7 +775,7 @@
   pointer-events: none;
   opacity: 0;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 226, 180, .13) 0%, rgba(242, 152, 80, .045) 26%, transparent 55%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 226, 180, .20) 0%, rgba(242, 152, 80, .075) 28%, transparent 58%),
     linear-gradient(180deg, rgba(255,255,255,.018), transparent 45%);
   z-index: 0;
 }
@@ -1516,7 +1516,7 @@
                 <span></span><span></span><span></span><span></span><span></span><span></span>
               </div>
             </div>
-            <h3 class="p4-card-title">✦ 記憶餘音（聲音）</h3>
+            <h3 class="p4-card-title">✦ 記憶餘音（聽覺）</h3>
             <p class="p4-card-description">擷取熟悉的語氣與聲線，輕聲說出那句未竟的問候。</p>
           </article>
 
@@ -1524,7 +1524,7 @@
             <div class="p4-card-visual-stage">
               <canvas class="p4-card-canvas" id="p4MemoryCanvas" aria-label="記憶金沙粒子互動"></canvas>
             </div>
-            <h3 class="p4-card-title">✦ 時光留香（記憶）</h3>
+            <h3 class="p4-card-title">✦ 時光留香（嗅覺）</h3>
             <p class="p4-card-description">描述記憶裡的味道與畫面（如阿嬤的粽香），勾勒出溫暖的歲月景象。</p>
           </article>
 
@@ -1764,37 +1764,40 @@
     // 🌌 2. 全頁背景 Canvas ( Banner 光束 )
     // =============================================================
     const bgCanvas = document.getElementById('mandalaCanvas');
-    const bgCtx = bgCanvas.getContext('2d');
+    const bgCtx = bgCanvas.getContext('2d', { alpha: false });
+    // P1 背景是全螢幕 Canvas，比 LP 的 40vh 波浪負擔高。
+    // 僅降低此 Canvas 的內部渲染倍率，不影響 CSS 顯示尺寸。
+    const BG_DPR = Math.min(window.devicePixelRatio || 1, 1.1);
     let isBgCanvasRendering = true;
 
     function resizeBgCanvas() {
-      bgCanvas.width = window.innerWidth * DPR;
-      bgCanvas.height = window.innerHeight * DPR;
+      bgCanvas.width = Math.round(window.innerWidth * BG_DPR);
+      bgCanvas.height = Math.round(window.innerHeight * BG_DPR);
     }
 
     let animationParams = { beamDownProgress: 0, horizonSpreadProgress: 0, particleGlowProgress: 0 };
-    const goldParticles = Array.from({ length: 50 }, () => ({
-      x: Math.random() * window.innerWidth * DPR,
-      y: Math.random() * window.innerHeight * DPR,
-      size: (Math.random() * 2.5 + 0.8) * DPR,
+    const goldParticles = Array.from({ length: 46 }, () => ({
+      x: Math.random() * window.innerWidth * BG_DPR,
+      y: Math.random() * window.innerHeight * BG_DPR,
+      size: (Math.random() * 2.5 + 0.8) * BG_DPR,
       alpha: Math.random() * 0.6 + 0.2,
-      speedY: (Math.random() - 0.5) * 0.8 * DPR,
-      speedX: (Math.random() - 0.5) * 0.5 * DPR,
+      speedY: (Math.random() - 0.5) * 0.8 * BG_DPR,
+      speedX: (Math.random() - 0.5) * 0.5 * BG_DPR,
       pulse: Math.random() * Math.PI
     }));
 
-    const diagParams = Array.from({ length: 28 }, (_, i) => ({
+    const diagParams = Array.from({ length: 24 }, (_, i) => ({
       isTopStart: i % 2 === 0,
-      startPosRatio: (i / 27) * 0.15,
-      endPosRatio: 0.7 + (i / 27) * 0.5,
+      startPosRatio: (i / 23) * 0.15,
+      endPosRatio: 0.7 + (i / 23) * 0.5,
       speed: 0.015 + Math.random() * 0.015,
       phase: Math.random() * Math.PI * 2,
       frequency1: 0.003 + Math.random() * 0.002,
       frequency2: 0.006 + Math.random() * 0.003,
-      amplitude1: (18 + Math.random() * 15) * DPR,
-      amplitude2: (10 + Math.random() * 8) * DPR,
+      amplitude1: (18 + Math.random() * 15) * BG_DPR,
+      amplitude2: (10 + Math.random() * 8) * BG_DPR,
       alpha: 0.08 + Math.random() * 0.18,
-      width: (Math.random() * 1.5 + 0.8) * DPR
+      width: (Math.random() * 1.5 + 0.8) * BG_DPR
     }));
 
     let globalTime = 0;
@@ -1802,7 +1805,7 @@
     function drawLightBeams() {
       const progress = animationParams.beamDownProgress;
       if (progress <= 0) return;
-      const W = bgCanvas.width, H = bgCanvas.height, margin = 120 * DPR;
+      const W = bgCanvas.width, H = bgCanvas.height, margin = 120 * BG_DPR;
 
       bgCtx.save();
       diagParams.forEach(p => {
@@ -1821,7 +1824,7 @@
         bgCtx.lineWidth = p.width;
 
         let isFirstPoint = true;
-        for (let dist = 0; dist <= currentLen; dist += 20 * DPR) {
+        for (let dist = 0; dist <= currentLen; dist += 28 * BG_DPR) {
           const baseX = startX + dirX * dist, baseY = startY + dirY * dist;
           const wave1 = Math.sin(dist * p.frequency1 + globalTime * p.speed + p.phase) * p.amplitude1;
           const wave2 = Math.cos(dist * p.frequency2 - globalTime * p.speed * 0.8 + p.phase) * p.amplitude2;
@@ -2060,6 +2063,10 @@
             duration: 0.8,
             ease: "power2.inOut"
           }, "+=1.0").to({}, { duration: 0.5 });
+        } else {
+          // 保留文字，但仍保留原本「停留 1.0 + 淡出 0.8 + 空白 0.5」的 2.3 秒時距，
+          // 因此後續各句的出現時間點完全不變。
+          timeline.to({}, { duration: 2.3 });
         }
       });
 
@@ -2096,7 +2103,8 @@
       const storyLines = gsap.utils.toArray('#text-container .story-line:not(#goldenLine)');
       const storyGroups = storyLines.map((line) => ({
         line,
-        parts: gsap.utils.toArray(line.querySelectorAll('.sub-part'))
+        parts: gsap.utils.toArray(line.querySelectorAll('.sub-part')),
+        keepVisible: true
       }));
 
       p2TextTimeline = gsap.timeline();
@@ -2209,16 +2217,30 @@
       p2PlayToken += 1;
       p2TextTimeline?.kill();
       p2SandTimeline?.kill();
+      p2TextTimeline = null;
+      p2SandTimeline = null;
       sandGlobalProgress.t = totalAnimationDuration;
 
+      // Skip 的終點必須與正常播放完成後一致：前四組故事保留，第五組金句也顯示。
       const storyLines = gsap.utils.toArray('#text-container .story-line:not(#goldenLine)');
-      gsap.set(storyLines, { opacity: 0, y: '115%' });
-      gsap.set(storyLines.flatMap(line => gsap.utils.toArray(line.querySelectorAll('.sub-part'))), { opacity: 0 });
+      const storyParts = storyLines.flatMap(line => gsap.utils.toArray(line.querySelectorAll('.sub-part')));
+      gsap.set(storyLines, { opacity: 1, y: '0%' });
+      gsap.set(storyParts, { opacity: 1 });
       gsap.set('#goldenLine', { opacity: 1, y: '0%' });
       gsap.set('#fPart1, #dot1, #dot2, #dot3, #fPart2', { opacity: 1 });
 
       completeP2Animation();
       animateSand();
+    }
+
+    function leaveP2Page() {
+      // 離開 P2 時停止所有只屬於 P2 的運算；回到 P2 時由 playP2Animation() 從頭建立。
+      p2PlayToken += 1;
+      p2TextTimeline?.kill();
+      p2SandTimeline?.kill();
+      p2TextTimeline = null;
+      p2SandTimeline = null;
+      stopSandCanvas();
     }
 
     function animateSand() {
@@ -2340,26 +2362,48 @@
         const y = collapseY + (particle.targetY - collapseY) * ringReveal;
         const highlighted = isBrandTransitionInteractive && brandTransitionHoverRing === particle.ring;
 
+        // 收束階段刻意提高亮度與粒徑。drawProgress 尚未展開曼陀羅時，
+        // 粒子不能只剩原本 15% 的可見度，否則使用者幾乎看不到「往中心聚攏」。
+        const isImploding = brandTransitionState.drawProgress < 0.02;
+        const gatherAlpha = Math.min(1, particle.alpha * (0.82 + brandTransitionState.implode * 0.28));
+        const normalAlpha = particle.alpha * Math.max(0.15, ringReveal);
+        const particleAlpha = isImploding ? gatherAlpha : normalAlpha;
+        const gatherScale = isImploding ? (1.28 + brandTransitionState.implode * 0.18) : 1;
+
         ctx.beginPath();
         ctx.fillStyle = highlighted
-          ? `rgba(255, 214, 128, ${Math.min(1, particle.alpha + 0.35)})`
-          : `rgba(196, 159, 85, ${particle.alpha * Math.max(0.15, ringReveal)})`;
-        ctx.shadowColor = highlighted ? 'rgba(255, 214, 128, 0.95)' : 'rgba(196, 159, 85, 0.45)';
-        ctx.shadowBlur = (highlighted ? 12 : 5) * DPR;
-        ctx.arc(x, y, particle.size * (highlighted ? 1.5 : 1), 0, Math.PI * 2);
+          ? `rgba(255, 224, 150, ${Math.min(1, particle.alpha + 0.38)})`
+          : `rgba(225, 178, 92, ${particleAlpha})`;
+        ctx.shadowColor = highlighted
+          ? 'rgba(255, 224, 150, 0.98)'
+          : (isImploding ? 'rgba(242, 180, 92, 0.82)' : 'rgba(196, 159, 85, 0.45)');
+        ctx.shadowBlur = (highlighted ? 12 : (isImploding ? 9 : 5)) * DPR;
+        ctx.arc(x, y, particle.size * gatherScale * (highlighted ? 1.5 : 1), 0, Math.PI * 2);
         ctx.fill();
       });
 
+      // P3 核心光點：放大並在粒子收束時逐步增亮，讓「聚攏成光點」清楚可見。
+      const coreRadius = (42 + brandTransitionState.implode * 24) * DPR;
+      const coreAlpha = 0.58 + brandTransitionState.implode * 0.40;
       const coreGlow = ctx.createRadialGradient(
         brandTransitionCenter.x, brandTransitionCenter.y, 0,
-        brandTransitionCenter.x, brandTransitionCenter.y, 26 * DPR
+        brandTransitionCenter.x, brandTransitionCenter.y, coreRadius
       );
-      coreGlow.addColorStop(0, 'rgba(255, 225, 160, 0.95)');
-      coreGlow.addColorStop(0.35, 'rgba(196, 159, 85, 0.65)');
+      coreGlow.addColorStop(0, `rgba(255, 232, 174, ${coreAlpha})`);
+      coreGlow.addColorStop(0.24, `rgba(242, 152, 80, ${0.72 * coreAlpha})`);
+      coreGlow.addColorStop(0.55, `rgba(196, 159, 85, ${0.38 * coreAlpha})`);
       coreGlow.addColorStop(1, 'rgba(196, 159, 85, 0)');
       ctx.fillStyle = coreGlow;
       ctx.beginPath();
-      ctx.arc(brandTransitionCenter.x, brandTransitionCenter.y, 26 * DPR, 0, Math.PI * 2);
+      ctx.arc(brandTransitionCenter.x, brandTransitionCenter.y, coreRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 收束完成時再補一顆清楚的實心核心，避免只有模糊光暈而看不到中心。
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255, 218, 142, ${0.55 + brandTransitionState.implode * 0.43})`;
+      ctx.shadowColor = 'rgba(242, 168, 88, 0.98)';
+      ctx.shadowBlur = (16 + brandTransitionState.implode * 18) * DPR;
+      ctx.arc(brandTransitionCenter.x, brandTransitionCenter.y, (7 + brandTransitionState.implode * 5) * DPR, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -2443,13 +2487,16 @@
       brandTransitionTL = gsap.timeline();
 
       brandTransitionTL
-        .to(brandTransitionState, { implode: 1, duration: 1.5, ease: 'power3.in' }, 0)
-        .to(brandTransitionState, { rotation: Math.PI * 0.35, drawProgress: 0.4, duration: 1.5, ease: 'power2.out' }, 1.5)
-        .to('.p3-text-1', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 1.5)
-        .to(brandTransitionState, { rotation: Math.PI * 0.7, drawProgress: 0.8, duration: 1.5, ease: 'power2.out' }, 3.0)
-        .to('.p3-text-2', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 3.0)
-        .to(brandTransitionState, { rotation: Math.PI, drawProgress: 1, duration: 1.5, ease: 'power2.out' }, 4.5)
-        .to('.p3-text-3', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 4.5)
+        // 收束拉長至 5.3 秒，讓粒子移動路徑能被明確辨識；文字不必等收束完成。
+        .to(brandTransitionState, { implode: 1, duration: 5.3, ease: 'power2.inOut' }, 0)
+        // 第一段文字維持約 4～5 秒出現，與仍在進行的收束動畫重疊，避免整頁節奏過長。
+        .to('.p3-text-1', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 4.3)
+        // 收束完成後才由中心光點向外長出曼陀羅。
+        .to(brandTransitionState, { rotation: Math.PI * 0.35, drawProgress: 0.4, duration: 1.5, ease: 'power2.out' }, 5.3)
+        .to('.p3-text-2', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 5.8)
+        .to(brandTransitionState, { rotation: Math.PI * 0.7, drawProgress: 0.8, duration: 1.5, ease: 'power2.out' }, 6.8)
+        .to('.p3-text-3', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 7.3)
+        .to(brandTransitionState, { rotation: Math.PI, drawProgress: 1, duration: 1.5, ease: 'power2.out' }, 8.3)
         .call(() => {
           isBrandTransitionInteractive = true;
           setPageAnimationLock(false);
@@ -2461,7 +2508,7 @@
           });
           animateArrow(document.getElementById('brandTransitionSection'));
           gsap.to('#brandTransitionSkipBtn', { opacity: 0, pointerEvents: 'none', duration: 0.4 });
-        }, null, 6.0);
+        }, null, 9.8);
     }
 
     function skipBrandTransitionAnimation() {
@@ -2865,8 +2912,33 @@
     let bannerTimeline = null;
     let isBeamAnimated = false;
 
+    function resetBannerBeamAnimation() {
+      bannerTimeline?.kill();
+      bannerTimeline = null;
+      isBeamAnimated = false;
+      gsap.killTweensOf([animationParams, '.brand-logo-img', '.bq-part', '#bannerSkipBtn']);
+
+      Object.assign(animationParams, {
+        beamDownProgress: 0,
+        horizonSpreadProgress: 0,
+        particleGlowProgress: 0
+      });
+
+      gsap.set('.brand-logo-img', { opacity: 0 });
+      gsap.set('.bq-part', { y: '115%', opacity: 0 });
+      gsap.set('#bannerSkipBtn', { opacity: 1, pointerEvents: 'auto' });
+      document.getElementById('bannerSkipBtn').classList.add('show');
+
+      const arrow = document.getElementById('p1ArrowBtn');
+      if (arrow) {
+        gsap.killTweensOf(arrow);
+        arrow.dataset.animated = 'false';
+        gsap.set(arrow, { opacity: 0, y: 0 });
+      }
+    }
+
     function playBannerBeamAnimation() {
-      if (isBeamAnimated) return;
+      resetBannerBeamAnimation();
       isBeamAnimated = true;
 
       bannerTimeline = gsap.timeline();
@@ -2945,9 +3017,15 @@
           stopLoadingCanvas();
           startBackgroundCanvas();
           stopSandCanvas();
+          // 每次重新進入 P1 都從初始狀態重播光束、Logo 與文字。
           playBannerBeamAnimation();
         },
-        leave() {}
+        leave() {
+          // 離頁後不讓 P1 Timeline 在背景繼續跑；返回時會重新建立。
+          bannerTimeline?.kill();
+          bannerTimeline = null;
+          isBeamAnimated = false;
+        }
       }],
       ['audiovisualSection', {
         enter() {
@@ -2955,11 +3033,10 @@
           stopLoadingCanvas();
           stopBackgroundCanvas();
           stopBrandTransitionCanvas();
-          playBannerBeamAnimation();
           playP2Animation();
         },
         leave() {
-          stopSandCanvas();
+          leaveP2Page();
         }
       }],
       ['brandTransitionSection', {
@@ -3122,6 +3199,7 @@
 
   const dissolveCtx = els.dissolveCanvas.getContext('2d');
   let page5TL = null;
+  let p5SpotlightTween = null;
   let p5DissolveRafId = null;
   let p5DissolveParticles = [];
   let selectedTarget = '';
@@ -3576,10 +3654,32 @@
     if (keepPage) page.scrollTop = 0;
   }
 
+  function stopP5SpotlightPulse() {
+    if (p5SpotlightTween) {
+      p5SpotlightTween.kill();
+      p5SpotlightTween = null;
+    }
+    gsap.killTweensOf(els.spotlight);
+    gsap.set(els.spotlight, { autoAlpha: 0 });
+  }
+
+  function startP5SpotlightPulse() {
+    stopP5SpotlightPulse();
+    // 單方向約 1.3 秒，亮→暗完整一輪約 2.6 秒，作為緩慢氣氛燈。
+    gsap.set(els.spotlight, { autoAlpha: 0.08 });
+    p5SpotlightTween = gsap.to(els.spotlight, {
+      autoAlpha: 0.92,
+      duration: 1.3,
+      repeat: -1,
+      yoyo: true,
+      ease: 'sine.inOut'
+    });
+  }
+
   function resetP5Entrance() {
     if (page5TL) { page5TL.kill(); page5TL = null; }
-    gsap.killTweensOf([els.spotlight, ...els.headerLines, els.stepTarget, ...els.targetBtns]);
-    gsap.set(els.spotlight, { autoAlpha: 0 });
+    stopP5SpotlightPulse();
+    gsap.killTweensOf([...els.headerLines, els.stepTarget, ...els.targetBtns]);
     gsap.set(els.headerLines, { y: '115%', autoAlpha: 0 });
     els.stepTarget.classList.add('is-open');
     els.stepTarget.setAttribute('aria-hidden', 'false');
@@ -3599,17 +3699,20 @@
     });
     page5TL
       .to(els.skipBtn, { autoAlpha: 1, pointerEvents: 'auto', duration: .4 }, .15)
-      .to(els.spotlight, { autoAlpha: 1, duration: 1.1, ease: 'power2.out' }, 0)
       .to(els.headerLines[0], { y: '0%', autoAlpha: 1, duration: .9, ease: 'power2.out' }, .15)
       .to(els.headerLines[1], { y: '0%', autoAlpha: 1, duration: .9, ease: 'power2.out' }, .78)
       .to(els.stepTarget, { autoAlpha: 1, y: 0, duration: .65, ease: 'power2.out' }, 1.2)
-      .to(els.targetBtns, { autoAlpha: 1, y: 0, duration: .45, stagger: .1, ease: 'power2.out' }, 1.35);
+      .to(els.targetBtns, { autoAlpha: 1, y: 0, duration: .45, stagger: .1, ease: 'power2.out' }, 1.35)
+      .call(startP5SpotlightPulse, null, 2.35);
   }
 
   function skipP5Entrance() {
-    if (page5TL) page5TL.progress(1);
-    else {
-      gsap.set([els.spotlight, ...els.headerLines, els.stepTarget, ...els.targetBtns], { autoAlpha: 1, y: 0 });
+    if (page5TL) {
+      page5TL.progress(1);
+      startP5SpotlightPulse();
+    } else {
+      gsap.set([...els.headerLines, els.stepTarget, ...els.targetBtns], { autoAlpha: 1, y: 0 });
+      startP5SpotlightPulse();
       setPageAnimationLock(false);
     }
     gsap.to(els.skipBtn, { autoAlpha: 0, pointerEvents: 'none', duration: .25 });
@@ -3624,6 +3727,7 @@
 
   window.leaveP5Page = function leaveP5Page() {
     if (page5TL) { page5TL.kill(); page5TL = null; }
+    stopP5SpotlightPulse();
     stopP5DissolveCanvas();
     if (els.modal.classList.contains('is-open')) closeModal(true);
     gsap.killTweensOf('#messageCardSection *');
