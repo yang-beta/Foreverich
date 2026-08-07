@@ -59,7 +59,7 @@ export default async function handler(req, res) {
                 'Authorization': `Bearer ${apiKey.trim()}`
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile", 
+                model: "openai/gpt-oss-120b", 
                 messages: [
                     { role: "user", content: prompt }
                 ],
@@ -73,7 +73,13 @@ export default async function handler(req, res) {
         // 🛡️ 容錯處理：若 Groq 伺服器發生異常（如超載、配額用盡、參數錯誤），不讓前端發生 Crash 崩潰[cite: 32]
         // 回傳狀態碼 200，但包裹錯誤狀態包供前端 app.js 進行友善的通道異常提示[cite: 32]。
         if (!response.ok) {
-            return res.status(200).json({ text: `[系統通道調整中]：${JSON.stringify(data)}` });
+            const upstreamMessage =
+                data?.error?.message ||
+                data?.message ||
+                `Groq upstream HTTP ${response.status}`;
+            return res.status(response.status).json({
+                error: `Groq API 回傳錯誤：${upstreamMessage}`
+            });
         }
 
         /**
