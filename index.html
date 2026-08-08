@@ -254,11 +254,12 @@
     .brand-logo-group {
       width: 320px;
       max-width: 75vw;
-      height: auto;
     
       display: flex;
       align-items: center;
       justify-content: center;
+    
+      gap: 20px;
     
       opacity: 0;
       margin-bottom: 2.5rem;
@@ -267,7 +268,6 @@
       will-change: opacity, transform;
     }
     
-    /* 三張圖片共用 */
     .brand-logo-part {
       display: block;
       height: auto;
@@ -275,26 +275,19 @@
       flex-shrink: 0;
     }
     
-    /*
-      三張圖片的寬度比例。
-      合計 100%，因此整組仍維持原本 320px 的總寬。
-    */
+    /* 左：洸 */
     .brand-logo-guang {
-      /* width: 15%; */
       width: 80px;
-      padding: 0 20 0 0;
     }
     
+    /* 中：Logo */
     .brand-logo-symbol {
-      /* width: 25%; */
       width: 100px;
-      padding: 0;
     }
     
+    /* 右：限 */
     .brand-logo-xian {
-      /* width: 15%; */
       width: 80px;
-      padding: 0 0 0 20;
     }
 
     .banner-questions-wrapper {
