@@ -251,14 +251,44 @@
       padding: 20px;
     }
 
-    .brand-logo-img {
+    .brand-logo-group {
       width: 320px;
       max-width: 75vw;
       height: auto;
-      opacity: 0; 
+    
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    
+      opacity: 0;
       margin-bottom: 2.5rem;
+    
       filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.15));
       will-change: opacity, transform;
+    }
+    
+    /* 三張圖片共用 */
+    .brand-logo-part {
+      display: block;
+      height: auto;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    
+    /*
+      三張圖片的寬度比例。
+      合計 100%，因此整組仍維持原本 320px 的總寬。
+    */
+    .brand-logo-guang {
+      width: 32%;
+    }
+    
+    .brand-logo-symbol {
+      width: 36%;
+    }
+    
+    .brand-logo-xian {
+      width: 32%;
     }
 
     .banner-questions-wrapper {
@@ -679,7 +709,7 @@
         margin-left: 0 !important;
       }
 
-      .brand-logo-img {
+      .brand-logo-group {
         width: 220px !important;
         max-width: 65vw !important;
         margin-bottom: 1.8rem !important;
@@ -1499,8 +1529,12 @@
     <!-- Page 1. Banner 頁 (P1) -->
     <div class="section-page hero-container" id="heroSection">
       <button class="skip-anim-btn show" id="bannerSkipBtn">Skip 略過動畫 ✕</button>
-
-      <img src="/img/logo02.png" class="brand-logo-img" alt="洸限" data-html2canvas-ignore="true">
+      <!-- logo圖 -->
+      <div class="brand-logo-group" data-html2canvas-ignore="true">
+        <img src="/img/guang.png" class="brand-logo-part brand-logo-guang" alt="洸">
+        <img src="/img/logo.png" class="brand-logo-part brand-logo-symbol" alt="洸限 Logo">
+        <img src="/img/xian.png" class="brand-logo-part brand-logo-xian" alt="限">
+      </div>
 
       <div class="banner-questions-wrapper">
         <div class="ui-line-mask">
@@ -3059,7 +3093,7 @@
       bannerTimeline?.kill();
       bannerTimeline = null;
       isBeamAnimated = false;
-      gsap.killTweensOf([animationParams, '.brand-logo-img', '.bq-part', '#bannerSkipBtn']);
+      gsap.killTweensOf([animationParams, '.brand-logo-group', '.bq-part', '#bannerSkipBtn']);
 
       Object.assign(animationParams, {
         beamDownProgress: 0,
@@ -3067,7 +3101,7 @@
         particleGlowProgress: 0
       });
 
-      gsap.set('.brand-logo-img', { opacity: 0 });
+      gsap.set('.brand-logo-group', { opacity: 0 });
       gsap.set('.bq-part', { y: '115%', opacity: 0 });
       gsap.set('#bannerSkipBtn', { opacity: 1, pointerEvents: 'auto' });
       document.getElementById('bannerSkipBtn').classList.add('show');
@@ -3087,7 +3121,7 @@
       bannerTimeline = gsap.timeline();
       bannerTimeline.to(animationParams, { beamDownProgress: 1, duration: 1.6, ease: "power2.inOut" })
       .to(animationParams, { horizonSpreadProgress: 1, duration: 1.4, ease: "power2.out" }, "-=0.2")
-      .to(".brand-logo-img", { opacity: 1, duration: 1.4, ease: "power1.out" }, "-=1.0")
+      .to(".brand-logo-group", { opacity: 1, duration: 1.4, ease: "power1.out" }, "-=1.0")
       .to(animationParams, { particleGlowProgress: 1, duration: 1.2, ease: "power1.out" }, "-=0.4");
       
       const bqParts = gsap.utils.toArray('.bq-part');
@@ -3117,7 +3151,7 @@
         animationParams.beamDownProgress = 1;
         animationParams.horizonSpreadProgress = 1;
         animationParams.particleGlowProgress = 1;
-        gsap.set(".brand-logo-img", { opacity: 1 });
+        gsap.set(".brand-logo-group", { opacity: 1 });
         gsap.set(".bq-part", { y: "0%", opacity: 1 });
         animateArrow(document.getElementById('heroSection'));
       }
