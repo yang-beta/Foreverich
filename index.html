@@ -548,9 +548,9 @@
       pointer-events: none;
       z-index: 0;
       background: radial-gradient(circle,
-        rgba(247, 208, 112, .22) 0%,
-        rgba(242, 152, 80, .09) 36%,
-        rgba(242, 152, 80, .025) 58%,
+        rgba(247, 208, 112, .30) 0%,
+        rgba(242, 152, 80, .13) 36%,
+        rgba(242, 152, 80, .04) 58%,
         transparent 74%);
       filter: blur(3px);
       transition: opacity .45s ease, transform .7s cubic-bezier(.22, 1, .36, 1);
@@ -559,20 +559,20 @@
     .p4-card-touch .p4-card-canvas {
       position: relative;
       z-index: 1;
-      opacity: .58;
-      filter: drop-shadow(0 0 4px rgba(242,152,80,.18));
+      opacity: .92;
+      filter: drop-shadow(0 0 3px rgba(242,152,80,.24));
       transition: opacity .45s ease, filter .45s ease;
     }
 
     .p4-card-touch.is-active .p4-touch-glow {
       opacity: .46;
       transform: translate(-50%, -50%) scale(1.75);
-      animation: p4TouchGlowPulse 4.8s ease-in-out infinite;
+      animation: none;
     }
 
     .p4-card-touch.is-active .p4-card-canvas {
-      opacity: .68;
-      filter: drop-shadow(0 0 5px rgba(247,208,112,.26));
+      opacity: 1;
+      filter: drop-shadow(0 0 5px rgba(247,208,112,.34));
     }
 
     @keyframes p4TouchGlowPulse {
@@ -640,12 +640,13 @@
     }
     .p4-audio-rings circle {
       fill: none;
-      stroke: rgba(242, 152, 80, .86);
-      stroke-width: 2;
+      stroke: rgba(242, 152, 80, .96);
+      stroke-width: 2.5;
       vector-effect: non-scaling-stroke;
       transform-box: fill-box;
       transform-origin: center;
-      opacity: .18;
+      opacity: .90;
+      filter: drop-shadow(0 0 2px rgba(242, 152, 80, .22));
     }
 
     /* 聽覺：由中心向外擴散的連續漣漪。
@@ -837,6 +838,40 @@
    規則：沿用主站共用文字、Skip、生命週期與單一 Resize 架構。
    ============================================================= */
 
+
+    /* 觸覺預設就維持亮金色，不再呈灰暗狀態 */
+    .p4-card-touch .p4-card-canvas {
+      opacity: .92;
+      filter: drop-shadow(0 0 3px rgba(247,208,112,.24));
+    }
+
+    /* Hover / Active：亮度約提升 20%，並維持慢速明暗呼吸 */
+    .p4-card-touch.is-active .p4-card-canvas {
+      opacity: 1;
+      filter: drop-shadow(0 0 5px rgba(247,208,112,.34));
+      animation: none;
+    }
+
+    .p4-card-touch.is-active .p4-touch-glow {
+      animation: p4TouchGlowPulse 4.8s ease-in-out infinite;
+    }
+
+    @keyframes p4TouchCanvasBreath {
+      0%, 100% { opacity: .84; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes p4TouchGlowPulse {
+      0%, 100% { opacity: .20; }
+      50% { opacity: .52; }
+    }
+
+
+    /* P4 icon clarity alignment: hearing */
+    .p4-card-audio .p4-audio-rings {
+      filter: drop-shadow(0 0 3px rgba(242, 152, 80, .34));
+    }
+
 /* =============================================================
    Page 5｜寄語入口
    ============================================================= */
@@ -874,10 +909,10 @@
   transform-origin: 800px 450px;
 }
 .p5-entry-wave-bg .p5-horn-short {
-  opacity: .44;
+  opacity: .40;
 }
 .p5-entry-wave-bg .p5-horn-full {
-  opacity: .56;
+  opacity: .72;
   will-change: transform;
 }
 .p5-entry-wave-bg .p5-horn-full-left {
@@ -1841,11 +1876,11 @@
           <article class="p4-card-item p4-card-audio" tabindex="0" data-p4-card="audio">
             <div class="p4-card-visual-stage">
               <svg class="p4-audio-rings" viewBox="0 0 220 160" aria-hidden="true">
-                <circle cx="110" cy="80" r="22"></circle>
-                <circle cx="110" cy="80" r="22"></circle>
-                <circle cx="110" cy="80" r="22"></circle>
-                <circle cx="110" cy="80" r="22"></circle>
-                <circle cx="110" cy="80" r="22"></circle>
+                <circle cx="110" cy="80" r="16"></circle>
+                <circle cx="110" cy="80" r="29"></circle>
+                <circle cx="110" cy="80" r="42"></circle>
+                <circle cx="110" cy="80" r="55"></circle>
+                <circle cx="110" cy="80" r="68"></circle>
               </svg>
             </div>
             <h3 class="p4-card-title">✦ 記憶餘音（聽覺）</h3>
@@ -1886,8 +1921,8 @@
       <svg class="p5-entry-wave-bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <g class="p5-horn p5-horn-short p5-horn-short-left"><ellipse cx="792.9" cy="450.0" rx="6.9" ry="17.4" transform="rotate(-0.11 792.9 450.0)"></ellipse><ellipse cx="785.4" cy="450.0" rx="10.0" ry="27.2" transform="rotate(-0.22 785.4 450.0)"></ellipse><ellipse cx="777.7" cy="450.0" rx="13.2" ry="37.3" transform="rotate(-0.33 777.7 450.0)"></ellipse><ellipse cx="770.0" cy="450.0" rx="16.3" ry="47.4" transform="rotate(-0.45 770.0 450.0)"></ellipse><ellipse cx="762.2" cy="450.0" rx="19.5" ry="57.6" transform="rotate(-0.56 762.2 450.0)"></ellipse><ellipse cx="754.4" cy="450.0" rx="22.8" ry="67.9" transform="rotate(-0.68 754.4 450.0)"></ellipse><ellipse cx="746.5" cy="450.0" rx="26.0" ry="78.3" transform="rotate(-0.79 746.5 450.0)"></ellipse><ellipse cx="738.6" cy="450.0" rx="29.3" ry="88.7" transform="rotate(-0.91 738.6 450.0)"></ellipse><ellipse cx="730.6" cy="450.0" rx="32.5" ry="99.2" transform="rotate(-1.03 730.6 450.0)"></ellipse><ellipse cx="722.6" cy="450.0" rx="35.8" ry="109.7" transform="rotate(-1.15 722.6 450.0)"></ellipse><ellipse cx="714.6" cy="450.0" rx="39.1" ry="120.2" transform="rotate(-1.27 714.6 450.0)"></ellipse><ellipse cx="706.5" cy="450.0" rx="42.4" ry="130.8" transform="rotate(-1.39 706.5 450.0)"></ellipse><ellipse cx="698.5" cy="450.0" rx="45.8" ry="141.4" transform="rotate(-1.51 698.5 450.0)"></ellipse><ellipse cx="690.4" cy="450.0" rx="49.1" ry="152.1" transform="rotate(-1.63 690.4 450.0)"></ellipse><ellipse cx="682.3" cy="450.0" rx="52.4" ry="162.7" transform="rotate(-1.75 682.3 450.0)"></ellipse><ellipse cx="674.1" cy="450.0" rx="55.8" ry="173.4" transform="rotate(-1.87 674.1 450.0)"></ellipse><ellipse cx="666.0" cy="450.0" rx="59.1" ry="184.1" transform="rotate(-1.99 666.0 450.0)"></ellipse><ellipse cx="657.8" cy="450.0" rx="62.5" ry="194.9" transform="rotate(-2.11 657.8 450.0)"></ellipse><ellipse cx="649.6" cy="450.0" rx="65.9" ry="205.6" transform="rotate(-2.23 649.6 450.0)"></ellipse><ellipse cx="641.4" cy="450.0" rx="69.2" ry="216.4" transform="rotate(-2.36 641.4 450.0)"></ellipse><ellipse cx="633.2" cy="450.0" rx="72.6" ry="227.2" transform="rotate(-2.48 633.2 450.0)"></ellipse><ellipse cx="625.0" cy="450.0" rx="76.0" ry="238.0" transform="rotate(-2.60 625.0 450.0)"></ellipse></g>
         <g class="p5-horn p5-horn-short p5-horn-short-right"><ellipse cx="807.1" cy="450.0" rx="6.9" ry="17.4" transform="rotate(0.11 807.1 450.0)"></ellipse><ellipse cx="814.6" cy="450.0" rx="10.0" ry="27.2" transform="rotate(0.22 814.6 450.0)"></ellipse><ellipse cx="822.3" cy="450.0" rx="13.2" ry="37.3" transform="rotate(0.33 822.3 450.0)"></ellipse><ellipse cx="830.0" cy="450.0" rx="16.3" ry="47.4" transform="rotate(0.45 830.0 450.0)"></ellipse><ellipse cx="837.8" cy="450.0" rx="19.5" ry="57.6" transform="rotate(0.56 837.8 450.0)"></ellipse><ellipse cx="845.6" cy="450.0" rx="22.8" ry="67.9" transform="rotate(0.68 845.6 450.0)"></ellipse><ellipse cx="853.5" cy="450.0" rx="26.0" ry="78.3" transform="rotate(0.79 853.5 450.0)"></ellipse><ellipse cx="861.4" cy="450.0" rx="29.3" ry="88.7" transform="rotate(0.91 861.4 450.0)"></ellipse><ellipse cx="869.4" cy="450.0" rx="32.5" ry="99.2" transform="rotate(1.03 869.4 450.0)"></ellipse><ellipse cx="877.4" cy="450.0" rx="35.8" ry="109.7" transform="rotate(1.15 877.4 450.0)"></ellipse><ellipse cx="885.4" cy="450.0" rx="39.1" ry="120.2" transform="rotate(1.27 885.4 450.0)"></ellipse><ellipse cx="893.5" cy="450.0" rx="42.4" ry="130.8" transform="rotate(1.39 893.5 450.0)"></ellipse><ellipse cx="901.5" cy="450.0" rx="45.8" ry="141.4" transform="rotate(1.51 901.5 450.0)"></ellipse><ellipse cx="909.6" cy="450.0" rx="49.1" ry="152.1" transform="rotate(1.63 909.6 450.0)"></ellipse><ellipse cx="917.7" cy="450.0" rx="52.4" ry="162.7" transform="rotate(1.75 917.7 450.0)"></ellipse><ellipse cx="925.9" cy="450.0" rx="55.8" ry="173.4" transform="rotate(1.87 925.9 450.0)"></ellipse><ellipse cx="934.0" cy="450.0" rx="59.1" ry="184.1" transform="rotate(1.99 934.0 450.0)"></ellipse><ellipse cx="942.2" cy="450.0" rx="62.5" ry="194.9" transform="rotate(2.11 942.2 450.0)"></ellipse><ellipse cx="950.4" cy="450.0" rx="65.9" ry="205.6" transform="rotate(2.23 950.4 450.0)"></ellipse><ellipse cx="958.6" cy="450.0" rx="69.2" ry="216.4" transform="rotate(2.36 958.6 450.0)"></ellipse><ellipse cx="966.8" cy="450.0" rx="72.6" ry="227.2" transform="rotate(2.48 966.8 450.0)"></ellipse><ellipse cx="975.0" cy="450.0" rx="76.0" ry="238.0" transform="rotate(2.60 975.0 450.0)"></ellipse></g>
-        <g class="p5-horn p5-horn-full p5-horn-full-left"><ellipse cx="784.0" cy="450.0" rx="12.4" ry="18.5" transform="rotate(-0.08 784.0 450.0)"></ellipse><ellipse cx="767.2" cy="450.0" rx="21.3" ry="29.5" transform="rotate(-0.16 767.2 450.0)"></ellipse><ellipse cx="750.1" cy="450.0" rx="30.3" ry="40.8" transform="rotate(-0.24 750.1 450.0)"></ellipse><ellipse cx="732.8" cy="450.0" rx="39.4" ry="52.1" transform="rotate(-0.32 732.8 450.0)"></ellipse><ellipse cx="715.3" cy="450.0" rx="48.6" ry="63.6" transform="rotate(-0.41 715.3 450.0)"></ellipse><ellipse cx="697.8" cy="450.0" rx="57.9" ry="75.1" transform="rotate(-0.49 697.8 450.0)"></ellipse><ellipse cx="680.1" cy="450.0" rx="67.2" ry="86.7" transform="rotate(-0.58 680.1 450.0)"></ellipse><ellipse cx="662.3" cy="450.0" rx="76.6" ry="98.4" transform="rotate(-0.66 662.3 450.0)"></ellipse><ellipse cx="644.5" cy="450.0" rx="86.0" ry="110.1" transform="rotate(-0.75 644.5 450.0)"></ellipse><ellipse cx="626.5" cy="450.0" rx="95.4" ry="121.9" transform="rotate(-0.83 626.5 450.0)"></ellipse><ellipse cx="608.5" cy="450.0" rx="104.9" ry="133.7" transform="rotate(-0.92 608.5 450.0)"></ellipse><ellipse cx="590.5" cy="450.0" rx="114.4" ry="145.5" transform="rotate(-1.01 590.5 450.0)"></ellipse><ellipse cx="572.4" cy="450.0" rx="123.9" ry="157.4" transform="rotate(-1.09 572.4 450.0)"></ellipse><ellipse cx="554.3" cy="450.0" rx="133.5" ry="169.3" transform="rotate(-1.18 554.3 450.0)"></ellipse><ellipse cx="536.1" cy="450.0" rx="143.1" ry="181.2" transform="rotate(-1.27 536.1 450.0)"></ellipse><ellipse cx="517.8" cy="450.0" rx="152.7" ry="193.2" transform="rotate(-1.36 517.8 450.0)"></ellipse><ellipse cx="499.6" cy="450.0" rx="162.3" ry="205.2" transform="rotate(-1.44 499.6 450.0)"></ellipse><ellipse cx="481.3" cy="450.0" rx="172.0" ry="217.2" transform="rotate(-1.53 481.3 450.0)"></ellipse><ellipse cx="462.9" cy="450.0" rx="181.6" ry="229.3" transform="rotate(-1.62 462.9 450.0)"></ellipse><ellipse cx="444.5" cy="450.0" rx="191.3" ry="241.3" transform="rotate(-1.71 444.5 450.0)"></ellipse><ellipse cx="426.1" cy="450.0" rx="201.0" ry="253.4" transform="rotate(-1.80 426.1 450.0)"></ellipse><ellipse cx="407.7" cy="450.0" rx="210.7" ry="265.5" transform="rotate(-1.89 407.7 450.0)"></ellipse><ellipse cx="389.2" cy="450.0" rx="220.5" ry="277.6" transform="rotate(-1.97 389.2 450.0)"></ellipse><ellipse cx="370.7" cy="450.0" rx="230.2" ry="289.8" transform="rotate(-2.06 370.7 450.0)"></ellipse><ellipse cx="352.2" cy="450.0" rx="240.0" ry="302.0" transform="rotate(-2.15 352.2 450.0)"></ellipse><ellipse cx="333.6" cy="450.0" rx="249.8" ry="314.1" transform="rotate(-2.24 333.6 450.0)"></ellipse><ellipse cx="315.1" cy="450.0" rx="259.6" ry="326.3" transform="rotate(-2.33 315.1 450.0)"></ellipse><ellipse cx="296.5" cy="450.0" rx="269.4" ry="338.5" transform="rotate(-2.42 296.5 450.0)"></ellipse><ellipse cx="277.8" cy="450.0" rx="279.2" ry="350.8" transform="rotate(-2.51 277.8 450.0)"></ellipse><ellipse cx="259.2" cy="450.0" rx="289.0" ry="363.0" transform="rotate(-2.60 259.2 450.0)"></ellipse></g>
-        <g class="p5-horn p5-horn-full p5-horn-full-right"><ellipse cx="816.0" cy="450.0" rx="12.4" ry="18.5" transform="rotate(0.08 816.0 450.0)"></ellipse><ellipse cx="832.8" cy="450.0" rx="21.3" ry="29.5" transform="rotate(0.16 832.8 450.0)"></ellipse><ellipse cx="849.9" cy="450.0" rx="30.3" ry="40.8" transform="rotate(0.24 849.9 450.0)"></ellipse><ellipse cx="867.2" cy="450.0" rx="39.4" ry="52.1" transform="rotate(0.32 867.2 450.0)"></ellipse><ellipse cx="884.7" cy="450.0" rx="48.6" ry="63.6" transform="rotate(0.41 884.7 450.0)"></ellipse><ellipse cx="902.2" cy="450.0" rx="57.9" ry="75.1" transform="rotate(0.49 902.2 450.0)"></ellipse><ellipse cx="919.9" cy="450.0" rx="67.2" ry="86.7" transform="rotate(0.58 919.9 450.0)"></ellipse><ellipse cx="937.7" cy="450.0" rx="76.6" ry="98.4" transform="rotate(0.66 937.7 450.0)"></ellipse><ellipse cx="955.5" cy="450.0" rx="86.0" ry="110.1" transform="rotate(0.75 955.5 450.0)"></ellipse><ellipse cx="973.5" cy="450.0" rx="95.4" ry="121.9" transform="rotate(0.83 973.5 450.0)"></ellipse><ellipse cx="991.5" cy="450.0" rx="104.9" ry="133.7" transform="rotate(0.92 991.5 450.0)"></ellipse><ellipse cx="1009.5" cy="450.0" rx="114.4" ry="145.5" transform="rotate(1.01 1009.5 450.0)"></ellipse><ellipse cx="1027.6" cy="450.0" rx="123.9" ry="157.4" transform="rotate(1.09 1027.6 450.0)"></ellipse><ellipse cx="1045.7" cy="450.0" rx="133.5" ry="169.3" transform="rotate(1.18 1045.7 450.0)"></ellipse><ellipse cx="1063.9" cy="450.0" rx="143.1" ry="181.2" transform="rotate(1.27 1063.9 450.0)"></ellipse><ellipse cx="1082.2" cy="450.0" rx="152.7" ry="193.2" transform="rotate(1.36 1082.2 450.0)"></ellipse><ellipse cx="1100.4" cy="450.0" rx="162.3" ry="205.2" transform="rotate(1.44 1100.4 450.0)"></ellipse><ellipse cx="1118.7" cy="450.0" rx="172.0" ry="217.2" transform="rotate(1.53 1118.7 450.0)"></ellipse><ellipse cx="1137.1" cy="450.0" rx="181.6" ry="229.3" transform="rotate(1.62 1137.1 450.0)"></ellipse><ellipse cx="1155.5" cy="450.0" rx="191.3" ry="241.3" transform="rotate(1.71 1155.5 450.0)"></ellipse><ellipse cx="1173.9" cy="450.0" rx="201.0" ry="253.4" transform="rotate(1.80 1173.9 450.0)"></ellipse><ellipse cx="1192.3" cy="450.0" rx="210.7" ry="265.5" transform="rotate(1.89 1192.3 450.0)"></ellipse><ellipse cx="1210.8" cy="450.0" rx="220.5" ry="277.6" transform="rotate(1.97 1210.8 450.0)"></ellipse><ellipse cx="1229.3" cy="450.0" rx="230.2" ry="289.8" transform="rotate(2.06 1229.3 450.0)"></ellipse><ellipse cx="1247.8" cy="450.0" rx="240.0" ry="302.0" transform="rotate(2.15 1247.8 450.0)"></ellipse><ellipse cx="1266.4" cy="450.0" rx="249.8" ry="314.1" transform="rotate(2.24 1266.4 450.0)"></ellipse><ellipse cx="1284.9" cy="450.0" rx="259.6" ry="326.3" transform="rotate(2.33 1284.9 450.0)"></ellipse><ellipse cx="1303.5" cy="450.0" rx="269.4" ry="338.5" transform="rotate(2.42 1303.5 450.0)"></ellipse><ellipse cx="1322.2" cy="450.0" rx="279.2" ry="350.8" transform="rotate(2.51 1322.2 450.0)"></ellipse><ellipse cx="1340.8" cy="450.0" rx="289.0" ry="363.0" transform="rotate(2.60 1340.8 450.0)"></ellipse></g>
+        <g class="p5-horn p5-horn-full p5-horn-full-left"><ellipse cx="778.2" cy="450.0" rx="13.5" ry="18.5" transform="rotate(-0.08 778.2 450.0)"></ellipse><ellipse cx="755.3" cy="450.0" rx="23.5" ry="29.5" transform="rotate(-0.16 755.3 450.0)"></ellipse><ellipse cx="732.0" cy="450.0" rx="33.6" ry="40.8" transform="rotate(-0.24 732.0 450.0)"></ellipse><ellipse cx="708.5" cy="450.0" rx="43.9" ry="52.1" transform="rotate(-0.32 708.5 450.0)"></ellipse><ellipse cx="684.7" cy="450.0" rx="54.2" ry="63.6" transform="rotate(-0.41 684.7 450.0)"></ellipse><ellipse cx="660.7" cy="450.0" rx="64.7" ry="75.1" transform="rotate(-0.49 660.7 450.0)"></ellipse><ellipse cx="636.6" cy="450.0" rx="75.2" ry="86.7" transform="rotate(-0.58 636.6 450.0)"></ellipse><ellipse cx="612.4" cy="450.0" rx="85.7" ry="98.4" transform="rotate(-0.66 612.4 450.0)"></ellipse><ellipse cx="588.1" cy="450.0" rx="96.3" ry="110.1" transform="rotate(-0.75 588.1 450.0)"></ellipse><ellipse cx="563.7" cy="450.0" rx="107.0" ry="121.9" transform="rotate(-0.83 563.7 450.0)"></ellipse><ellipse cx="539.2" cy="450.0" rx="117.6" ry="133.7" transform="rotate(-0.92 539.2 450.0)"></ellipse><ellipse cx="514.6" cy="450.0" rx="128.3" ry="145.5" transform="rotate(-1.01 514.6 450.0)"></ellipse><ellipse cx="490.0" cy="450.0" rx="139.1" ry="157.4" transform="rotate(-1.09 490.0 450.0)"></ellipse><ellipse cx="465.3" cy="450.0" rx="149.9" ry="169.3" transform="rotate(-1.18 465.3 450.0)"></ellipse><ellipse cx="440.5" cy="450.0" rx="160.7" ry="181.2" transform="rotate(-1.27 440.5 450.0)"></ellipse><ellipse cx="415.6" cy="450.0" rx="171.5" ry="193.2" transform="rotate(-1.36 415.6 450.0)"></ellipse><ellipse cx="390.8" cy="450.0" rx="182.3" ry="205.2" transform="rotate(-1.44 390.8 450.0)"></ellipse><ellipse cx="365.8" cy="450.0" rx="193.2" ry="217.2" transform="rotate(-1.53 365.8 450.0)"></ellipse><ellipse cx="340.8" cy="450.0" rx="204.1" ry="229.3" transform="rotate(-1.62 340.8 450.0)"></ellipse><ellipse cx="315.8" cy="450.0" rx="215.0" ry="241.3" transform="rotate(-1.71 315.8 450.0)"></ellipse><ellipse cx="290.7" cy="450.0" rx="225.9" ry="253.4" transform="rotate(-1.80 290.7 450.0)"></ellipse><ellipse cx="265.6" cy="450.0" rx="236.9" ry="265.5" transform="rotate(-1.89 265.6 450.0)"></ellipse><ellipse cx="240.4" cy="450.0" rx="247.8" ry="277.6" transform="rotate(-1.97 240.4 450.0)"></ellipse><ellipse cx="215.2" cy="450.0" rx="258.8" ry="289.8" transform="rotate(-2.06 215.2 450.0)"></ellipse><ellipse cx="190.0" cy="450.0" rx="269.8" ry="302.0" transform="rotate(-2.15 190.0 450.0)"></ellipse><ellipse cx="164.7" cy="450.0" rx="280.8" ry="314.1" transform="rotate(-2.24 164.7 450.0)"></ellipse><ellipse cx="139.4" cy="450.0" rx="291.8" ry="326.3" transform="rotate(-2.33 139.4 450.0)"></ellipse><ellipse cx="114.1" cy="450.0" rx="302.9" ry="338.5" transform="rotate(-2.42 114.1 450.0)"></ellipse><ellipse cx="88.7" cy="450.0" rx="313.9" ry="350.8" transform="rotate(-2.51 88.7 450.0)"></ellipse><ellipse cx="63.3" cy="450.0" rx="325.0" ry="363.0" transform="rotate(-2.60 63.3 450.0)"></ellipse></g>
+        <g class="p5-horn p5-horn-full p5-horn-full-right"><ellipse cx="821.8" cy="450.0" rx="13.5" ry="18.5" transform="rotate(0.08 821.8 450.0)"></ellipse><ellipse cx="844.7" cy="450.0" rx="23.5" ry="29.5" transform="rotate(0.16 844.7 450.0)"></ellipse><ellipse cx="868.0" cy="450.0" rx="33.6" ry="40.8" transform="rotate(0.24 868.0 450.0)"></ellipse><ellipse cx="891.5" cy="450.0" rx="43.9" ry="52.1" transform="rotate(0.32 891.5 450.0)"></ellipse><ellipse cx="915.3" cy="450.0" rx="54.2" ry="63.6" transform="rotate(0.41 915.3 450.0)"></ellipse><ellipse cx="939.3" cy="450.0" rx="64.7" ry="75.1" transform="rotate(0.49 939.3 450.0)"></ellipse><ellipse cx="963.4" cy="450.0" rx="75.2" ry="86.7" transform="rotate(0.58 963.4 450.0)"></ellipse><ellipse cx="987.6" cy="450.0" rx="85.7" ry="98.4" transform="rotate(0.66 987.6 450.0)"></ellipse><ellipse cx="1011.9" cy="450.0" rx="96.3" ry="110.1" transform="rotate(0.75 1011.9 450.0)"></ellipse><ellipse cx="1036.3" cy="450.0" rx="107.0" ry="121.9" transform="rotate(0.83 1036.3 450.0)"></ellipse><ellipse cx="1060.8" cy="450.0" rx="117.6" ry="133.7" transform="rotate(0.92 1060.8 450.0)"></ellipse><ellipse cx="1085.4" cy="450.0" rx="128.3" ry="145.5" transform="rotate(1.01 1085.4 450.0)"></ellipse><ellipse cx="1110.0" cy="450.0" rx="139.1" ry="157.4" transform="rotate(1.09 1110.0 450.0)"></ellipse><ellipse cx="1134.7" cy="450.0" rx="149.9" ry="169.3" transform="rotate(1.18 1134.7 450.0)"></ellipse><ellipse cx="1159.5" cy="450.0" rx="160.7" ry="181.2" transform="rotate(1.27 1159.5 450.0)"></ellipse><ellipse cx="1184.4" cy="450.0" rx="171.5" ry="193.2" transform="rotate(1.36 1184.4 450.0)"></ellipse><ellipse cx="1209.2" cy="450.0" rx="182.3" ry="205.2" transform="rotate(1.44 1209.2 450.0)"></ellipse><ellipse cx="1234.2" cy="450.0" rx="193.2" ry="217.2" transform="rotate(1.53 1234.2 450.0)"></ellipse><ellipse cx="1259.2" cy="450.0" rx="204.1" ry="229.3" transform="rotate(1.62 1259.2 450.0)"></ellipse><ellipse cx="1284.2" cy="450.0" rx="215.0" ry="241.3" transform="rotate(1.71 1284.2 450.0)"></ellipse><ellipse cx="1309.3" cy="450.0" rx="225.9" ry="253.4" transform="rotate(1.80 1309.3 450.0)"></ellipse><ellipse cx="1334.4" cy="450.0" rx="236.9" ry="265.5" transform="rotate(1.89 1334.4 450.0)"></ellipse><ellipse cx="1359.6" cy="450.0" rx="247.8" ry="277.6" transform="rotate(1.97 1359.6 450.0)"></ellipse><ellipse cx="1384.8" cy="450.0" rx="258.8" ry="289.8" transform="rotate(2.06 1384.8 450.0)"></ellipse><ellipse cx="1410.0" cy="450.0" rx="269.8" ry="302.0" transform="rotate(2.15 1410.0 450.0)"></ellipse><ellipse cx="1435.3" cy="450.0" rx="280.8" ry="314.1" transform="rotate(2.24 1435.3 450.0)"></ellipse><ellipse cx="1460.6" cy="450.0" rx="291.8" ry="326.3" transform="rotate(2.33 1460.6 450.0)"></ellipse><ellipse cx="1485.9" cy="450.0" rx="302.9" ry="338.5" transform="rotate(2.42 1485.9 450.0)"></ellipse><ellipse cx="1511.3" cy="450.0" rx="313.9" ry="350.8" transform="rotate(2.51 1511.3 450.0)"></ellipse><ellipse cx="1536.7" cy="450.0" rx="325.0" ry="363.0" transform="rotate(2.60 1536.7 450.0)"></ellipse></g>
       </svg>
       <button class="skip-anim-btn" id="p5EntrySkipBtn">Skip 略過動畫 ✕</button>
       <div class="p5-entry-content">
@@ -3003,7 +3038,15 @@
       ctx.clearRect(0, 0, w, h);
       ctx.save();
       ctx.translate(w / 2, h / 2);
-      ctx.rotate(Math.sin(p4VisualTime * .576) * .045);
+      const visualActive = activeP4Card === 'visual';
+
+      // Hover / Active 時大幅增加旋轉角度與移動距離。
+      // 預設維持輕微呼吸；靠近後才有明顯動態。
+      const visualSwing = visualActive ? 1 : .18;
+      const moveX = Math.sin(p4VisualTime * .92) * (visualActive ? 18 * DPR : 2 * DPR);
+      const moveY = Math.cos(p4VisualTime * .68) * (visualActive ? 9 * DPR : 1.5 * DPR);
+      ctx.translate(moveX, moveY);
+      ctx.rotate(Math.sin(p4VisualTime * .78) * .28 * visualSwing);
 
       ctx.strokeStyle = 'rgba(242, 152, 80, .84)';
       ctx.lineWidth = Math.max(1.1, 1.2 * DPR);
@@ -3059,43 +3102,132 @@
       ctx.save();
       ctx.translate(w / 2, h / 2);
 
-      const rays = window.innerWidth <= 768 ? 46 : 62;
-      const innerR = Math.min(w, h) * .105;
-      const outerR = Math.min(w, h) * .355;
+      const isMobile = window.innerWidth <= 768;
+      const active = activeP4Card === 'touch';
 
-      // 約 4.8 秒一輪的慢速亮起 / 暗下。
-      const pulse = .50 + .18 * (0.5 + 0.5 * Math.sin(timestamp / 760));
-      const activeBoost = activeP4Card === 'touch' ? 1 : .70;
+      // 參考圖核心特徵：
+      // 1. 中央明確空心，不允許線條進入。
+      // 2. 外圍線條由外往內、逆時針收束。
+      // 3. 線條彼此交疊，但中心仍維持乾淨留白。
+      const base = Math.min(w, h);
+      const innerHole = base * .115;
+      const outerR = base * .39;
 
-      ctx.lineWidth = Math.max(.75, .90 * DPR);
+      const strands = 8;
+      const steps = isMobile ? 34 : 46;
+
+      // Hover 後仍是慢速呼吸，但不改變幾何結構。
+      // 旋渦線本身不再整體呼吸，保持穩定清楚。
+      const breath = 1;
+
+      ctx.strokeStyle = `rgba(242, 152, 80, ${.90 * breath})`;
+      ctx.lineWidth = Math.max(1.75 * DPR, 1.75);
       ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = `rgba(242, 152, 80, ${active ? .24 : .15})`;
+      ctx.shadowBlur = active ? 4 * DPR : 2 * DPR;
 
-      for (let i = 0; i < rays; i += 1) {
-        const a = (i / rays) * Math.PI * 2;
-        const twist = .44 * Math.sin(a * 1.28);
-        const a2 = a + twist;
-        const alpha = (.16 + .09 * ((i % 5) / 5)) * activeBoost * pulse;
+      /*
+        每一條線從外圈開始，沿逆時針方向逐步向內收。
+        收束到 innerHole 外緣就停止，因此中心永遠保持空白。
+      */
+      for (let i = 0; i < strands; i += 1) {
+        const baseAngle = (i / strands) * Math.PI * 2;
 
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(242, 152, 80, ${alpha})`;
-        ctx.moveTo(Math.cos(a) * innerR, Math.sin(a) * innerR);
-        ctx.quadraticCurveTo(
-          Math.cos(a + twist * .48) * ((innerR + outerR) * .5),
-          Math.sin(a + twist * .48) * ((innerR + outerR) * .5),
-          Math.cos(a2) * outerR,
-          Math.sin(a2) * outerR
-        );
+
+        for (let s = 0; s <= steps; s += 1) {
+          const t = s / steps;
+
+          // 外 -> 內
+          const radius =
+            outerR - (outerR - innerHole) * Math.pow(t, .94);
+
+          // 逆時針往內旋轉。
+          // 越接近中心，旋轉量越多，形成明顯交疊漩渦。
+          const angle =
+            baseAngle -
+            (Math.PI * 1.55) * Math.pow(t, 1.08) -
+            0.10 * Math.sin(t * Math.PI);
+
+          // 輕微橢圓變形，避免太像數學完美圓環。
+          const x = Math.cos(angle) * radius;
+          const y = Math.sin(angle) * radius * .94;
+
+          if (s === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
         ctx.stroke();
       }
 
-      const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, outerR * .34);
-      glow.addColorStop(0, `rgba(242, 152, 80, ${.055 * pulse})`);
-      glow.addColorStop(.5, `rgba(242, 152, 80, ${.015 * pulse})`);
-      glow.addColorStop(1, 'rgba(242, 152, 80, 0)');
-      ctx.fillStyle = glow;
+      // 中央遮罩：保證任何 antialias / shadow 都不會侵入空心區。
+      ctx.globalCompositeOperation = 'destination-out';
       ctx.beginPath();
-      ctx.arc(0, 0, outerR * .34, 0, Math.PI * 2);
+      ctx.arc(0, 0, innerHole * .96, 0, Math.PI * 2);
       ctx.fill();
+
+      ctx.globalCompositeOperation = 'source-over';
+
+      // 空心邊緣僅保留非常淡的暖光，不畫實線圓框。
+      const rim = ctx.createRadialGradient(
+        0, 0, innerHole * .78,
+        0, 0, innerHole * 1.28
+      );
+      rim.addColorStop(0, 'rgba(242, 152, 80, 0)');
+      rim.addColorStop(.62, `rgba(242, 152, 80, ${active ? .045 * breath : .025})`);
+      rim.addColorStop(1, 'rgba(242, 152, 80, 0)');
+      ctx.fillStyle = rim;
+      ctx.beginPath();
+      ctx.arc(0, 0, innerHole * 1.28, 0, Math.PI * 2);
+      ctx.fill();
+
+
+      /*
+        Hover / Active 時的觸覺微光：
+        不再讓整個旋渦一起明暗，而是在框內分布多個金色光點，
+        每顆使用不同 phase / speed 隨機感亮起與暗掉。
+        使用數學固定種子，不需要建立額外 DOM 或第二套 RAF。
+      */
+      const sparkleCount = isMobile ? 18 : 28;
+      const sparkleAreaX = Math.min(w * .42, outerR * 1.55);
+      const sparkleAreaY = Math.min(h * .40, outerR * 1.25);
+
+      for (let i = 0; i < sparkleCount; i += 1) {
+        // deterministic pseudo-random position
+        const seedA = Math.sin((i + 1) * 12.9898) * 43758.5453;
+        const seedB = Math.sin((i + 1) * 78.233) * 12345.6789;
+        const seedC = Math.sin((i + 1) * 39.425) * 24680.1357;
+
+        const randA = seedA - Math.floor(seedA);
+        const randB = seedB - Math.floor(seedB);
+        const randC = seedC - Math.floor(seedC);
+
+        const px = (randA * 2 - 1) * sparkleAreaX;
+        const py = (randB * 2 - 1) * sparkleAreaY;
+
+        // 中央空心區不要出現光點
+        if (Math.hypot(px, py) < innerHole * 1.20) continue;
+
+        const speed = .0010 + randC * .0017;
+        const phase = randA * Math.PI * 4 + randB * Math.PI * 2;
+        const wave = 0.5 + 0.5 * Math.sin(timestamp * speed + phase);
+
+        // 非 Hover 時只留極淡環境光；Hover 後才明顯隨機閃爍
+        const alpha = active
+          ? .08 + Math.pow(wave, 2.2) * .72
+          : .035 + Math.pow(wave, 2.4) * .12;
+
+        const radius = (1.0 + randC * 1.8) * DPR;
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(247, 190, 105, ${alpha})`;
+        ctx.shadowColor = `rgba(242, 152, 80, ${alpha * .7})`;
+        ctx.shadowBlur = (active ? 4.5 : 2) * DPR;
+        ctx.arc(px, py, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       ctx.restore();
     }
 
@@ -4503,6 +4635,38 @@
   resetP5Entrance();
 })();
 
-  </script>
+  
+  /* P4 touch icon override: clearer spiral geometry */
+  function drawP4TouchCanvas() {
+    const canvas = document.getElementById('p4TouchCanvas');
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, rect.width), h = Math.max(1, rect.height);
+    canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    const base=Math.min(w,h), active=activeP4Card==='touch';
+    const breath=active ? (.90+.10*Math.sin(performance.now()*.00130)) : 1;
+    ctx.save(); ctx.translate(w*.5,h*.5);
+    ctx.strokeStyle=`rgba(242,152,80,${active?.98:.92})`;
+    ctx.lineWidth=2.55; ctx.lineCap='round';
+    ctx.shadowColor=`rgba(242,152,80,${active?.34:.24})`;
+    ctx.shadowBlur=active?6:3; ctx.globalAlpha=breath;
+    const arms=48, innerR=base*.105, outerR=base*.365, turns=1.18, steps=34;
+    for(let i=0;i<arms;i++){
+      const start=Math.PI*2*i/arms; ctx.beginPath();
+      for(let s=0;s<=steps;s++){
+        const t=s/steps,e=t*t*(3-2*t),r=innerR+(outerR-innerR)*e;
+        const a=start+turns*Math.PI*2*t+.12*Math.sin(t*Math.PI);
+        const x=Math.cos(a)*r,y=Math.sin(a)*r;
+        s?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+</script>
 </body>
 </html>
