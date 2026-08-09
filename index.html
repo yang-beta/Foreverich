@@ -768,142 +768,8 @@
 
 
 /* =============================================================
-   Page 5｜寄語入口
-   ============================================================= */
-(() => {
-  'use strict';
-  const page = document.getElementById('messageEntrySection');
-  if (!page) return;
-  const lines = gsap.utils.toArray('#messageEntrySection .p5-entry-line');
-  const options = document.getElementById('p5EntryOptions');
-  const skipBtn = document.getElementById('p5EntrySkipBtn');
-  const writeBtn = document.getElementById('p5WriteMemoryBtn');
-  const wallBtn = document.getElementById('p5ViewWallBtn');
-  let tl = null;
-
-  function goToSection(id) {
-    const target = document.getElementById(id);
-    const index = pageElements.indexOf(target);
-    if (index >= 0) goToPage(index);
-  }
-  function readyOptions() {
-    options.classList.add('is-ready');
-    options.setAttribute('aria-hidden','false');
-  }
-  function reset() {
-    tl?.kill(); tl=null;
-    gsap.killTweensOf([...lines, options, skipBtn]);
-    gsap.set(lines,{y:'115%',autoAlpha:0});
-    gsap.set(options,{y:18,autoAlpha:0});
-    options.classList.remove('is-ready');
-    options.setAttribute('aria-hidden','true');
-    gsap.set(skipBtn,{autoAlpha:0,pointerEvents:'none'});
-  }
-  window.enterP5EntryPage = function() {
-    reset();
-    setPageAnimationLock(true);
-    tl = gsap.timeline({
-      onComplete() {
-        readyOptions();
-        setPageAnimationLock(false);
-        gsap.to(skipBtn,{autoAlpha:0,pointerEvents:'none',duration:.3});
-      }
-    })
-    .to(skipBtn,{autoAlpha:1,pointerEvents:'auto',duration:.35},.12)
-    .to(lines[0],{y:'0%',autoAlpha:1,duration:1,ease:'power2.out'},.25)
-    .to(lines[1],{y:'0%',autoAlpha:1,duration:1,ease:'power2.out'},'+=.65')
-    .to(options,{y:0,autoAlpha:1,duration:.75,ease:'power2.out'},'+=.75')
-    .call(readyOptions);
-  };
-  window.leaveP5EntryPage = function() {
-    tl?.kill(); tl=null;
-    gsap.killTweensOf([...lines,options,skipBtn]);
-    setPageAnimationLock(false);
-  };
-  skipBtn.addEventListener('click',()=>{
-    if (tl) tl.progress(1);
-    else {
-      gsap.set(lines,{y:0,autoAlpha:1});
-      gsap.set(options,{y:0,autoAlpha:1});
-      readyOptions();
-      setPageAnimationLock(false);
-    }
-  });
-  writeBtn.addEventListener('click',()=>goToSection('messageCardSection'));
-  wallBtn.addEventListener('click',()=>goToSection('memoryWallSection'));
-})();
-
-/* =============================================================
-   洸語牆｜最近 12 則留言
-   ============================================================= */
-(() => {
-  'use strict';
-  const page=document.getElementById('memoryWallSection');
-  const grid=document.getElementById('memoryWallGrid');
-  const continueBtn=document.getElementById('memoryWallContinueBtn');
-  if(!page||!grid||!continueBtn) return;
-  let fetchToken=0;
-
-  function goP6(){
-    const target=document.getElementById('messageCardSection');
-    const index=pageElements.indexOf(target);
-    if(index>=0) goToPage(index);
-  }
-  function parseStoredText(raw=''){
-    const s=String(raw||'').trim();
-    const m=s.match(/^\[(.*?)\]\s+([\s\S]*?)(?:\s+\((.*?)\))?$/);
-    return m ? {target:m[1]||'一份思念',quote:m[2]||'',meta:m[3]||''}
-             : {target:'一份思念',quote:s,meta:''};
-  }
-  function createCard(item){
-    const d=parseStoredText(item?.text);
-    const card=document.createElement('article');
-    card.className='memory-wall-card';
-    const meta=document.createElement('div'); meta.className='memory-wall-meta';
-    const target=document.createElement('span'); target.textContent=d.target;
-    const date=document.createElement('time');
-    date.textContent=item?.created_at?new Date(item.created_at).toLocaleDateString('zh-TW').replace(/\//g,'.'):'';
-    meta.append(target,date);
-    const quote=document.createElement('div'); quote.className='memory-wall-quote'; quote.textContent=d.quote||'一束沒有被說出口的思念。';
-    const foot=document.createElement('div'); foot.className='memory-wall-foot'; foot.textContent=d.meta||'洸限 · 時光寄語';
-    card.append(meta,quote,foot);
-    return card;
-  }
-  async function load(){
-    const token=++fetchToken;
-    grid.innerHTML='<div class="memory-wall-loading">正在拾起最近的思念微光……</div>';
-    try{
-      const client=window.getRemembranceSupabaseClient?.();
-      if(!client) throw new Error('SUPABASE_CLIENT_UNAVAILABLE');
-      const {data,error}=await client.from('remembrance-db').select('*').order('created_at',{ascending:false}).limit(12);
-      if(error) throw error;
-      if(token!==fetchToken) return;
-      grid.replaceChildren();
-      if(!data?.length){
-        const el=document.createElement('div'); el.className='memory-wall-empty'; el.textContent='牆上還沒有思念，等待第一道微光。'; grid.appendChild(el); return;
-      }
-      data.slice(0,12).forEach(item=>grid.appendChild(createCard(item)));
-    }catch(error){
-      console.error('洸語牆讀取失敗:',error);
-      if(token!==fetchToken) return;
-      grid.innerHTML='<div class="memory-wall-error">目前暫時無法讀取洸語牆，請稍後再試。</div>';
-    }
-  }
-  window.enterMemoryWallPage=function(){
-    load();
-    gsap.fromTo('.memory-wall-header',{autoAlpha:0,y:14},{autoAlpha:1,y:0,duration:.7,ease:'power2.out'});
-    gsap.fromTo(continueBtn,{autoAlpha:0,y:10},{autoAlpha:1,y:0,duration:.55,delay:.35,ease:'power2.out'});
-  };
-  window.leaveMemoryWallPage=function(){
-    fetchToken+=1;
-    gsap.killTweensOf(['.memory-wall-header',continueBtn]);
-  };
-  continueBtn.addEventListener('click',goP6);
-})();
-
-/* =============================================================
    Page 6｜個人思念留言與寄語小卡
-   規則：僅處理 P5 視覺；共用文字、Skip、頁面生命週期沿用主站。
+   規則：沿用主站共用文字、Skip、生命週期與單一 Resize 架構。
    ============================================================= */
 
 /* =============================================================
@@ -1899,19 +1765,6 @@
       </div>
     </div>
 
-    <!-- 洸語牆｜最近 12 則 -->
-    <div class="section-page memory-wall-section" id="memoryWallSection">
-      <div class="memory-wall-shell">
-        <header class="memory-wall-header">
-          <div class="ui-line-mask"><div class="ui-line-content memory-wall-title">思念洸語牆</div></div>
-          <p>十二道最近留下的思念，在這裡安靜發光。</p>
-        </header>
-        <div class="memory-wall-grid" id="memoryWallGrid" aria-live="polite">
-          <div class="memory-wall-loading">正在拾起最近的思念微光……</div>
-        </div>
-        <button type="button" class="memory-wall-continue" id="memoryWallContinueBtn">寫下個人思念</button>
-      </div>
-    </div>
 
     <!-- Page 6. 個人思念留言與時光小卡（原 P5） -->
     <div class="section-page p5-message-section" id="messageCardSection">
@@ -2033,6 +1886,21 @@
             <button type="button" class="p5-outro-btn p5-outro-btn-primary" id="p5HomeBtn">返回首頁</button>
           </div>
         </div>
+      </div>
+    </div>
+
+
+    <!-- Page 7. 洸語牆｜最近 12 則 -->
+    <div class="section-page memory-wall-section" id="memoryWallSection">
+      <div class="memory-wall-shell">
+        <header class="memory-wall-header">
+          <div class="ui-line-mask"><div class="ui-line-content memory-wall-title">思念洸語牆</div></div>
+          <p>十二道最近留下的思念，在這裡安靜發光。</p>
+        </header>
+        <div class="memory-wall-grid" id="memoryWallGrid" aria-live="polite">
+          <div class="memory-wall-loading">正在拾起最近的思念微光……</div>
+        </div>
+        <button type="button" class="memory-wall-continue" id="memoryWallContinueBtn">返回留言板・寫下個人思念</button>
       </div>
     </div>
     </div>
@@ -3494,6 +3362,142 @@
     function nextPage() {
       goToPage(currentPageIndex + 1);
     }
+
+
+        // =============================================================
+        // Page 5｜寄語入口
+        // =============================================================
+    (() => {
+      'use strict';
+      const page = document.getElementById('messageEntrySection');
+      if (!page) return;
+      const lines = gsap.utils.toArray('#messageEntrySection .p5-entry-line');
+      const options = document.getElementById('p5EntryOptions');
+      const skipBtn = document.getElementById('p5EntrySkipBtn');
+      const writeBtn = document.getElementById('p5WriteMemoryBtn');
+      const wallBtn = document.getElementById('p5ViewWallBtn');
+      let tl = null;
+
+      function goToSection(id) {
+        const target = document.getElementById(id);
+        const index = pageElements.indexOf(target);
+        if (index >= 0) goToPage(index);
+      }
+      function readyOptions() {
+        options.classList.add('is-ready');
+        options.setAttribute('aria-hidden','false');
+      }
+      function reset() {
+        tl?.kill(); tl=null;
+        gsap.killTweensOf([...lines, options, skipBtn]);
+        gsap.set(lines,{y:'115%',autoAlpha:0});
+        gsap.set(options,{y:18,autoAlpha:0});
+        options.classList.remove('is-ready');
+        options.setAttribute('aria-hidden','true');
+        gsap.set(skipBtn,{autoAlpha:0,pointerEvents:'none'});
+      }
+      window.enterP5EntryPage = function() {
+        reset();
+        setPageAnimationLock(true);
+        tl = gsap.timeline({
+          onComplete() {
+            readyOptions();
+            setPageAnimationLock(false);
+            gsap.to(skipBtn,{autoAlpha:0,pointerEvents:'none',duration:.3});
+          }
+        })
+        .to(skipBtn,{autoAlpha:1,pointerEvents:'auto',duration:.35},.12)
+        .to(lines[0],{y:'0%',autoAlpha:1,duration:1,ease:'power2.out'},.25)
+        .to(lines[1],{y:'0%',autoAlpha:1,duration:1,ease:'power2.out'},'+=.65')
+        .to(options,{y:0,autoAlpha:1,duration:.75,ease:'power2.out'},'+=.75')
+        .call(readyOptions);
+      };
+      window.leaveP5EntryPage = function() {
+        tl?.kill(); tl=null;
+        gsap.killTweensOf([...lines,options,skipBtn]);
+        setPageAnimationLock(false);
+      };
+      skipBtn.addEventListener('click',()=>{
+        if (tl) tl.progress(1);
+        else {
+          gsap.set(lines,{y:0,autoAlpha:1});
+          gsap.set(options,{y:0,autoAlpha:1});
+          readyOptions();
+          setPageAnimationLock(false);
+        }
+      });
+      writeBtn.addEventListener('click',()=>goToSection('messageCardSection'));
+      wallBtn.addEventListener('click',()=>goToSection('memoryWallSection'));
+    })();
+
+        // =============================================================
+        // Page 7｜洸語牆（最近 12 則留言）
+        // =============================================================
+    (() => {
+      'use strict';
+      const page=document.getElementById('memoryWallSection');
+      const grid=document.getElementById('memoryWallGrid');
+      const continueBtn=document.getElementById('memoryWallContinueBtn');
+      if(!page||!grid||!continueBtn) return;
+      let fetchToken=0;
+
+      function goP6(){
+        const target=document.getElementById('messageCardSection');
+        const index=pageElements.indexOf(target);
+        if(index>=0) goToPage(index);
+      }
+      function parseStoredText(raw=''){
+        const s=String(raw||'').trim();
+        const m=s.match(/^\[(.*?)\]\s+([\s\S]*?)(?:\s+\((.*?)\))?$/);
+        return m ? {target:m[1]||'一份思念',quote:m[2]||'',meta:m[3]||''}
+                 : {target:'一份思念',quote:s,meta:''};
+      }
+      function createCard(item){
+        const d=parseStoredText(item?.text);
+        const card=document.createElement('article');
+        card.className='memory-wall-card';
+        const meta=document.createElement('div'); meta.className='memory-wall-meta';
+        const target=document.createElement('span'); target.textContent=d.target;
+        const date=document.createElement('time');
+        date.textContent=item?.created_at?new Date(item.created_at).toLocaleDateString('zh-TW').replace(/\//g,'.'):'';
+        meta.append(target,date);
+        const quote=document.createElement('div'); quote.className='memory-wall-quote'; quote.textContent=d.quote||'一束沒有被說出口的思念。';
+        const foot=document.createElement('div'); foot.className='memory-wall-foot'; foot.textContent=d.meta||'洸限 · 時光寄語';
+        card.append(meta,quote,foot);
+        return card;
+      }
+      async function load(){
+        const token=++fetchToken;
+        grid.innerHTML='<div class="memory-wall-loading">正在拾起最近的思念微光……</div>';
+        try{
+          const client=window.getRemembranceSupabaseClient?.();
+          if(!client) throw new Error('SUPABASE_CLIENT_UNAVAILABLE');
+          const {data,error}=await client.from('remembrance-db').select('*').order('created_at',{ascending:false}).limit(12);
+          if(error) throw error;
+          if(token!==fetchToken) return;
+          grid.replaceChildren();
+          if(!data?.length){
+            const el=document.createElement('div'); el.className='memory-wall-empty'; el.textContent='牆上還沒有思念，等待第一道微光。'; grid.appendChild(el); return;
+          }
+          data.slice(0,12).forEach(item=>grid.appendChild(createCard(item)));
+        }catch(error){
+          console.error('洸語牆讀取失敗:',error);
+          if(token!==fetchToken) return;
+          grid.innerHTML='<div class="memory-wall-error">目前暫時無法讀取洸語牆，請稍後再試。</div>';
+        }
+      }
+      window.enterMemoryWallPage=function(){
+        load();
+        gsap.fromTo('.memory-wall-header',{autoAlpha:0,y:14},{autoAlpha:1,y:0,duration:.7,ease:'power2.out'});
+        gsap.fromTo(continueBtn,{autoAlpha:0,y:10},{autoAlpha:1,y:0,duration:.55,delay:.35,ease:'power2.out'});
+      };
+      window.leaveMemoryWallPage=function(){
+        fetchToken+=1;
+        gsap.killTweensOf(['.memory-wall-header',continueBtn]);
+      };
+      continueBtn.addEventListener('click',goP6);
+    })();
+
 
     function resizeAllCanvases() {
       resizeLoadingCanvas();
