@@ -124,6 +124,7 @@
       outline: none;
       z-index: 10;
       opacity: 0;             /* 初始隱藏，由 GSAP 依時間軸淡入 */
+      pointer-events: none;   /* 動畫完成前不可點擊，避免透明按鈕提前切頁 */
       padding: 0;
       display: flex;
       justify-content: center;
@@ -777,12 +778,64 @@
    ============================================================= */
 .p5-entry-section {
   z-index: 10;
-  background: radial-gradient(circle at 50% 42%, rgba(242,152,80,.08), transparent 34%), #1a1a1a;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(242,152,80,.028), transparent 42%),
+    #1a1a1a;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.p5-entry-content { width:min(920px,90vw); display:flex; flex-direction:column; align-items:center; text-align:center; }
+
+/* P5 四組喇叭形線框背景
+   效能策略：
+   1. 靜態 SVG 約 44 條 ellipse，不做逐線 JS / Canvas 重算。
+   2. 只對四個 <g> 做很慢的 opacity + scale 呼吸，主要由 compositor 處理。
+   3. 整體低透明度，避免干擾前景文字。 */
+.p5-entry-wave-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: .16;
+}
+.p5-entry-wave-bg .p5-horn {
+  fill: none;
+  stroke: rgba(224, 214, 204, .54);
+  stroke-width: 1.05;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: p5HornAtmosphere 9s ease-in-out infinite alternate;
+}
+.p5-entry-wave-bg .p5-horn-b,
+.p5-entry-wave-bg .p5-horn-d {
+  opacity: .58;
+  animation-duration: 11s;
+  animation-delay: -4.5s;
+}
+.p5-entry-wave-bg .p5-horn-c {
+  animation-delay: -2.2s;
+}
+@keyframes p5HornAtmosphere {
+  0%   { opacity: .44; transform: scale(0.992); }
+  50%  { opacity: .72; }
+  100% { opacity: .52; transform: scale(1.012); }
+}
+
+.p5-entry-content {
+  position: relative;
+  z-index: 2;
+  width:min(920px,90vw);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+#messageEntrySection .skip-anim-btn { z-index: 5; }
 .p5-entry-copy { width:100%; }
 .p5-entry-line { font-size:clamp(1.02rem,1.6vw,1.28rem); line-height:2; letter-spacing:.14em; }
 .p5-entry-options { width:min(760px,94%); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:clamp(42px,7vh,72px); opacity:0; transform:translateY(18px); pointer-events:none; }
@@ -890,6 +943,17 @@
   flex-direction: column;
   gap: clamp(8px, 1.25vh, 13px);
 }
+
+/* P6 已移除原先頂部兩行引言，因此表單改為真正垂直置中。 */
+#messageCardSection .p5-shell {
+  justify-content: center;
+  padding-top: clamp(12px, 2vh, 22px);
+  padding-bottom: clamp(12px, 2vh, 22px);
+}
+#messageCardSection .p5-form-container {
+  flex: 0 1 auto;
+}
+
 
 .p5-form-step {
   width: 100%;
@@ -1460,7 +1524,7 @@
       </div>
 
       <div class="lp-logo-lockup" id="lpLogoLockup">
-        <img src="/img/Guang.png" class="lp-side-word lp-side-word-guang" alt="洸">
+        <img src="/img/guang.png" class="lp-side-word lp-side-word-guang" alt="洸">
         <div class="logo-container" id="logoBox">
         <svg id="_圖層_1" data-name="圖層_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 841.89 595.28">
           <defs><style>.st0 { fill: #f29850; }</style></defs>
@@ -1746,6 +1810,13 @@
 
     <!-- Page 5. 寄語入口 -->
     <div class="section-page p5-entry-section" id="messageEntrySection">
+
+      <svg class="p5-entry-wave-bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <g class="p5-horn p5-horn-a"><ellipse cx="120.0" cy="305.0" rx="122.0" ry="270.0" transform="rotate(-7.00 120.0 305.0)"></ellipse><ellipse cx="201.8" cy="322.4" rx="110.5" ry="244.5" transform="rotate(-6.30 201.8 322.4)"></ellipse><ellipse cx="274.7" cy="338.0" rx="99.0" ry="219.0" transform="rotate(-5.60 274.7 338.0)"></ellipse><ellipse cx="344.6" cy="352.9" rx="87.5" ry="193.5" transform="rotate(-4.90 344.6 352.9)"></ellipse><ellipse cx="412.7" cy="367.4" rx="76.0" ry="168.0" transform="rotate(-4.20 412.7 367.4)"></ellipse><ellipse cx="479.4" cy="381.6" rx="64.5" ry="142.5" transform="rotate(-3.50 479.4 381.6)"></ellipse><ellipse cx="545.0" cy="395.6" rx="53.0" ry="117.0" transform="rotate(-2.80 545.0 395.6)"></ellipse><ellipse cx="609.8" cy="409.4" rx="41.5" ry="91.5" transform="rotate(-2.10 609.8 409.4)"></ellipse><ellipse cx="673.8" cy="423.1" rx="30.0" ry="66.0" transform="rotate(-1.40 673.8 423.1)"></ellipse><ellipse cx="737.2" cy="436.6" rx="18.5" ry="40.5" transform="rotate(-0.70 737.2 436.6)"></ellipse><ellipse cx="800.0" cy="450.0" rx="7.0" ry="15.0" transform="rotate(-0.00 800.0 450.0)"></ellipse></g>
+        <g class="p5-horn p5-horn-b"><ellipse cx="120.0" cy="595.0" rx="122.0" ry="270.0" transform="rotate(7.00 120.0 595.0)"></ellipse><ellipse cx="201.8" cy="577.6" rx="110.5" ry="244.5" transform="rotate(6.30 201.8 577.6)"></ellipse><ellipse cx="274.7" cy="562.0" rx="99.0" ry="219.0" transform="rotate(5.60 274.7 562.0)"></ellipse><ellipse cx="344.6" cy="547.1" rx="87.5" ry="193.5" transform="rotate(4.90 344.6 547.1)"></ellipse><ellipse cx="412.7" cy="532.6" rx="76.0" ry="168.0" transform="rotate(4.20 412.7 532.6)"></ellipse><ellipse cx="479.4" cy="518.4" rx="64.5" ry="142.5" transform="rotate(3.50 479.4 518.4)"></ellipse><ellipse cx="545.0" cy="504.4" rx="53.0" ry="117.0" transform="rotate(2.80 545.0 504.4)"></ellipse><ellipse cx="609.8" cy="490.6" rx="41.5" ry="91.5" transform="rotate(2.10 609.8 490.6)"></ellipse><ellipse cx="673.8" cy="476.9" rx="30.0" ry="66.0" transform="rotate(1.40 673.8 476.9)"></ellipse><ellipse cx="737.2" cy="463.4" rx="18.5" ry="40.5" transform="rotate(0.70 737.2 463.4)"></ellipse><ellipse cx="800.0" cy="450.0" rx="7.0" ry="15.0" transform="rotate(0.00 800.0 450.0)"></ellipse></g>
+        <g class="p5-horn p5-horn-c"><ellipse cx="1480.0" cy="305.0" rx="122.0" ry="270.0" transform="rotate(7.00 1480.0 305.0)"></ellipse><ellipse cx="1398.2" cy="322.4" rx="110.5" ry="244.5" transform="rotate(6.30 1398.2 322.4)"></ellipse><ellipse cx="1325.3" cy="338.0" rx="99.0" ry="219.0" transform="rotate(5.60 1325.3 338.0)"></ellipse><ellipse cx="1255.4" cy="352.9" rx="87.5" ry="193.5" transform="rotate(4.90 1255.4 352.9)"></ellipse><ellipse cx="1187.3" cy="367.4" rx="76.0" ry="168.0" transform="rotate(4.20 1187.3 367.4)"></ellipse><ellipse cx="1120.6" cy="381.6" rx="64.5" ry="142.5" transform="rotate(3.50 1120.6 381.6)"></ellipse><ellipse cx="1055.0" cy="395.6" rx="53.0" ry="117.0" transform="rotate(2.80 1055.0 395.6)"></ellipse><ellipse cx="990.2" cy="409.4" rx="41.5" ry="91.5" transform="rotate(2.10 990.2 409.4)"></ellipse><ellipse cx="926.2" cy="423.1" rx="30.0" ry="66.0" transform="rotate(1.40 926.2 423.1)"></ellipse><ellipse cx="862.8" cy="436.6" rx="18.5" ry="40.5" transform="rotate(0.70 862.8 436.6)"></ellipse><ellipse cx="800.0" cy="450.0" rx="7.0" ry="15.0" transform="rotate(0.00 800.0 450.0)"></ellipse></g>
+        <g class="p5-horn p5-horn-d"><ellipse cx="1480.0" cy="595.0" rx="122.0" ry="270.0" transform="rotate(-7.00 1480.0 595.0)"></ellipse><ellipse cx="1398.2" cy="577.6" rx="110.5" ry="244.5" transform="rotate(-6.30 1398.2 577.6)"></ellipse><ellipse cx="1325.3" cy="562.0" rx="99.0" ry="219.0" transform="rotate(-5.60 1325.3 562.0)"></ellipse><ellipse cx="1255.4" cy="547.1" rx="87.5" ry="193.5" transform="rotate(-4.90 1255.4 547.1)"></ellipse><ellipse cx="1187.3" cy="532.6" rx="76.0" ry="168.0" transform="rotate(-4.20 1187.3 532.6)"></ellipse><ellipse cx="1120.6" cy="518.4" rx="64.5" ry="142.5" transform="rotate(-3.50 1120.6 518.4)"></ellipse><ellipse cx="1055.0" cy="504.4" rx="53.0" ry="117.0" transform="rotate(-2.80 1055.0 504.4)"></ellipse><ellipse cx="990.2" cy="490.6" rx="41.5" ry="91.5" transform="rotate(-2.10 990.2 490.6)"></ellipse><ellipse cx="926.2" cy="476.9" rx="30.0" ry="66.0" transform="rotate(-1.40 926.2 476.9)"></ellipse><ellipse cx="862.8" cy="463.4" rx="18.5" ry="40.5" transform="rotate(-0.70 862.8 463.4)"></ellipse><ellipse cx="800.0" cy="450.0" rx="7.0" ry="15.0" transform="rotate(-0.00 800.0 450.0)"></ellipse></g>
+      </svg>
       <button class="skip-anim-btn" id="p5EntrySkipBtn">Skip 略過動畫 ✕</button>
       <div class="p5-entry-content">
         <div class="p5-entry-copy">
@@ -2318,7 +2389,8 @@
 
       gsap.set(storyLines, { y: '115%', opacity: 0 });
       gsap.set(animatedParts, { opacity: 0 });
-      gsap.set(arrow, { opacity: 0, y: 0 });
+      gsap.set(arrow, { opacity: 0, y: 0, pointerEvents: 'none' });
+      arrow.setAttribute('aria-disabled', 'true');
       arrow.dataset.animated = 'false';
       gsap.set(skipBtn, { opacity: 1, pointerEvents: 'auto' });
       skipBtn.classList.add('show');
@@ -2532,7 +2604,17 @@
       brandTransitionCanvas.height = window.innerHeight * DPR;
       brandTransitionCenter.x = brandTransitionCanvas.width * 0.5;
       brandTransitionCenter.y = brandTransitionCanvas.height * 0.4;
-      brandTransitionMaxRadius = Math.min(brandTransitionCanvas.width, brandTransitionCanvas.height) * 0.25;
+      // 曼陀羅最外圈延伸到整個 viewport。
+      // 使用中心到最遠角落的距離，粒子數不增加，因此保留既有效能與所有動態效果。
+      const farthestX = Math.max(
+        brandTransitionCenter.x,
+        brandTransitionCanvas.width - brandTransitionCenter.x
+      );
+      const farthestY = Math.max(
+        brandTransitionCenter.y,
+        brandTransitionCanvas.height - brandTransitionCenter.y
+      );
+      brandTransitionMaxRadius = Math.hypot(farthestX, farthestY) * 0.94;
       buildBrandTransitionParticles();
     }
 
@@ -2720,7 +2802,8 @@
       const arrow = document.getElementById('p3ArrowBtn');
       gsap.killTweensOf(arrow);
       arrow.dataset.animated = 'false';
-      gsap.set(arrow, { opacity: 0, y: 0 });
+      gsap.set(arrow, { opacity: 0, y: 0, pointerEvents: 'none' });
+      arrow.setAttribute('aria-disabled', 'true');
     }
 
     function playBrandTransitionAnimation() {
@@ -3028,7 +3111,8 @@
       const arrow = document.getElementById('p4ArrowBtn');
       gsap.killTweensOf(arrow);
       arrow.dataset.animated = 'false';
-      gsap.set(arrow, { opacity: 0, y: 0 });
+      gsap.set(arrow, { opacity: 0, y: 0, pointerEvents: 'none' });
+      arrow.setAttribute('aria-disabled', 'true');
       gsap.set('#aiReconstructionSkipBtn', { opacity: 1, pointerEvents: 'auto' });
     }
 
@@ -3096,8 +3180,9 @@
       if (!element || element.dataset.animated === 'true') return;
 
       element.dataset.animated = 'true';
+      element.setAttribute('aria-disabled', 'false');
       gsap.killTweensOf(element);
-      gsap.set(element, { y: 0 });
+      gsap.set(element, { y: 0, pointerEvents: 'auto' });
 
       gsap.to(element, {
         opacity: 1,
@@ -3115,7 +3200,16 @@
     }
 
     document.querySelectorAll('.scroll-arrow-btn').forEach((button) => {
-      button.addEventListener('click', nextPage);
+      button.setAttribute('aria-disabled', 'true');
+      button.addEventListener('click', (event) => {
+        // opacity:0 不等於不可點。只有 animateArrow() 完成啟用後才允許切頁。
+        if (button.dataset.animated !== 'true') {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        nextPage();
+      });
     });
 
     document.getElementById('loadingSkipBtn').addEventListener('click', skipLoadingToBanner);
@@ -3183,7 +3277,8 @@
       if (arrow) {
         gsap.killTweensOf(arrow);
         arrow.dataset.animated = 'false';
-        gsap.set(arrow, { opacity: 0, y: 0 });
+        gsap.set(arrow, { opacity: 0, y: 0, pointerEvents: 'none' });
+      arrow.setAttribute('aria-disabled', 'true');
       }
     }
 
