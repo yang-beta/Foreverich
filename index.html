@@ -184,6 +184,17 @@
 
     .char { opacity: 0; display: inline-block; transform: translateY(10px); }
 
+    .lp-logo-lockup {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(10px, 1.5vw, 22px);
+      margin-bottom: -90px;
+      margin-top: -30px;
+    }
+
     .logo-container {
       width: 500px;
       height: 500px;
@@ -196,9 +207,18 @@
       transform: scale(0.7);
       filter: blur(20px);
       opacity: 0;
-      margin-bottom: -90px;
-      margin-top: -30px;
+      margin: 0;
       will-change: clip-path, transform, filter, opacity;
+    }
+
+    .lp-side-word {
+      width: clamp(78px, 8vw, 122px);
+      height: auto;
+      flex: 0 0 auto;
+      opacity: 0;
+      transform: scale(.94);
+      filter: blur(8px) drop-shadow(0 0 14px rgba(255,255,255,.08));
+      will-change: opacity, transform, filter;
     }
 
     .logo-container svg {
@@ -251,44 +271,6 @@
       padding: 20px;
     }
 
-    .brand-logo-group {
-      width: 320px;
-      max-width: 75vw;
-    
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    
-      gap: 30px;
-    
-      opacity: 0;
-      margin-bottom: 2.5rem;
-    
-      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.15));
-      will-change: opacity, transform;
-    }
-    
-    .brand-logo-part {
-      display: block;
-      height: auto;
-      object-fit: contain;
-      flex-shrink: 0;
-    }
-    
-    /* 左：洸 */
-    .brand-logo-guang {
-      width: 60px;
-    }
-    
-    /* 中：Logo */
-    .brand-logo-symbol {
-      width: 100px;
-    }
-    
-    /* 右：限 */
-    .brand-logo-xian {
-      width: 60px;
-    }
 
     .banner-questions-wrapper {
       display: flex;
@@ -708,16 +690,20 @@
         margin-left: 0 !important;
       }
 
-      .brand-logo-group {
-        width: 220px !important;
-        max-width: 65vw !important;
-        margin-bottom: 1.8rem !important;
+
+      .lp-logo-lockup {
+        gap: 8px !important;
+        margin-bottom: -50px !important;
       }
 
       .logo-container {
         width: 300px !important;
         height: 300px !important;
-        margin-bottom: -50px !important;
+        margin: 0 !important;
+      }
+
+      .lp-side-word {
+        width: clamp(54px, 16vw, 78px);
       }
 
       .skip-anim-btn {
@@ -780,10 +766,200 @@
 
     }
 
+
 /* =============================================================
-   Page 5｜留言板與寄語小卡
+   Page 5｜寄語入口
+   ============================================================= */
+(() => {
+  'use strict';
+  const page = document.getElementById('messageEntrySection');
+  if (!page) return;
+  const lines = gsap.utils.toArray('#messageEntrySection .p5-entry-line');
+  const options = document.getElementById('p5EntryOptions');
+  const skipBtn = document.getElementById('p5EntrySkipBtn');
+  const writeBtn = document.getElementById('p5WriteMemoryBtn');
+  const wallBtn = document.getElementById('p5ViewWallBtn');
+  let tl = null;
+
+  function goToSection(id) {
+    const target = document.getElementById(id);
+    const index = pageElements.indexOf(target);
+    if (index >= 0) goToPage(index);
+  }
+  function readyOptions() {
+    options.classList.add('is-ready');
+    options.setAttribute('aria-hidden','false');
+  }
+  function reset() {
+    tl?.kill(); tl=null;
+    gsap.killTweensOf([...lines, options, skipBtn]);
+    gsap.set(lines,{y:'115%',autoAlpha:0});
+    gsap.set(options,{y:18,autoAlpha:0});
+    options.classList.remove('is-ready');
+    options.setAttribute('aria-hidden','true');
+    gsap.set(skipBtn,{autoAlpha:0,pointerEvents:'none'});
+  }
+  window.enterP5EntryPage = function() {
+    reset();
+    setPageAnimationLock(true);
+    tl = gsap.timeline({
+      onComplete() {
+        readyOptions();
+        setPageAnimationLock(false);
+        gsap.to(skipBtn,{autoAlpha:0,pointerEvents:'none',duration:.3});
+      }
+    })
+    .to(skipBtn,{autoAlpha:1,pointerEvents:'auto',duration:.35},.12)
+    .to(lines[0],{y:'0%',autoAlpha:1,duration:1,ease:'power2.out'},.25)
+    .to(lines[1],{y:'0%',autoAlpha:1,duration:1,ease:'power2.out'},'+=.65')
+    .to(options,{y:0,autoAlpha:1,duration:.75,ease:'power2.out'},'+=.75')
+    .call(readyOptions);
+  };
+  window.leaveP5EntryPage = function() {
+    tl?.kill(); tl=null;
+    gsap.killTweensOf([...lines,options,skipBtn]);
+    setPageAnimationLock(false);
+  };
+  skipBtn.addEventListener('click',()=>{
+    if (tl) tl.progress(1);
+    else {
+      gsap.set(lines,{y:0,autoAlpha:1});
+      gsap.set(options,{y:0,autoAlpha:1});
+      readyOptions();
+      setPageAnimationLock(false);
+    }
+  });
+  writeBtn.addEventListener('click',()=>goToSection('messageCardSection'));
+  wallBtn.addEventListener('click',()=>goToSection('memoryWallSection'));
+})();
+
+/* =============================================================
+   洸語牆｜最近 12 則留言
+   ============================================================= */
+(() => {
+  'use strict';
+  const page=document.getElementById('memoryWallSection');
+  const grid=document.getElementById('memoryWallGrid');
+  const continueBtn=document.getElementById('memoryWallContinueBtn');
+  if(!page||!grid||!continueBtn) return;
+  let fetchToken=0;
+
+  function goP6(){
+    const target=document.getElementById('messageCardSection');
+    const index=pageElements.indexOf(target);
+    if(index>=0) goToPage(index);
+  }
+  function parseStoredText(raw=''){
+    const s=String(raw||'').trim();
+    const m=s.match(/^\[(.*?)\]\s+([\s\S]*?)(?:\s+\((.*?)\))?$/);
+    return m ? {target:m[1]||'一份思念',quote:m[2]||'',meta:m[3]||''}
+             : {target:'一份思念',quote:s,meta:''};
+  }
+  function createCard(item){
+    const d=parseStoredText(item?.text);
+    const card=document.createElement('article');
+    card.className='memory-wall-card';
+    const meta=document.createElement('div'); meta.className='memory-wall-meta';
+    const target=document.createElement('span'); target.textContent=d.target;
+    const date=document.createElement('time');
+    date.textContent=item?.created_at?new Date(item.created_at).toLocaleDateString('zh-TW').replace(/\//g,'.'):'';
+    meta.append(target,date);
+    const quote=document.createElement('div'); quote.className='memory-wall-quote'; quote.textContent=d.quote||'一束沒有被說出口的思念。';
+    const foot=document.createElement('div'); foot.className='memory-wall-foot'; foot.textContent=d.meta||'洸限 · 時光寄語';
+    card.append(meta,quote,foot);
+    return card;
+  }
+  async function load(){
+    const token=++fetchToken;
+    grid.innerHTML='<div class="memory-wall-loading">正在拾起最近的思念微光……</div>';
+    try{
+      const client=window.getRemembranceSupabaseClient?.();
+      if(!client) throw new Error('SUPABASE_CLIENT_UNAVAILABLE');
+      const {data,error}=await client.from('remembrance-db').select('*').order('created_at',{ascending:false}).limit(12);
+      if(error) throw error;
+      if(token!==fetchToken) return;
+      grid.replaceChildren();
+      if(!data?.length){
+        const el=document.createElement('div'); el.className='memory-wall-empty'; el.textContent='牆上還沒有思念，等待第一道微光。'; grid.appendChild(el); return;
+      }
+      data.slice(0,12).forEach(item=>grid.appendChild(createCard(item)));
+    }catch(error){
+      console.error('洸語牆讀取失敗:',error);
+      if(token!==fetchToken) return;
+      grid.innerHTML='<div class="memory-wall-error">目前暫時無法讀取洸語牆，請稍後再試。</div>';
+    }
+  }
+  window.enterMemoryWallPage=function(){
+    load();
+    gsap.fromTo('.memory-wall-header',{autoAlpha:0,y:14},{autoAlpha:1,y:0,duration:.7,ease:'power2.out'});
+    gsap.fromTo(continueBtn,{autoAlpha:0,y:10},{autoAlpha:1,y:0,duration:.55,delay:.35,ease:'power2.out'});
+  };
+  window.leaveMemoryWallPage=function(){
+    fetchToken+=1;
+    gsap.killTweensOf(['.memory-wall-header',continueBtn]);
+  };
+  continueBtn.addEventListener('click',goP6);
+})();
+
+/* =============================================================
+   Page 6｜個人思念留言與寄語小卡
    規則：僅處理 P5 視覺；共用文字、Skip、頁面生命週期沿用主站。
    ============================================================= */
+
+/* =============================================================
+   Page 5｜寄語入口
+   ============================================================= */
+.p5-entry-section {
+  z-index: 10;
+  background: radial-gradient(circle at 50% 42%, rgba(242,152,80,.08), transparent 34%), #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.p5-entry-content { width:min(920px,90vw); display:flex; flex-direction:column; align-items:center; text-align:center; }
+.p5-entry-copy { width:100%; }
+.p5-entry-line { font-size:clamp(1.02rem,1.6vw,1.28rem); line-height:2; letter-spacing:.14em; }
+.p5-entry-options { width:min(760px,94%); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:clamp(42px,7vh,72px); opacity:0; transform:translateY(18px); pointer-events:none; }
+.p5-entry-options.is-ready { pointer-events:auto; }
+.p5-entry-option { min-height:116px; padding:20px 24px; border:1px solid rgba(230,230,232,.18); border-radius:22px; background:rgba(31,31,31,.62); color:#E6E6E8; cursor:pointer; display:flex; align-items:center; gap:18px; text-align:left; transition:border-color .3s ease,box-shadow .3s ease,transform .3s ease,background .3s ease; }
+.p5-entry-option:hover { transform:translateY(-3px); border-color:rgba(242,152,80,.65); box-shadow:0 0 26px rgba(242,152,80,.12); background:rgba(242,152,80,.055); }
+.p5-entry-option-index { width:42px; height:42px; border:1px solid rgba(242,152,80,.55); border-radius:50%; display:grid; place-items:center; color:#f29850; font:500 .8rem 'Noto Sans TC',sans-serif; flex:0 0 auto; }
+.p5-entry-option-copy { display:flex; flex-direction:column; gap:7px; }
+.p5-entry-option-copy strong { font:500 1rem 'Noto Serif TC',serif; letter-spacing:.12em; }
+.p5-entry-option-copy small { color:rgba(230,230,232,.58); font-size:.76rem; line-height:1.65; letter-spacing:.08em; }
+
+/* =============================================================
+   洸語牆｜最近 12 則
+   ============================================================= */
+.memory-wall-section { z-index:10; background:radial-gradient(circle at 50% 50%,rgba(242,152,80,.045),transparent 46%),#1a1a1a; display:flex; align-items:center; justify-content:center; }
+.memory-wall-shell { width:min(1180px,92vw); height:min(90vh,820px); display:flex; flex-direction:column; align-items:center; }
+.memory-wall-header { text-align:center; margin-bottom:clamp(18px,3vh,30px); }
+.memory-wall-title { font-size:clamp(1.28rem,2vw,1.65rem); color:#E6E6E8; letter-spacing:.22em; }
+.memory-wall-header p { margin-top:8px; color:rgba(230,230,232,.52); font-size:.82rem; letter-spacing:.12em; }
+.memory-wall-grid { width:100%; flex:1 1 auto; min-height:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(3,minmax(0,1fr)); gap:clamp(10px,1.4vw,16px); }
+.memory-wall-card { position:relative; min-width:0; overflow:hidden; border:1px solid rgba(230,230,232,.13); border-radius:16px; background:rgba(31,31,31,.72); padding:16px 17px 14px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 12px 34px rgba(0,0,0,.22); }
+.memory-wall-card::before { content:""; position:absolute; left:0; top:18%; bottom:18%; width:2px; background:rgba(242,152,80,.65); }
+.memory-wall-meta { display:flex; justify-content:space-between; gap:8px; color:rgba(242,152,80,.72); font-size:.64rem; letter-spacing:.06em; }
+.memory-wall-quote { margin:10px 0; color:rgba(230,230,232,.86); font:400 clamp(.78rem,.92vw,.9rem) 'Noto Serif TC',serif; line-height:1.8; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+.memory-wall-foot { color:rgba(230,230,232,.42); font-size:.65rem; letter-spacing:.06em; }
+.memory-wall-loading,.memory-wall-empty,.memory-wall-error { grid-column:1/-1; grid-row:1/-1; display:grid; place-items:center; color:rgba(230,230,232,.48); font-size:.86rem; letter-spacing:.1em; }
+.memory-wall-continue { margin-top:18px; padding:9px 18px; border:1px solid rgba(242,152,80,.6); border-radius:999px; background:rgba(242,152,80,.06); color:#ffd4ad; font:400 .8rem 'Noto Serif TC',serif; letter-spacing:.12em; cursor:pointer; transition:background .3s ease,box-shadow .3s ease,transform .3s ease; }
+.memory-wall-continue:hover { transform:translateY(-2px); background:rgba(242,152,80,.12); box-shadow:0 0 20px rgba(242,152,80,.12); }
+@media (max-width:900px) {
+  .p5-entry-options { grid-template-columns:1fr; }
+  .memory-wall-shell { height:92vh; }
+  .memory-wall-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(6,minmax(0,1fr)); }
+  .memory-wall-quote { -webkit-line-clamp:3; }
+}
+@media (max-width:600px) {
+  .p5-entry-option { min-height:92px; padding:16px 18px; }
+  .memory-wall-grid { gap:8px; }
+  .memory-wall-card { padding:11px 12px 10px; }
+  .memory-wall-meta { font-size:.58rem; }
+  .memory-wall-quote { font-size:.72rem; line-height:1.55; -webkit-line-clamp:3; }
+  .memory-wall-foot { font-size:.58rem; }
+}
+
 .p5-message-section {
   --p5-gold: #f29850;
   --p5-gold-soft: rgba(242, 152, 80, .28);
@@ -1417,7 +1593,9 @@
         <span class="char">．</span><span class="char">．</span><span class="char">．</span>
       </div>
 
-      <div class="logo-container" id="logoBox">
+      <div class="lp-logo-lockup" id="lpLogoLockup">
+        <img src="/img/Guang.png" class="lp-side-word lp-side-word-guang" alt="洸">
+        <div class="logo-container" id="logoBox">
         <svg id="_圖層_1" data-name="圖層_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 841.89 595.28">
           <defs><style>.st0 { fill: #f29850; }</style></defs>
           <circle class="st0" cx="420.88" cy="297.44" r="14.4"/>
@@ -1511,6 +1689,8 @@
             </g>
           </g>
         </svg>
+        </div>
+        <img src="/img/xian.png" class="lp-side-word lp-side-word-xian" alt="限">
       </div>
 
       <div class="interactive-area">
@@ -1528,12 +1708,6 @@
     <!-- Page 1. Banner 頁 (P1) -->
     <div class="section-page hero-container" id="heroSection">
       <button class="skip-anim-btn show" id="bannerSkipBtn">Skip 略過動畫 ✕</button>
-      <!-- logo圖 -->
-      <div class="brand-logo-group" data-html2canvas-ignore="true">
-        <img src="/img/guang.png" class="brand-logo-part brand-logo-guang" alt="洸">
-        <img src="/img/logo.png" class="brand-logo-part brand-logo-symbol" alt="洸限 Logo">
-        <img src="/img/xian.png" class="brand-logo-part brand-logo-xian" alt="限">
-      </div>
 
       <div class="banner-questions-wrapper">
         <div class="ui-line-mask">
@@ -1704,21 +1878,46 @@
       </button>
     </div>
 
-    <!-- Page 5. 留言板與寄語小卡（寄語 ―― 寫給時光的信） -->
+    <!-- Page 5. 寄語入口 -->
+    <div class="section-page p5-entry-section" id="messageEntrySection">
+      <button class="skip-anim-btn" id="p5EntrySkipBtn">Skip 略過動畫 ✕</button>
+      <div class="p5-entry-content">
+        <div class="p5-entry-copy">
+          <div class="ui-line-mask"><div class="ui-line-content p5-entry-line">把那些來不及說的話、忘不掉的情景，留在這裡吧。</div></div>
+          <div class="ui-line-mask"><div class="ui-line-content p5-entry-line">寫下你的思念碎片，我們為你梳理成一張寄往時光的卡片。</div></div>
+        </div>
+        <div class="p5-entry-options" id="p5EntryOptions" aria-hidden="true">
+          <button type="button" class="p5-entry-option" id="p5WriteMemoryBtn">
+            <span class="p5-entry-option-index">A</span>
+            <span class="p5-entry-option-copy"><strong>寫下個人思念</strong><small>把此刻想說的話，凝聚成一張時光卡片</small></span>
+          </button>
+          <button type="button" class="p5-entry-option" id="p5ViewWallBtn">
+            <span class="p5-entry-option-index">B</span>
+            <span class="p5-entry-option-copy"><strong>觀看思念洸語牆</strong><small>看看最近留下的十二道思念微光</small></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 洸語牆｜最近 12 則 -->
+    <div class="section-page memory-wall-section" id="memoryWallSection">
+      <div class="memory-wall-shell">
+        <header class="memory-wall-header">
+          <div class="ui-line-mask"><div class="ui-line-content memory-wall-title">思念洸語牆</div></div>
+          <p>十二道最近留下的思念，在這裡安靜發光。</p>
+        </header>
+        <div class="memory-wall-grid" id="memoryWallGrid" aria-live="polite">
+          <div class="memory-wall-loading">正在拾起最近的思念微光……</div>
+        </div>
+        <button type="button" class="memory-wall-continue" id="memoryWallContinueBtn">寫下個人思念</button>
+      </div>
+    </div>
+
+    <!-- Page 6. 個人思念留言與時光小卡（原 P5） -->
     <div class="section-page p5-message-section" id="messageCardSection">
       <div class="p5-spotlight" aria-hidden="true"></div>
       <button class="skip-anim-btn" id="p5SkipBtn">Skip 略過動畫 ✕</button>
-
       <div class="p5-shell">
-        <header class="p5-header" id="p5Header">
-          <div class="ui-line-mask">
-            <div class="ui-line-content p5-header-line">把那些來不及說的話、忘不掉的情景，留在這裡吧。</div>
-          </div>
-          <div class="ui-line-mask">
-            <div class="ui-line-content p5-header-line">寫下你的思念碎片，我們為你梳理成一張寄往時光的卡片。</div>
-          </div>
-        </header>
-
         <div class="p5-form-container" id="p5FormContainer">
           <section class="p5-form-step step-target" id="p5StepTarget" aria-labelledby="p5TargetQuestion">
             <h2 class="p5-step-title p5-step-title-combined" id="p5TargetQuestion">
@@ -1835,6 +2034,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
 
 
@@ -3072,6 +3272,13 @@
     .to({}, { duration: 0.8 })
     .to("#loadingText", { opacity: 0, duration: 1.0, ease: "power2.inOut" })
     .to("#logoBox", { clipPath: "circle(70% at 50% 50%)", scale: 1, filter: "blur(0px)", opacity: 1, duration: 3.5, ease: "power1.inOut" }, "-=0.5")
+    .to(".lp-side-word", {
+      opacity: 1,
+      scale: 1,
+      filter: "blur(0px) drop-shadow(0 0 16px rgba(255,255,255,.16))",
+      duration: 1.5,
+      ease: "power2.out"
+    }, "-=1.55")
     .to({}, { duration: 1.5 });
 
     openingTextItems.forEach((item, index) => {
@@ -3092,7 +3299,7 @@
       bannerTimeline?.kill();
       bannerTimeline = null;
       isBeamAnimated = false;
-      gsap.killTweensOf([animationParams, '.brand-logo-group', '.bq-part', '#bannerSkipBtn']);
+      gsap.killTweensOf([animationParams, '.bq-part', '#bannerSkipBtn']);
 
       Object.assign(animationParams, {
         beamDownProgress: 0,
@@ -3100,7 +3307,6 @@
         particleGlowProgress: 0
       });
 
-      gsap.set('.brand-logo-group', { opacity: 0 });
       gsap.set('.bq-part', { y: '115%', opacity: 0 });
       gsap.set('#bannerSkipBtn', { opacity: 1, pointerEvents: 'auto' });
       document.getElementById('bannerSkipBtn').classList.add('show');
@@ -3120,7 +3326,6 @@
       bannerTimeline = gsap.timeline();
       bannerTimeline.to(animationParams, { beamDownProgress: 1, duration: 1.6, ease: "power2.inOut" })
       .to(animationParams, { horizonSpreadProgress: 1, duration: 1.4, ease: "power2.out" }, "-=0.2")
-      .to(".brand-logo-group", { opacity: 1, duration: 1.4, ease: "power1.out" }, "-=1.0")
       .to(animationParams, { particleGlowProgress: 1, duration: 1.2, ease: "power1.out" }, "-=0.4");
       
       const bqParts = gsap.utils.toArray('.bq-part');
@@ -3150,7 +3355,6 @@
         animationParams.beamDownProgress = 1;
         animationParams.horizonSpreadProgress = 1;
         animationParams.particleGlowProgress = 1;
-        gsap.set(".brand-logo-group", { opacity: 1 });
         gsap.set(".bq-part", { y: "0%", opacity: 1 });
         animateArrow(document.getElementById('heroSection'));
       }
@@ -3193,7 +3397,7 @@
           stopLoadingCanvas();
           startBackgroundCanvas();
           stopSandCanvas();
-          // 每次重新進入 P1 都從初始狀態重播光束、Logo 與文字。
+          // 每次重新進入 P1 都從初始狀態重播光束與文字。
           playBannerBeamAnimation();
         },
         leave() {
@@ -3241,19 +3445,29 @@
           leaveP4Page();
         }
       }],
+      ['messageEntrySection', {
+        enter() {
+          lCanvas.style.opacity = '0';
+          stopLoadingCanvas(); stopBackgroundCanvas(); stopSandCanvas(); stopBrandTransitionCanvas(); stopP4Canvases();
+          window.enterP5EntryPage?.();
+        },
+        leave() { window.leaveP5EntryPage?.(); }
+      }],
+      ['memoryWallSection', {
+        enter() {
+          lCanvas.style.opacity = '0';
+          stopLoadingCanvas(); stopBackgroundCanvas(); stopSandCanvas(); stopBrandTransitionCanvas(); stopP4Canvases();
+          window.enterMemoryWallPage?.();
+        },
+        leave() { window.leaveMemoryWallPage?.(); }
+      }],
       ['messageCardSection', {
         enter() {
           lCanvas.style.opacity = '0';
-          stopLoadingCanvas();
-          stopBackgroundCanvas();
-          stopSandCanvas();
-          stopBrandTransitionCanvas();
-          stopP4Canvases();
-          window.enterP5Page?.();
+          stopLoadingCanvas(); stopBackgroundCanvas(); stopSandCanvas(); stopBrandTransitionCanvas(); stopP4Canvases();
+          window.enterP6Page?.();
         },
-        leave() {
-          window.leaveP5Page?.();
-        }
+        leave() { window.leaveP6Page?.(); }
       }]
     ]);
 
@@ -3335,7 +3549,6 @@
 
   const els = {
     spotlight: page.querySelector('.p5-spotlight'),
-    headerLines: gsap.utils.toArray('#messageCardSection .p5-header-line'),
     stepTarget: document.getElementById('p5StepTarget'),
     targetBtns: gsap.utils.toArray('#messageCardSection .p5-target-btn'),
     customWrap: document.getElementById('p5CustomTargetWrap'),
@@ -3719,9 +3932,7 @@
       const canvas = await html2canvas(els.card, {
         scale: 3,
         backgroundColor: null,
-        useCORS: true,
-        // html2canvas 會 clone 文件；明確忽略 P1 logo，避免 P5 下載時再次請求不存在的 /img/logo02.png。
-        ignoreElements: (element) => element.classList?.contains('brand-logo-img')
+        useCORS: true
       });
       const link = document.createElement('a');
       link.download = `洸限_時光小卡_${formatDate().replace(/\./g, '-')}.png`;
@@ -3741,6 +3952,7 @@
     supabaseClient = window.supabase.createClient(P5_SUPABASE_URL, P5_SUPABASE_ANON_KEY);
     return supabaseClient;
   }
+  window.getRemembranceSupabaseClient = getSupabaseClient;
 
   async function persistCard() {
     const client = getSupabaseClient();
@@ -3778,9 +3990,7 @@
     const snapshot = await html2canvas(els.card, {
       scale: 1,
       backgroundColor: null,
-      useCORS: true,
-      // 寄出卡片時也會再次截圖做粒子化；同樣排除 P1 logo。
-      ignoreElements: (element) => element.classList?.contains('brand-logo-img')
+      useCORS: true
     });
     const sourceCtx = snapshot.getContext('2d', { willReadFrequently: true });
     const rect = els.card.getBoundingClientRect();
@@ -3971,8 +4181,7 @@
   function resetP5Entrance() {
     if (page5TL) { page5TL.kill(); page5TL = null; }
     stopP5SpotlightPulse();
-    gsap.killTweensOf([...els.headerLines, els.stepTarget, ...els.targetBtns]);
-    gsap.set(els.headerLines, { y: '115%', autoAlpha: 0 });
+    gsap.killTweensOf([els.stepTarget, ...els.targetBtns]);
     els.stepTarget.classList.add('is-open');
     els.stepTarget.setAttribute('aria-hidden', 'false');
     gsap.set(els.stepTarget, { autoAlpha: 0, y: 20 });
@@ -3990,12 +4199,10 @@
       }
     });
     page5TL
-      .to(els.skipBtn, { autoAlpha: 1, pointerEvents: 'auto', duration: .4 }, .15)
-      .to(els.headerLines[0], { y: '0%', autoAlpha: 1, duration: .9, ease: 'power2.out' }, .15)
-      .to(els.headerLines[1], { y: '0%', autoAlpha: 1, duration: .9, ease: 'power2.out' }, .78)
-      .to(els.stepTarget, { autoAlpha: 1, y: 0, duration: .65, ease: 'power2.out' }, 1.2)
-      .to(els.targetBtns, { autoAlpha: 1, y: 0, duration: .45, stagger: .1, ease: 'power2.out' }, 1.35)
-      .call(startP5SpotlightPulse, null, 2.35);
+      .to(els.skipBtn, { autoAlpha: 1, pointerEvents: 'auto', duration: .35 }, .1)
+      .to(els.stepTarget, { autoAlpha: 1, y: 0, duration: .65, ease: 'power2.out' }, .2)
+      .to(els.targetBtns, { autoAlpha: 1, y: 0, duration: .45, stagger: .1, ease: 'power2.out' }, .35)
+      .call(startP5SpotlightPulse, null, 1.15);
   }
 
   function skipP5Entrance() {
@@ -4003,21 +4210,21 @@
       page5TL.progress(1);
       startP5SpotlightPulse();
     } else {
-      gsap.set([...els.headerLines, els.stepTarget, ...els.targetBtns], { autoAlpha: 1, y: 0 });
+      gsap.set([els.stepTarget, ...els.targetBtns], { autoAlpha: 1, y: 0 });
       startP5SpotlightPulse();
       setPageAnimationLock(false);
     }
     gsap.to(els.skipBtn, { autoAlpha: 0, pointerEvents: 'none', duration: .25 });
   }
 
-  window.enterP5Page = function enterP5Page() {
+  window.enterP6Page = function enterP6Page() {
     stopP5DissolveCanvas();
     closeModal(true);
     resetP5Form();
     playP5Entrance();
   };
 
-  window.leaveP5Page = function leaveP5Page() {
+  window.leaveP6Page = function leaveP6Page() {
     if (page5TL) { page5TL.kill(); page5TL = null; }
     stopP5SpotlightPulse();
     stopP5DissolveCanvas();
