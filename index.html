@@ -428,25 +428,15 @@
       position: relative;
     }
 
-    .p4-mandala-backdrop {
+    .p4-terrain-backdrop {
       position: absolute;
-      left: 50%;
-      top: 40%;
-      width: min(62vw, 680px);
-      aspect-ratio: 1;
-      transform: translate(-50%, -50%) scale(0.85);
-      opacity: 0.2;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
       pointer-events: none;
-      border-radius: 50%;
-      background:
-        repeating-radial-gradient(
-          circle at center,
-          transparent 0 28px,
-          rgba(242,152,80,.20) 29px 30px,
-          transparent 31px 56px
-        );
-      filter: drop-shadow(0 0 20px rgba(242,152,80,.14));
-      /* P4 背景固定為靜態同心圓，不做旋轉或持續動畫。 */
+      z-index: 1;
+      opacity: 0.72;
     }
 
     .p4-content {
@@ -1850,7 +1840,7 @@
 
     <!-- Page 4. AI 重現與感官體驗（讓時光重現 ―― 感官的召喚） -->
     <div class="section-page ai-reconstruction-section" id="aiReconstructionSection">
-      <div class="p4-mandala-backdrop" id="p4MandalaBackdrop" aria-hidden="true"></div>
+      <canvas class="p4-terrain-backdrop" id="p4TerrainBackdrop" aria-hidden="true"></canvas>
 
       <button class="skip-anim-btn" id="aiReconstructionSkipBtn">Skip 略過動畫 ✕</button>
 
@@ -2194,14 +2184,22 @@
       pulse: Math.random() * Math.PI
     }));
 
-    // P1 背景：上下兩組同心圓。
-    // 上組每個圓的 6 點鐘位置往畫面 2/3 地平線靠攏；
-    // 下組每個圓的 12 點鐘位置往同一條地平線靠攏。
+    // P1 背景｜非同心正圓＋漸增缺口版本
+    // 上方：6 點鐘起筆，順時針繪製
+    // 下方：12 點鐘起筆，順時針繪製
+    // 缺口由最內圈 4% 線性增加至最外圈 8%
     const p1CircleCount = 20;
     const p1CircleProgress = Array.from(
       { length: p1CircleCount },
       (_, i) => (i + 1) / p1CircleCount
     );
+
+    // 缺口由最內圈 3% 線性增加到最外圈 4%
+    const P1_INNER_GAP_RATIO = 0.03;
+    const P1_OUTER_GAP_RATIO = 0.04;
+
+    const P1_TOP_START_ANGLE = Math.PI / 2;       // 6 點鐘
+    const P1_BOTTOM_START_ANGLE = Math.PI * 1.5;  // 12 點鐘
 
     let globalTime = 0;
 
@@ -2211,47 +2209,457 @@
 
       const W = bgCanvas.width;
       const H = bgCanvas.height;
-      const spread = animationParams.horizonSpreadProgress;
       const centerX = W * 0.5;
+
+      // 上下兩組共同靠攏的水平位置：畫面高度約 2/3。
       const horizonY = H * 0.66;
 
-      const minRx = W * .05;
-      const maxRx = W * .47;
-      const minRy = H * .055;
-      const maxRy = H * .44;
+      // 所有圈仍為真正正圓。
+      const minRadius = Math.min(W, H) * 0.075;
+      const maxRadius = Math.hypot(W, H) * 0.58;
+
+      /*
+        非同心的關鍵：
+        不再讓所有圓共用相同 centerY。
+
+        上方：
+        小圈的 6 點鐘位置較靠上，
+        越外圈越接近 horizonY。
+
+        下方：
+        小圈的 12 點鐘位置較靠下，
+        越外圈越接近 horizonY。
+      */
+      const topInnerBottomY = H * 0.24;
+      const bottomInnerTopY = H * 0.90;
+
+      /*
+        下方整組同步上移：
+        目標是讓「下方最內圈的 12 點鐘位置」
+        剛好接觸「上方最外圈的 6 點鐘位置」。
+
+        上方最外圈的 6 點鐘位置在 converge = 1 時，
+        正好就是 horizonY。
+
+        因此先算出下方第 1 圈目前的 12 點鐘位置，
+        再把這個差值套用到下方所有圈。
+      */
+      const firstProgress = 1 / p1CircleCount;
+      const firstConverge =
+        firstProgress * firstProgress * (3 - 2 * firstProgress);
+
+      const bottomFirstTopPointY =
+        bottomInnerTopY +
+        (horizonY - bottomInnerTopY) * firstConverge;
+
+      const bottomGroupShiftY =
+        bottomFirstTopPointY - horizonY;
 
       bgCtx.save();
-      bgCtx.strokeStyle = `rgba(205, 193, 181, ${0.15 * appear})`;
-      bgCtx.lineWidth = Math.max(.72 * BG_DPR, .72);
+      bgCtx.lineWidth = Math.max(0.78 * BG_DPR, 0.78);
+      bgCtx.strokeStyle = `rgba(205, 193, 181, ${0.155 * appear})`;
       bgCtx.shadowColor = 'rgba(242, 152, 80, .035)';
       bgCtx.shadowBlur = 1.2 * BG_DPR;
+      bgCtx.lineCap = 'round';
 
-      p1CircleProgress.forEach((t, index) => {
-        const eased = Math.pow(t, 1.035);
-        const rx = minRx + (maxRx - minRx) * eased;
-        const ry = minRy + (maxRy - minRy) * eased;
+      /*
+        先建立所有圈的幾何資料。
+        這樣上方第 i 圈可以精準讀取「下方倒數第 i 圈」的位置。
+      */
+      const p1RingGeometry = p1CircleProgress.map((progress, index) => {
+        const eased = Math.pow(progress, 1.035);
 
-        // 上方組：6 點鐘位置 = centerY + ry，逐步向 horizonY 靠攏。
-        const topNaturalCy = H * .09 + ry * .18;
-        const topTargetCy = horizonY - ry;
-        const topCy = topNaturalCy + (topTargetCy - topNaturalCy) * spread;
+        const radius =
+          minRadius +
+          (maxRadius - minRadius) * eased;
 
-        // 下方組：12 點鐘位置 = centerY - ry，逐步向 horizonY 靠攏。
-        const bottomNaturalCy = H * 1.08 - ry * .10;
-        const bottomTargetCy = horizonY + ry;
-        const bottomCy = bottomNaturalCy + (bottomTargetCy - bottomNaturalCy) * spread;
+        const breathe =
+          1 +
+          Math.sin(globalTime * 0.006 + index * 0.17) * 0.0018;
 
-        // 只保留極輕微呼吸，不改變「收攏」構圖。
-        const breathe = 1 + Math.sin(globalTime * .006 + index * .17) * .002;
+        const r = radius * breathe;
 
+        /*
+          缺口線性遞增：
+          第 1 圈 = 3%
+          第 20 圈 = 4%
+
+          20 圈共有 19 個間隔，所以每往外一圈增加：
+          (4% - 3%) / 19 ≈ 0.052632%
+        */
+        const ringT =
+          p1CircleCount <= 1
+            ? 0
+            : index / (p1CircleCount - 1);
+
+        const gapRatio =
+          P1_INNER_GAP_RATIO +
+          (P1_OUTER_GAP_RATIO - P1_INNER_GAP_RATIO) * ringT;
+
+        const drawRatio = 1 - gapRatio;
+        const arcLength = Math.PI * 2 * drawRatio;
+
+        const converge =
+          progress * progress * (3 - 2 * progress);
+
+        // 下方組原本的 12 點鐘位置
+        const bottomTopPointY =
+          bottomInnerTopY +
+          (horizonY - bottomInnerTopY) * converge;
+
+        // 套用上一版「下方整組同步往上移」
+        const shiftedBottomTopPointY =
+          bottomTopPointY - bottomGroupShiftY;
+
+        /*
+          接觸點間距再次壓縮：
+          上一版保留原始距離的 1/3；
+          這次再縮短一半，因此只保留原始距離的 1/6。
+
+          原本：
+          distance = shiftedBottomTopPointY - horizonY
+
+          新版：
+          distance × 1/3
+
+          這樣：
+          1. 下方最內圈仍維持在 horizonY。
+          2. 下方越外圈，12 點鐘位置仍依序往上。
+          3. 但每一圈之間的垂直間距縮成原本約 1/3。
+          4. 上方組因為採反向配對，也會同步縮小間距。
+        */
+        const compressedBottomTopPointY =
+          horizonY +
+          (shiftedBottomTopPointY - horizonY) * (1 / 6);
+
+        return {
+          index,
+          progress,
+          r,
+          arcLength,
+          shiftedBottomTopPointY: compressedBottomTopPointY
+        };
+      });
+
+      /*
+        P1 淡金光暈：
+        由內圈單向往外圈擴散，到最外圈後重新從內圈開始。
+        沿用既有 renderBg RAF，不額外建立動畫循環。
+      */
+      const p1GlowProgress =
+        ((globalTime * 0.0045) % 1 + 1) % 1;
+
+      /*
+        首尾交叉淡化：
+        原本 progress 會 0.999 -> 0 瞬間跳回第一圈。
+        現在最後 14% 先讓舊光暈淡出，
+        同時讓下一輪第一圈提前淡入，避免跳格。
+
+        上方：內 -> 外
+        下方：外 -> 內
+      */
+      const p1GlowCrossfadeRange = 0.14;
+
+      const smooth01 = (value) => {
+        const t = Math.max(0, Math.min(1, value));
+        return t * t * (3 - 2 * t);
+      };
+
+      const endFade =
+        1 -
+        smooth01(
+          (p1GlowProgress - (1 - p1GlowCrossfadeRange)) /
+          p1GlowCrossfadeRange
+        );
+
+      const nextCycleFade =
+        smooth01(
+          (p1GlowProgress - (1 - p1GlowCrossfadeRange)) /
+          p1GlowCrossfadeRange
+        );
+
+      // 本輪位置
+      const p1TopGlowRing =
+        p1GlowProgress * (p1CircleCount - 1);
+
+      const p1BottomGlowRing =
+        (1 - p1GlowProgress) * (p1CircleCount - 1);
+
+      // 下一輪起始位置（只在尾端 crossfade 時可見）
+      const p1NextTopGlowRing = 0;
+      const p1NextBottomGlowRing = p1CircleCount - 1;
+
+      p1RingGeometry.forEach((ring, index) => {
+        const pairedBottomIndex =
+          p1CircleCount - 1 - index;
+
+        const pairedBottom =
+          p1RingGeometry[pairedBottomIndex];
+
+        const topBottomPointY =
+          pairedBottom.shiftedBottomTopPointY;
+
+        const topCenterY =
+          topBottomPointY - ring.r;
+
+        const bottomCenterY =
+          ring.shiftedBottomTopPointY + ring.r;
+
+        // -------------------------
+        // 上方：本輪內 -> 外
+        // -------------------------
+        const topDistance =
+          Math.abs(index - p1TopGlowRing);
+
+        const topGlowCurrent =
+          Math.max(0, 1 - topDistance / 3.0) * endFade;
+
+        // 下一輪第一圈提前淡入
+        const topNextDistance =
+          Math.abs(index - p1NextTopGlowRing);
+
+        const topGlowNext =
+          Math.max(0, 1 - topNextDistance / 3.0) * nextCycleFade;
+
+        const topGlow =
+          Math.max(topGlowCurrent, topGlowNext);
+
+        if (topGlow > 0) {
+          bgCtx.save();
+
+          bgCtx.strokeStyle =
+            `rgba(242, 168, 82, ${0.025 + topGlow * 0.075})`;
+
+          bgCtx.lineWidth =
+            Math.max(0.9 * BG_DPR, 0.9);
+
+          bgCtx.shadowColor =
+            `rgba(242, 152, 80, ${0.08 + topGlow * 0.16})`;
+
+          bgCtx.shadowBlur =
+            (3 + topGlow * 9) * BG_DPR;
+
+          bgCtx.beginPath();
+          bgCtx.arc(
+            centerX,
+            topCenterY,
+            ring.r,
+            P1_TOP_START_ANGLE,
+            P1_TOP_START_ANGLE + ring.arcLength,
+            false
+          );
+          bgCtx.stroke();
+
+          bgCtx.restore();
+        }
+
+        // -------------------------
+        // 下方：本輪外 -> 內
+        // -------------------------
+        const bottomDistance =
+          Math.abs(index - p1BottomGlowRing);
+
+        const bottomGlowCurrent =
+          Math.max(0, 1 - bottomDistance / 3.0) * endFade;
+
+        // 下一輪最外圈提前淡入
+        const bottomNextDistance =
+          Math.abs(index - p1NextBottomGlowRing);
+
+        const bottomGlowNext =
+          Math.max(0, 1 - bottomNextDistance / 3.0) * nextCycleFade;
+
+        const bottomGlow =
+          Math.max(bottomGlowCurrent, bottomGlowNext);
+
+        if (bottomGlow > 0) {
+          bgCtx.save();
+
+          bgCtx.strokeStyle =
+            `rgba(242, 168, 82, ${0.025 + bottomGlow * 0.075})`;
+
+          bgCtx.lineWidth =
+            Math.max(0.9 * BG_DPR, 0.9);
+
+          bgCtx.shadowColor =
+            `rgba(242, 152, 80, ${0.08 + bottomGlow * 0.16})`;
+
+          bgCtx.shadowBlur =
+            (3 + bottomGlow * 9) * BG_DPR;
+
+          bgCtx.beginPath();
+          bgCtx.arc(
+            centerX,
+            bottomCenterY,
+            ring.r,
+            P1_BOTTOM_START_ANGLE,
+            P1_BOTTOM_START_ANGLE + ring.arcLength,
+            false
+          );
+          bgCtx.stroke();
+
+          bgCtx.restore();
+        }
+      });
+
+      p1RingGeometry.forEach((ring, index) => {
+        /*
+          反向配對：
+
+          上方第 1 圈  -> 下方第 20 圈
+          上方第 2 圈  -> 下方第 19 圈
+          ...
+          上方第 20 圈 -> 下方第 1 圈
+
+          上方圓的「6 點鐘位置」
+          直接等於對應下方圓的「12 點鐘位置」。
+        */
+        const pairedBottomIndex =
+          p1CircleCount - 1 - index;
+
+        const pairedBottom =
+          p1RingGeometry[pairedBottomIndex];
+
+        const topBottomPointY =
+          pairedBottom.shiftedBottomTopPointY;
+
+        // 上方正圓圓心 = 配對接觸點 - 自己的半徑
+        const topCenterY =
+          topBottomPointY - ring.r;
+
+        // -------------------------
+        // 上方組
+        // -------------------------
         bgCtx.beginPath();
-        bgCtx.ellipse(centerX, topCy, rx * breathe, ry * breathe, 0, 0, Math.PI * 2);
+        bgCtx.arc(
+          centerX,
+          topCenterY,
+          ring.r,
+          P1_TOP_START_ANGLE,
+          P1_TOP_START_ANGLE + ring.arcLength,
+          false
+        );
         bgCtx.stroke();
 
+        // -------------------------
+        // 下方組
+        // 下方位置維持上一版，不再改動。
+        // -------------------------
+        const bottomCenterY =
+          ring.shiftedBottomTopPointY + ring.r;
+
         bgCtx.beginPath();
-        bgCtx.ellipse(centerX, bottomCy, rx * breathe, ry * breathe, 0, 0, Math.PI * 2);
+        bgCtx.arc(
+          centerX,
+          bottomCenterY,
+          ring.r,
+          P1_BOTTOM_START_ANGLE,
+          P1_BOTTOM_START_ANGLE + ring.arcLength,
+          false
+        );
         bgCtx.stroke();
       });
+
+
+      /*
+        上方組最內圈 6 點鐘位置的人形剪影。
+        直接 Canvas 繪製，不使用圖片資源。
+      */
+      const personContactY =
+        p1RingGeometry[p1CircleCount - 1]
+          .shiftedBottomTopPointY;
+
+      const personX = centerX;
+
+      // 尺寸直接跟 Canvas 尺寸走，避免 DPR 重複放大
+      const personH =
+        Math.max(
+          28 * BG_DPR,
+          Math.min(W, H) * 0.045
+        );
+
+      const personGlow =
+        0.72 +
+        0.18 *
+        (0.5 + 0.5 * Math.sin(globalTime * 0.010));
+
+      bgCtx.save();
+      bgCtx.translate(personX, personContactY);
+
+      // 人物直接使用與圈圈一致的淡金色填滿，不使用外框線。
+      bgCtx.fillStyle =
+        `rgba(205, 193, 181, ${0.30 * personGlow})`;
+
+      bgCtx.shadowColor =
+        `rgba(242, 152, 80, ${0.18 * personGlow})`;
+
+      bgCtx.shadowBlur =
+        7 * BG_DPR;
+
+      // 頭
+      bgCtx.beginPath();
+      bgCtx.arc(
+        0,
+        -personH * 0.78,
+        personH * 0.105,
+        0,
+        Math.PI * 2
+      );
+      bgCtx.fill();
+
+      // 身體
+      bgCtx.beginPath();
+      bgCtx.moveTo(
+        -personH * 0.085,
+        -personH * 0.64
+      );
+      bgCtx.quadraticCurveTo(
+        -personH * 0.13,
+        -personH * 0.38,
+        -personH * 0.16,
+        -personH * 0.08
+      );
+      bgCtx.lineTo(
+        -personH * 0.105,
+        0
+      );
+      bgCtx.lineTo(
+        personH * 0.105,
+        0
+      );
+      bgCtx.lineTo(
+        personH * 0.16,
+        -personH * 0.08
+      );
+      bgCtx.quadraticCurveTo(
+        personH * 0.13,
+        -personH * 0.38,
+        personH * 0.085,
+        -personH * 0.64
+      );
+      bgCtx.closePath();
+      bgCtx.fill();
+
+      // 手臂：改為填滿的小型多邊形，不再使用描邊線。
+      bgCtx.beginPath();
+
+      // 左手
+      bgCtx.moveTo(-personH * 0.075, -personH * 0.56);
+      bgCtx.lineTo(-personH * 0.115, -personH * 0.54);
+      bgCtx.lineTo(-personH * 0.225, -personH * 0.285);
+      bgCtx.lineTo(-personH * 0.185, -personH * 0.265);
+      bgCtx.closePath();
+
+      // 右手
+      bgCtx.moveTo(personH * 0.075, -personH * 0.56);
+      bgCtx.lineTo(personH * 0.115, -personH * 0.54);
+      bgCtx.lineTo(personH * 0.225, -personH * 0.285);
+      bgCtx.lineTo(personH * 0.185, -personH * 0.265);
+      bgCtx.closePath();
+
+      bgCtx.fill();
+
+      bgCtx.restore();
 
       bgCtx.restore();
     }
@@ -2995,6 +3403,17 @@
     const p4TouchCanvas = document.getElementById('p4TouchCanvas');
     const p4TouchCtx = p4TouchCanvas.getContext('2d');
 
+    // P4 背景｜坡形線條 Canvas
+    const p4TerrainCanvas = document.getElementById('p4TerrainBackdrop');
+    const p4TerrainCtx = p4TerrainCanvas.getContext('2d');
+
+    const P4_TERRAIN_LINE_COUNT = 45;
+    const P4_TERRAIN_DPR_MAX = 1.5;
+
+    let p4TerrainRafId = null;
+    let p4TerrainStartTime = 0;
+    let p4TerrainFeatures = [];
+
     let page4TL = null;
     let isP4Interactive = false;
     let activeP4Card = null;
@@ -3002,7 +3421,281 @@
     let p4MemoryPointer = { x: 0.5, y: 0.5 };
     let p4MemoryParticles = [];
 
+
+    function p4TerrainBump(value, center, spread) {
+      const d = (value - center) / spread;
+      return Math.exp(-(d * d));
+    }
+
+    function p4TerrainLocalFeature(px, depth, feature) {
+      const nx = (px - feature.x) / feature.sizeX;
+      const ny = (depth - feature.y) / feature.sizeY;
+      const r2 = nx * nx + ny * ny;
+      return Math.exp(-Math.pow(r2, feature.power)) * feature.amplitude;
+    }
+
+    function buildP4TerrainFeatures() {
+      // 每次進入 P4 重新配置，但同一次停留期間固定不跳動。
+      // 固定 2 個大型凹凸，再加 0~2 個隨機小型特徵。
+      const features = [
+        {
+          x: 0.30 + Math.random() * 0.08,
+          y: 0.46 + Math.random() * 0.14,
+          sizeX: 0.065 + Math.random() * 0.018,
+          sizeY: 0.14 + Math.random() * 0.05,
+          amplitude: 0.052 + Math.random() * 0.015,
+          power: 1.35
+        },
+        {
+          x: 0.68 + Math.random() * 0.10,
+          y: 0.52 + Math.random() * 0.16,
+          sizeX: 0.055 + Math.random() * 0.020,
+          sizeY: 0.12 + Math.random() * 0.05,
+          amplitude: -(0.046 + Math.random() * 0.016),
+          power: 1.45
+        }
+      ];
+
+      const extraCount = Math.floor(Math.random() * 3); // 0~2，總數 2~4
+
+      for (let i = 0; i < extraCount; i += 1) {
+        const sign = Math.random() > 0.5 ? 1 : -1;
+
+        features.push({
+          x: 0.12 + Math.random() * 0.76,
+          y: 0.22 + Math.random() * 0.62,
+          sizeX: 0.020 + Math.random() * 0.030,
+          sizeY: 0.055 + Math.random() * 0.065,
+          amplitude: sign * (0.020 + Math.random() * 0.025),
+          power: 1.55 + Math.random() * 0.35
+        });
+      }
+
+      p4TerrainFeatures = features;
+    }
+
+    function p4TerrainShape(px, depth, time) {
+      /*
+        整體坡形 = 上一個獨立測試版約 50% 起伏。
+        局部凹凸維持較大的尺寸差異，因此仍然清楚可見。
+      */
+      const broad =
+        Math.sin(px * Math.PI * 3.05 + time) * 0.013;
+
+      const broadHill1 =
+        -p4TerrainBump(px, 0.30, 0.12) * 0.015;
+
+      const broadHill2 =
+        -p4TerrainBump(px, 0.72, 0.14) * 0.013;
+
+      const broadValley1 =
+        p4TerrainBump(px, 0.50, 0.095) * 0.0125;
+
+      const broadValley2 =
+        p4TerrainBump(px, 0.11, 0.10) * 0.008;
+
+      const depthWave =
+        Math.sin(
+          px * Math.PI * 4.15 -
+          depth * 2.3 +
+          time * 0.55
+        ) *
+        0.024 *
+        depth *
+        (1 - depth * 0.28);
+
+      const secondary =
+        Math.sin(
+          px * Math.PI * 1.65 +
+          depth * 3.0 -
+          time * 0.32
+        ) *
+        0.005 *
+        depth;
+
+      let local = 0;
+      for (const feature of p4TerrainFeatures) {
+        local += p4TerrainLocalFeature(px, depth, feature);
+      }
+
+      // 極淡微地形，只破除過度平整，不形成額外坑洞
+      const micro =
+        Math.sin(px * Math.PI * 10.5 + depth * 5.8 + time * 0.16) *
+        Math.sin(px * Math.PI * 4.7 - depth * 3.7) *
+        0.0013 *
+        (0.30 + depth * 0.70);
+
+      return (
+        broad +
+        broadHill1 +
+        broadHill2 +
+        broadValley1 +
+        broadValley2 +
+        depthWave +
+        secondary +
+        local +
+        micro
+      );
+    }
+
+    function resizeP4TerrainCanvas() {
+      const rect = aiReconstructionSection.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, P4_TERRAIN_DPR_MAX);
+
+      p4TerrainCanvas.width = Math.max(1, Math.round(rect.width * dpr));
+      p4TerrainCanvas.height = Math.max(1, Math.round(rect.height * dpr));
+      p4TerrainCanvas.style.width = `${rect.width}px`;
+      p4TerrainCanvas.style.height = `${rect.height}px`;
+
+      p4TerrainCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function drawP4TerrainFrame(timestamp = performance.now()) {
+      const rect = aiReconstructionSection.getBoundingClientRect();
+      const W = rect.width;
+      const H = rect.height;
+
+      if (!W || !H) return;
+
+      const ctx = p4TerrainCtx;
+      const elapsed = timestamp - p4TerrainStartTime;
+      const time = elapsed * 0.000085;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // 整個坡形背景往下移：
+      // 約前 3/4 線條留在畫面內，最下方約 1/4 自然超出 viewport。
+      const topY = H * 0.64;
+      const bottomY = H * 1.14;
+      const span = bottomY - topY;
+      const samples = Math.max(150, Math.floor(W / 10));
+
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // ---------------------------------------------------------
+      // P1 式金色掃光：由最上層線條往最下層移動
+      // 尾端使用 crossfade，避免回到第一圈時出現跳格。
+      // ---------------------------------------------------------
+      const glowProgress = ((elapsed * 0.000055) % 1 + 1) % 1;
+      const glowLine = glowProgress * (P4_TERRAIN_LINE_COUNT - 1);
+
+      const crossRange = 0.14;
+      const crossT = Math.max(
+        0,
+        Math.min(
+          1,
+          (glowProgress - (1 - crossRange)) / crossRange
+        )
+      );
+      const smoothCross = crossT * crossT * (3 - 2 * crossT);
+      const currentFade = 1 - smoothCross;
+      const nextFade = smoothCross;
+
+      for (let i = 0; i < P4_TERRAIN_LINE_COUNT; i += 1) {
+        const depth = i / (P4_TERRAIN_LINE_COUNT - 1);
+        const easedDepth = Math.pow(depth, 1.16);
+        const baseY = topY + easedDepth * span;
+
+        const normalAlpha = 0.16 + depth * 0.22;
+
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(205, 193, 181, ${normalAlpha})`;
+        ctx.lineWidth = 0.82;
+
+        const points = [];
+
+        for (let s = 0; s <= samples; s += 1) {
+          const px = s / samples;
+          const x = px * W;
+
+          const deformation =
+            p4TerrainShape(px, depth, time) *
+            H *
+            (0.62 + depth * 0.72);
+
+          const y = baseY + deformation;
+          points.push([x, y]);
+
+          if (s === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
+        ctx.stroke();
+
+        // 本輪掃光
+        const currentDistance = Math.abs(i - glowLine);
+        const currentGlow =
+          Math.max(0, 1 - currentDistance / 3.2) *
+          currentFade;
+
+        // 下一輪最上層提前淡入
+        const nextDistance = Math.abs(i - 0);
+        const nextGlow =
+          Math.max(0, 1 - nextDistance / 3.2) *
+          nextFade;
+
+        const glow = Math.max(currentGlow, nextGlow);
+
+        if (glow > 0) {
+          ctx.save();
+          ctx.beginPath();
+
+          for (let p = 0; p < points.length; p += 1) {
+            const [x, y] = points[p];
+            if (p === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+
+          ctx.strokeStyle =
+            `rgba(242, 168, 82, ${0.05 + glow * 0.20})`;
+
+          ctx.lineWidth = 1.0;
+          ctx.shadowColor =
+            `rgba(242, 152, 80, ${0.10 + glow * 0.22})`;
+
+          ctx.shadowBlur = 4 + glow * 9;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    function renderP4Terrain(timestamp) {
+      if (
+        currentPageIndex !== pageElements.indexOf(aiReconstructionSection)
+      ) {
+        p4TerrainRafId = null;
+        return;
+      }
+
+      drawP4TerrainFrame(timestamp);
+      p4TerrainRafId = requestAnimationFrame(renderP4Terrain);
+    }
+
+    function startP4Terrain() {
+      stopP4Terrain();
+
+      if (!p4TerrainFeatures.length) {
+        buildP4TerrainFeatures();
+      }
+
+      resizeP4TerrainCanvas();
+      p4TerrainStartTime = performance.now();
+      drawP4TerrainFrame(p4TerrainStartTime);
+      p4TerrainRafId = requestAnimationFrame(renderP4Terrain);
+    }
+
+    function stopP4Terrain() {
+      if (p4TerrainRafId !== null) {
+        cancelAnimationFrame(p4TerrainRafId);
+        p4TerrainRafId = null;
+      }
+    }
+
     function resizeP4Canvases() {
+      resizeP4TerrainCanvas();
+
       [p4VisualCanvas, p4MemoryCanvas, p4TouchCanvas].forEach((canvas) => {
         const rect = canvas.getBoundingClientRect();
         canvas.width = Math.max(1, Math.round(rect.width * DPR));
@@ -3365,10 +4058,10 @@
     function resetP4State() {
       page4TL?.kill();
       stopP4Canvases();
+      stopP4Terrain();
       clearP4CardFocus();
       isP4Interactive = false;
       gsap.killTweensOf('#aiReconstructionSection *');
-      gsap.set('#p4MandalaBackdrop', { opacity: .2, scale: .85, xPercent: -50, yPercent: -50 });
       gsap.set('#aiReconstructionSection .p4-header-line', { autoAlpha: 0, y: 20 });
       gsap.set(p4Cards, { autoAlpha: 0, y: 35, scale: .95 });
       gsap.set('#aiReconstructionSection .p4-footer-text', { opacity: 0, y: 20 });
@@ -3388,12 +4081,16 @@
 
     function playP4Animation() {
       resetP4State();
+
+      // 每次進入 P4 重新產生 2~4 個局部凹凸，停留期間固定。
+      buildP4TerrainFeatures();
+      startP4Terrain();
+
       setPageAnimationLock(true);
       const p4HeaderLines = gsap.utils.toArray('#aiReconstructionSection .p4-header-line');
 
       page4TL = gsap.timeline();
       page4TL
-        .set('#p4MandalaBackdrop', { opacity: .2, scale: .85 }, 0)
         .to(p4HeaderLines[0], { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 1.7)
         .to(p4HeaderLines[1], { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 3.2)
         .to(p4Cards, {
@@ -3411,7 +4108,10 @@
 
     function skipP4Animation() {
       page4TL?.pause();
-      gsap.set('#p4MandalaBackdrop', { opacity: .2, scale: .85, xPercent: -50, yPercent: -50 });
+
+      if (p4TerrainRafId === null) {
+        startP4Terrain();
+      }
       gsap.set('#aiReconstructionSection .p4-header-line, #aiReconstructionSection .p4-footer-text', { autoAlpha: 1, y: 0 });
       gsap.set(p4Cards, { autoAlpha: 1, y: 0, scale: 1 });
       enableP4Interaction();
@@ -3424,6 +4124,7 @@
       isP4Interactive = false;
       clearP4CardFocus();
       stopP4Canvases();
+      stopP4Terrain();
       gsap.to('#aiReconstructionSection .p4-card-item', {
         opacity: 0,
         y: 20,
@@ -3737,6 +4438,111 @@
       const wallBtn = document.getElementById('p5ViewWallBtn');
       let tl = null;
 
+      // P5 外層喇叭｜中央 -> 左右兩側淡金掃光
+      // 只處理 outer horns，不改 inner horns。
+      const p5OuterLeft = Array.from(
+        page.querySelectorAll('.p5-horn-full-left ellipse')
+      );
+      const p5OuterRight = Array.from(
+        page.querySelectorAll('.p5-horn-full-right ellipse')
+      );
+
+      let p5HornGlowRafId = null;
+      let p5HornGlowStartTime = 0;
+
+      function smooth01(value) {
+        const t = Math.max(0, Math.min(1, value));
+        return t * t * (3 - 2 * t);
+      }
+
+      function clearP5HornGlow() {
+        [...p5OuterLeft, ...p5OuterRight].forEach((ellipse) => {
+          ellipse.style.removeProperty('stroke');
+          ellipse.style.removeProperty('filter');
+          ellipse.style.removeProperty('opacity');
+        });
+      }
+
+      function drawP5HornGlow(timestamp) {
+        if (p5HornGlowRafId === null) return;
+
+        const count = Math.min(p5OuterLeft.length, p5OuterRight.length);
+        if (!count) {
+          p5HornGlowRafId = null;
+          return;
+        }
+
+        const elapsed = timestamp - p5HornGlowStartTime;
+
+        // 約 7.6 秒由中心走到兩側。
+        const progress = ((elapsed * 0.000132) % 1 + 1) % 1;
+        const glowIndex = progress * (count - 1);
+
+        // 接近最外側時，提前讓下一輪中央淡入，避免瞬間跳回。
+        const crossRange = 0.14;
+        const crossT = smooth01(
+          (progress - (1 - crossRange)) / crossRange
+        );
+        const currentFade = 1 - crossT;
+        const nextFade = crossT;
+
+        for (let i = 0; i < count; i += 1) {
+          const currentDistance = Math.abs(i - glowIndex);
+          const currentGlow =
+            Math.max(0, 1 - currentDistance / 3.2) * currentFade;
+
+          const nextDistance = Math.abs(i);
+          const nextGlow =
+            Math.max(0, 1 - nextDistance / 3.2) * nextFade;
+
+          const glow = Math.max(currentGlow, nextGlow);
+
+          const applyGlow = (ellipse) => {
+            if (!ellipse) return;
+
+            if (glow <= 0.001) {
+              ellipse.style.removeProperty('stroke');
+              ellipse.style.removeProperty('filter');
+              ellipse.style.removeProperty('opacity');
+              return;
+            }
+
+            ellipse.style.stroke =
+              `rgba(242, 168, 82, ${0.44 + glow * 0.42})`;
+
+            ellipse.style.opacity =
+              `${0.82 + glow * 0.18}`;
+
+            ellipse.style.filter =
+              `drop-shadow(0 0 ${2 + glow * 7}px rgba(242, 152, 80, ${0.10 + glow * 0.28}))`;
+          };
+
+          // 同一個 index = 距離中央相同，因此左右同步往外。
+          applyGlow(p5OuterLeft[i]);
+          applyGlow(p5OuterRight[i]);
+        }
+
+        p5HornGlowRafId = requestAnimationFrame(drawP5HornGlow);
+      }
+
+      function startP5HornGlow() {
+        stopP5HornGlow();
+        clearP5HornGlow();
+
+        if (!p5OuterLeft.length || !p5OuterRight.length) return;
+
+        p5HornGlowStartTime = performance.now();
+        p5HornGlowRafId = requestAnimationFrame(drawP5HornGlow);
+      }
+
+      function stopP5HornGlow() {
+        if (p5HornGlowRafId !== null) {
+          cancelAnimationFrame(p5HornGlowRafId);
+          p5HornGlowRafId = null;
+        }
+        clearP5HornGlow();
+      }
+
       function goToSection(id) {
         const target = document.getElementById(id);
         const index = pageElements.indexOf(target);
@@ -3748,6 +4554,7 @@
       }
       function reset() {
         tl?.kill(); tl=null;
+        stopP5HornGlow();
         gsap.killTweensOf([...lines, options, skipBtn]);
         gsap.set(lines,{y:'115%',autoAlpha:0});
         gsap.set(options,{y:18,autoAlpha:0});
@@ -3757,6 +4564,7 @@
       }
       window.enterP5EntryPage = function() {
         reset();
+        startP5HornGlow();
         setPageAnimationLock(true);
         tl = gsap.timeline({
           onComplete() {
@@ -3773,6 +4581,7 @@
       };
       window.leaveP5EntryPage = function() {
         tl?.kill(); tl=null;
+        stopP5HornGlow();
         gsap.killTweensOf([...lines,options,skipBtn]);
         setPageAnimationLock(false);
       };
