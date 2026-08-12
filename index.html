@@ -1008,6 +1008,40 @@
     background .32s ease;
 }
 
+
+.memory-wall-card[data-card-theme="elder"] {
+  background:
+    repeating-radial-gradient(ellipse at 8% 95%, transparent 0 20px, rgba(242,152,80,.035) 21px 22px, transparent 23px 31px),
+    rgba(31,31,31,.72);
+}
+.memory-wall-card[data-card-theme="parents"] {
+  background:
+    radial-gradient(ellipse at 0% 70%, transparent 0 62%, rgba(242,152,80,.038) 63% 64%, transparent 65%),
+    radial-gradient(ellipse at 100% 70%, transparent 0 62%, rgba(242,152,80,.038) 63% 64%, transparent 65%),
+    rgba(31,31,31,.72);
+}
+.memory-wall-card[data-card-theme="partner"] {
+  background:
+    radial-gradient(circle at 42% 65%, transparent 0 34%, rgba(242,152,80,.035) 35% 36%, transparent 37%),
+    radial-gradient(circle at 58% 65%, transparent 0 34%, rgba(242,152,80,.035) 35% 36%, transparent 37%),
+    rgba(31,31,31,.72);
+}
+.memory-wall-card[data-card-theme="friend"] {
+  background:
+    linear-gradient(120deg, transparent 0 42%, rgba(242,152,80,.035) 42.3% 42.8%, transparent 43.1%),
+    rgba(31,31,31,.72);
+}
+.memory-wall-card[data-card-theme="pet"] {
+  background:
+    radial-gradient(circle at 82% 75%, transparent 0 28%, rgba(242,152,80,.034) 29% 30%, transparent 31%),
+    rgba(31,31,31,.72);
+}
+.memory-wall-card[data-card-theme="other"] {
+  background:
+    repeating-radial-gradient(circle at 82% 72%, transparent 0 18px, rgba(242,152,80,.025) 19px 20px, transparent 21px 29px),
+    rgba(31,31,31,.72);
+}
+
 .memory-wall-card:hover,
 .memory-wall-card:focus-visible {
   transform:translateY(-3px);
@@ -1532,6 +1566,168 @@
   color: #f3ece5;
   transform-origin: center;
 }
+
+/* =============================================================
+   時光小卡｜依寄送對象切換淡背景與右上角象徵 Icon
+   ============================================================= */
+.p5-card-theme-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .55;
+}
+
+.p5-card-recipient-icon {
+  position: absolute;
+  top: clamp(24px, 4vw, 36px);
+  right: clamp(24px, 4vw, 36px);
+  z-index: 3;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: rgba(242,185,129,.72);
+  opacity: .78;
+  filter: drop-shadow(0 0 6px rgba(242,152,80,.12));
+  pointer-events: none;
+}
+
+.p5-card-recipient-icon::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 1px solid rgba(242,152,80,.13);
+  border-radius: 50%;
+}
+
+.p5-card-recipient-icon svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.p5-card-recipient-icon svg * {
+  vector-effect: non-scaling-stroke;
+}
+
+/* 1｜長輩／祖父母：年輪＋蒸氣曲線 */
+.p5-time-card[data-card-theme="elder"] .p5-card-theme-pattern {
+  background:
+    repeating-radial-gradient(
+      ellipse at 18% 82%,
+      transparent 0 21px,
+      rgba(242,152,80,.075) 22px 23px,
+      transparent 24px 34px
+    ),
+    radial-gradient(
+      ellipse at 80% 25%,
+      transparent 0 26%,
+      rgba(242,152,80,.04) 27% 28%,
+      transparent 29% 40%,
+      rgba(242,152,80,.035) 41% 42%,
+      transparent 43%
+    );
+}
+
+/* 2｜父母：兩道包覆式弧線 */
+.p5-time-card[data-card-theme="parents"] .p5-card-theme-pattern {
+  background:
+    radial-gradient(
+      ellipse 75% 58% at -2% 58%,
+      transparent 0 62%,
+      rgba(242,152,80,.065) 63% 64%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 75% 58% at 102% 58%,
+      transparent 0 62%,
+      rgba(242,152,80,.065) 63% 64%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse at 50% 65%,
+      rgba(242,152,80,.025),
+      transparent 58%
+    );
+}
+
+/* 3｜伴侶：兩組彼此靠近、交會的波紋 */
+.p5-time-card[data-card-theme="partner"] .p5-card-theme-pattern {
+  background:
+    repeating-radial-gradient(
+      circle at 38% 56%,
+      transparent 0 30px,
+      rgba(242,152,80,.055) 31px 32px,
+      transparent 33px 43px
+    ),
+    repeating-radial-gradient(
+      circle at 62% 56%,
+      transparent 0 30px,
+      rgba(242,152,80,.055) 31px 32px,
+      transparent 33px 43px
+    );
+}
+
+/* 4｜摯友：兩條並行後交錯的線 */
+.p5-time-card[data-card-theme="friend"] .p5-card-theme-pattern {
+  background:
+    linear-gradient(
+      112deg,
+      transparent 0 27%,
+      rgba(242,152,80,.048) 27.2% 27.55%,
+      transparent 27.8% 100%
+    ),
+    linear-gradient(
+      68deg,
+      transparent 0 55%,
+      rgba(242,152,80,.052) 55.2% 55.55%,
+      transparent 55.8% 100%
+    ),
+    radial-gradient(circle at 25% 33%, rgba(242,152,80,.10) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 71% 69%, rgba(242,152,80,.09) 0 1.5px, transparent 2px);
+}
+
+/* 5｜毛孩：腳印軌跡＋圓形波紋 */
+.p5-time-card[data-card-theme="pet"] .p5-card-theme-pattern {
+  background:
+    repeating-radial-gradient(
+      circle at 76% 75%,
+      transparent 0 27px,
+      rgba(242,152,80,.052) 28px 29px,
+      transparent 30px 40px
+    ),
+    radial-gradient(ellipse at 21% 71%, rgba(242,152,80,.065) 0 4px, transparent 4.8px),
+    radial-gradient(circle at 17% 67%, rgba(242,152,80,.052) 0 2.6px, transparent 3.2px),
+    radial-gradient(circle at 21% 64%, rgba(242,152,80,.052) 0 2.6px, transparent 3.2px),
+    radial-gradient(circle at 25% 67%, rgba(242,152,80,.052) 0 2.6px, transparent 3.2px),
+    radial-gradient(ellipse at 42% 53%, rgba(242,152,80,.055) 0 3.5px, transparent 4.2px),
+    radial-gradient(circle at 39% 50%, rgba(242,152,80,.045) 0 2.2px, transparent 2.8px),
+    radial-gradient(circle at 42% 47%, rgba(242,152,80,.045) 0 2.2px, transparent 2.8px),
+    radial-gradient(circle at 45% 50%, rgba(242,152,80,.045) 0 2.2px, transparent 2.8px);
+}
+
+/* 6｜其他：品牌曼陀羅 */
+.p5-time-card[data-card-theme="other"] .p5-card-theme-pattern {
+  background:
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 27px,
+      rgba(242,152,80,.047) 28px 29px,
+      transparent 30px 40px
+    ),
+    repeating-conic-gradient(
+      from 8deg at 50% 50%,
+      rgba(242,152,80,.035) 0 .7deg,
+      transparent .8deg 15deg
+    );
+}
+
+/* 新主題背景啟用後，舊中央曼陀羅只保留極淡品牌底紋 */
+.p5-time-card[data-card-theme]:not([data-card-theme="other"]) .p5-card-mandala {
+  opacity: .018;
+}
+
 .p5-time-card::after {
   content: '';
   position: absolute;
@@ -2013,12 +2209,12 @@
               <span>這張卡片，你想寄給誰？</span>
             </h2>
             <div class="p5-target-options" id="p5TargetOptions">
+              <button type="button" class="p5-pill p5-target-btn" data-target="長輩／祖父母">長輩／祖父母</button>
+              <button type="button" class="p5-pill p5-target-btn" data-target="父母">父母</button>
+              <button type="button" class="p5-pill p5-target-btn" data-target="伴侶">伴侶</button>
               <button type="button" class="p5-pill p5-target-btn" data-target="摯友">摯友</button>
-              <button type="button" class="p5-pill p5-target-btn" data-target="家人">家人</button>
-              <button type="button" class="p5-pill p5-target-btn" data-target="長輩">長輩</button>
               <button type="button" class="p5-pill p5-target-btn" data-target="毛孩">毛孩</button>
-              <button type="button" class="p5-pill p5-target-btn" data-target="過去的自己">過去的自己</button>
-              <button type="button" class="p5-pill p5-target-btn" data-target="自訂">自訂</button>
+              <button type="button" class="p5-pill p5-target-btn" data-target="其他">其他</button>
             </div>
             <div class="p5-custom-target-wrap" id="p5CustomTargetWrap" aria-hidden="true">
               <label for="p5CustomTarget">你想怎麼稱呼這個對象？</label>
@@ -2090,8 +2286,10 @@
         <div class="p5-card-ready" id="p5CardReady" aria-hidden="true">
           <button type="button" class="p5-modal-close" id="p5ModalCloseBtn" aria-label="關閉時光小卡">✕</button>
 
-          <article class="p5-time-card" id="p5PrintableCard">
+          <article class="p5-time-card" id="p5PrintableCard" data-card-theme="other">
+            <div class="p5-card-theme-pattern" aria-hidden="true"></div>
             <div class="p5-card-mandala" aria-hidden="true"></div>
+            <div class="p5-card-recipient-icon" id="p5CardRecipientIcon" aria-hidden="true"></div>
             <div class="p5-card-topline">
               <div class="p5-card-tags">
                 <span id="p5CardTarget">寄給 / —</span>
@@ -2102,7 +2300,7 @@
             <blockquote class="p5-card-copy" id="p5CardText">文字會在這裡凝結成光。</blockquote>
             <div class="p5-card-bottomline">
               <time id="p5CardDate"></time>
-              <span class="p5-card-stamp">洸限<br><small>TIME LETTER</small></span>
+              <span class="p5-card-stamp">洸限<br><small>TIME CAPSULE</small></span>
             </div>
           </article>
 
@@ -4691,6 +4889,18 @@
         const d=parseStoredText(item?.text);
         const card=document.createElement('article');
         card.className='memory-wall-card';
+
+        const wallTheme = (() => {
+          const raw = String(d.target || '');
+          if (/長輩|祖父|祖母|阿公|阿嬤|爺爺|奶奶|外公|外婆/.test(raw)) return 'elder';
+          if (/父母|爸爸|媽媽|父親|母親/.test(raw)) return 'parents';
+          if (/伴侶|愛人|男友|女友|先生|太太|丈夫|妻子/.test(raw)) return 'partner';
+          if (/摯友|朋友|好友|同學/.test(raw)) return 'friend';
+          if (/毛孩|狗|貓|寵物/.test(raw)) return 'pet';
+          return 'other';
+        })();
+
+        card.dataset.cardTheme = wallTheme;
         card.tabIndex=0;
         card.setAttribute('role','button');
         card.setAttribute('aria-label',`查看寄給 ${d.target || '一份思念'} 的完整時光小卡`);
@@ -4840,6 +5050,7 @@
     ready: document.getElementById('p5CardReady'),
     closeBtn: document.getElementById('p5ModalCloseBtn'),
     card: document.getElementById('p5PrintableCard'),
+    cardRecipientIcon: document.getElementById('p5CardRecipientIcon'),
     cardTarget: document.getElementById('p5CardTarget'),
     cardScene: document.getElementById('p5CardScene'),
     cardEmotion: document.getElementById('p5CardEmotion'),
@@ -5125,6 +5336,80 @@
       .to(els.loadingText, { autoAlpha: 1, y: 0, duration: .5, ease: 'power2.out' }, '-=.2');
   }
 
+  function resolveCardTheme(targetText = '') {
+    const raw = String(targetText || '').trim();
+
+    if (/長輩|祖父|祖母|阿公|阿嬤|爺爺|奶奶|外公|外婆/.test(raw)) return 'elder';
+    if (/父母|爸爸|媽媽|父親|母親/.test(raw)) return 'parents';
+    if (/伴侶|愛人|男友|女友|先生|太太|丈夫|妻子/.test(raw)) return 'partner';
+    if (/摯友|朋友|好友|同學/.test(raw)) return 'friend';
+    if (/毛孩|狗|貓|寵物/.test(raw)) return 'pet';
+
+    return 'other';
+  }
+
+  function getRecipientIconSvg(theme) {
+    const common = `fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"`;
+
+    const icons = {
+      elder: `
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <path ${common} d="M20 5c-7 0-12.5 5.2-12.5 12.2 0 8.9 6.6 16.6 12.5 17.8 5.9-1.2 12.5-8.9 12.5-17.8C32.5 10.2 27 5 20 5Z"/>
+          <path ${common} d="M20 10.5c-4.1 0-7.2 3-7.2 7.1 0 5.6 3.8 10.4 7.2 11.5 3.4-1.1 7.2-5.9 7.2-11.5 0-4.1-3.1-7.1-7.2-7.1Z"/>
+          <path ${common} d="M20 15.4c-1.9 0-3.5 1.5-3.5 3.5 0 2.8 1.7 5.1 3.5 5.9 1.8-.8 3.5-3.1 3.5-5.9 0-2-1.6-3.5-3.5-3.5Z"/>
+        </svg>`,
+
+      parents: `
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <path ${common} d="M7 29c3-9 7.5-14.5 13-17.2"/>
+          <path ${common} d="M33 29c-3-9-7.5-14.5-13-17.2"/>
+          <path ${common} d="M10.5 31.5c2.8-5.8 5.8-9.4 9.5-11.7"/>
+          <path ${common} d="M29.5 31.5c-2.8-5.8-5.8-9.4-9.5-11.7"/>
+          <path ${common} d="M15.3 27.6c1.7 1.3 3.3 2 4.7 2s3-.7 4.7-2"/>
+        </svg>`,
+
+      partner: `
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <circle ${common} cx="15.2" cy="20" r="9.3"/>
+          <circle ${common} cx="24.8" cy="20" r="9.3"/>
+        </svg>`,
+
+      friend: `
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <circle fill="currentColor" cx="11" cy="26" r="2.1"/>
+          <circle fill="currentColor" cx="29" cy="14" r="2.1"/>
+          <path ${common} d="M12.8 24.8 27.2 15.2"/>
+          <path ${common} d="M11 14.7c4.4 1.6 7.3 3.6 9 6 1.8 2.4 4.7 4.1 9 4.8"/>
+          <path ${common} d="m20 7 1.35 3.05L24.5 11.4l-3.15 1.35L20 15.8l-1.35-3.05-3.15-1.35 3.15-1.35L20 7Z"/>
+        </svg>`,
+
+      pet: `
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <ellipse ${common} cx="20" cy="25.4" rx="7.4" ry="5.8"/>
+          <circle ${common} cx="10.7" cy="18" r="3.15"/>
+          <circle ${common} cx="17" cy="13.2" r="3.15"/>
+          <circle ${common} cx="23" cy="13.2" r="3.15"/>
+          <circle ${common} cx="29.3" cy="18" r="3.15"/>
+        </svg>`,
+
+      other: `
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <circle fill="currentColor" cx="20" cy="20" r="2.4"/>
+          <circle ${common} cx="20" cy="20" r="7"/>
+          <circle ${common} cx="20" cy="20" r="12"/>
+          <path ${common} d="M20 4.5v6M20 29.5v6M4.5 20h6M29.5 20h6"/>
+        </svg>`
+    };
+
+    return icons[theme] || icons.other;
+  }
+
+  function applyCardRecipientTheme(targetText = '') {
+    const theme = resolveCardTheme(targetText);
+    els.card.dataset.cardTheme = theme;
+    els.cardRecipientIcon.innerHTML = getRecipientIconSvg(theme);
+  }
+
   function setCardViewMode(mode = 'generated') {
     cardViewMode = mode;
     const isWallView = mode === 'wall';
@@ -5167,6 +5452,8 @@
       .map(item => item.trim())
       .filter(Boolean);
 
+    applyCardRecipientTheme(target);
+
     els.cardTarget.textContent = `寄給 / ${target}`;
     els.cardScene.textContent = `場景 / ${metaParts[0] || '未指定'}`;
     els.cardEmotion.textContent = `情感 / ${metaParts[1] || '未指定'}`;
@@ -5203,6 +5490,7 @@
   function showGeneratedCard(quote) {
     const target = getResolvedTarget();
     setCardViewMode('generated');
+    applyCardRecipientTheme(selectedTarget || target);
     lastGeneratedQuote = quote;
     els.cardTarget.textContent = `寄給 / ${target}`;
     els.cardScene.textContent = `場景 / ${selectedScene || '未指定'}`;
