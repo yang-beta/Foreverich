@@ -198,9 +198,9 @@
       */
       --lp-guang-width: clamp(39px, 4vw, 61px);
       --lp-xian-width: clamp(39px, 4vw, 61px);
-      --lp-word-gap: clamp(2px, .4vw, 7px);
-      --lp-guang-inset: 8px;
-      --lp-xian-inset: 8px;
+      --lp-word-gap: clamp(0px, .08vw, 2px);
+      --lp-guang-inset: 26px;
+      --lp-xian-inset: 26px;
 
       position: relative;
       z-index: 2;
@@ -772,9 +772,9 @@
       .lp-logo-lockup {
         --lp-guang-width: clamp(27px, 8vw, 39px);
         --lp-xian-width: clamp(27px, 8vw, 39px);
-        --lp-word-gap: 4px;
-        --lp-guang-inset: 2px;
-        --lp-xian-inset: 2px;
+        --lp-word-gap: 1px;
+        --lp-guang-inset: 10px;
+        --lp-xian-inset: 10px;
 
         gap: var(--lp-word-gap) !important;
         margin-bottom: -50px !important;
@@ -2285,12 +2285,12 @@
 /* LP：三行文字整組向 Logo 靠近，避免與 bottom:15% 的共用箭頭交疊。
    只移動文字群，不改共用箭頭規則。 */
 #openingHero .interactive-area {
-  transform: translateY(-72px);
+  transform: translateY(-118px);
 }
 
 @media (max-width: 768px) {
   #openingHero .interactive-area {
-    transform: translateY(-56px);
+    transform: translateY(-88px);
   }
 }
 
@@ -2311,6 +2311,11 @@
 
 #messageEntrySection:not(.is-horn-revealed) .p5-horn-glow-layer {
   opacity:0;
+}
+
+
+#openingHero .interactive-area .banner-question-part {
+  margin-bottom: .12em;
 }
 
 </style>
