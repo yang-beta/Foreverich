@@ -186,12 +186,28 @@
     .char { opacity: 0; display: inline-block; transform: translateY(10px); }
 
     .lp-logo-lockup {
+      /*
+        LP 左右文字圖調整區
+        ---------------------------------------------------------
+        --lp-guang-width / --lp-xian-width：左右字圖大小
+        --lp-word-gap：字圖與中央 Logo 的基本距離
+        --lp-guang-inset / --lp-xian-inset：額外向 Logo 靠近的距離
+
+        注意：
+        不使用 transform 位移，避免與 GSAP 的 scale 動畫互相覆蓋。
+      */
+      --lp-guang-width: clamp(78px, 8vw, 122px);
+      --lp-xian-width: clamp(78px, 8vw, 122px);
+      --lp-word-gap: clamp(4px, .6vw, 10px);
+      --lp-guang-inset: 4px;
+      --lp-xian-inset: 4px;
+
       position: relative;
       z-index: 2;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: clamp(10px, 1.5vw, 22px);
+      gap: var(--lp-word-gap);
       margin-bottom: -90px;
       margin-top: -30px;
     }
@@ -213,13 +229,22 @@
     }
 
     .lp-side-word {
-      width: clamp(78px, 8vw, 122px);
       height: auto;
       flex: 0 0 auto;
       opacity: 0;
       transform: scale(.94);
       filter: blur(8px) drop-shadow(0 0 14px rgba(255,255,255,.08));
       will-change: opacity, transform, filter;
+    }
+
+    .lp-side-word-guang {
+      width: var(--lp-guang-width);
+      margin-right: calc(var(--lp-guang-inset) * -1);
+    }
+
+    .lp-side-word-xian {
+      width: var(--lp-xian-width);
+      margin-left: calc(var(--lp-xian-inset) * -1);
     }
 
     .logo-container svg {
@@ -745,7 +770,13 @@
 
 
       .lp-logo-lockup {
-        gap: 8px !important;
+        --lp-guang-width: clamp(54px, 16vw, 78px);
+        --lp-xian-width: clamp(54px, 16vw, 78px);
+        --lp-word-gap: 4px;
+        --lp-guang-inset: 2px;
+        --lp-xian-inset: 2px;
+
+        gap: var(--lp-word-gap) !important;
         margin-bottom: -50px !important;
       }
 
@@ -755,9 +786,7 @@
         margin: 0 !important;
       }
 
-      .lp-side-word {
-        width: clamp(54px, 16vw, 78px);
-      }
+
 
       .skip-anim-btn {
         top: 20px !important;
@@ -941,6 +970,14 @@
 .p5-entry-option-copy strong { font:500 1rem 'Noto Serif TC',serif; letter-spacing:.12em; }
 .p5-entry-option-copy small { color:rgba(230,230,232,.58); font-size:.76rem; line-height:1.65; letter-spacing:.08em; }
 
+
+.p5-card-ready.is-wall-view .p5-card-actions {
+  justify-content:center;
+}
+.p5-card-ready.is-wall-view #p5DownloadBtn {
+  flex:0 1 280px;
+}
+
 /* =============================================================
    洸語牆｜最近 12 則
    ============================================================= */
@@ -950,7 +987,37 @@
 .memory-wall-title { font-size:clamp(1.28rem,2vw,1.65rem); color:#E6E6E8; letter-spacing:.22em; }
 .memory-wall-header p { margin-top:8px; color:rgba(230,230,232,.52); font-size:.82rem; letter-spacing:.12em; }
 .memory-wall-grid { width:100%; flex:1 1 auto; min-height:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); grid-template-rows:repeat(3,minmax(0,1fr)); gap:clamp(10px,1.4vw,16px); }
-.memory-wall-card { position:relative; min-width:0; overflow:hidden; border:1px solid rgba(230,230,232,.13); border-radius:16px; background:rgba(31,31,31,.72); padding:16px 17px 14px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 12px 34px rgba(0,0,0,.22); }
+.memory-wall-card {
+  position:relative;
+  min-width:0;
+  overflow:hidden;
+  border:1px solid rgba(230,230,232,.13);
+  border-radius:16px;
+  background:rgba(31,31,31,.72);
+  padding:16px 17px 14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  box-shadow:0 12px 34px rgba(0,0,0,.22);
+  cursor:pointer;
+  outline:none;
+  transition:
+    transform .32s cubic-bezier(.22,1,.36,1),
+    border-color .32s ease,
+    box-shadow .32s ease,
+    background .32s ease;
+}
+
+.memory-wall-card:hover,
+.memory-wall-card:focus-visible {
+  transform:translateY(-3px);
+  border-color:rgba(242,152,80,.50);
+  background:rgba(38,33,29,.78);
+  box-shadow:
+    0 14px 38px rgba(0,0,0,.26),
+    0 0 22px rgba(242,152,80,.12),
+    inset 0 0 18px rgba(242,152,80,.035);
+}
 .memory-wall-card::before { content:""; position:absolute; left:0; top:18%; bottom:18%; width:2px; background:rgba(242,152,80,.65); }
 .memory-wall-meta { display:flex; justify-content:space-between; gap:8px; color:rgba(242,152,80,.72); font-size:.64rem; letter-spacing:.06em; }
 .memory-wall-quote { margin:10px 0; color:rgba(230,230,232,.86); font:400 clamp(.78rem,.92vw,.9rem) 'Noto Serif TC',serif; line-height:1.8; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
@@ -4624,14 +4691,44 @@
         const d=parseStoredText(item?.text);
         const card=document.createElement('article');
         card.className='memory-wall-card';
+        card.tabIndex=0;
+        card.setAttribute('role','button');
+        card.setAttribute('aria-label',`查看寄給 ${d.target || '一份思念'} 的完整時光小卡`);
+
         const meta=document.createElement('div'); meta.className='memory-wall-meta';
         const target=document.createElement('span'); target.textContent=d.target;
         const date=document.createElement('time');
         date.textContent=item?.created_at?new Date(item.created_at).toLocaleDateString('zh-TW').replace(/\//g,'.'):'';
         meta.append(target,date);
-        const quote=document.createElement('div'); quote.className='memory-wall-quote'; quote.textContent=d.quote||'一束沒有被說出口的思念。';
-        const foot=document.createElement('div'); foot.className='memory-wall-foot'; foot.textContent=d.meta||'洸限 · 時光寄語';
+
+        const quote=document.createElement('div');
+        quote.className='memory-wall-quote';
+        quote.textContent=d.quote||'一束沒有被說出口的思念。';
+
+        const foot=document.createElement('div');
+        foot.className='memory-wall-foot';
+        foot.textContent=d.meta||'洸限 · 時光寄語';
+
         card.append(meta,quote,foot);
+
+        const openFullCard=()=>{
+          if(typeof window.openMemoryWallCard!=='function') return;
+          window.openMemoryWallCard({
+            target:d.target||'一份思念',
+            quote:d.quote||'一束沒有被說出口的思念。',
+            meta:d.meta||'',
+            date:date.textContent||''
+          });
+        };
+
+        card.addEventListener('click',openFullCard);
+        card.addEventListener('keydown',(event)=>{
+          if(event.key==='Enter'||event.key===' '){
+            event.preventDefault();
+            openFullCard();
+          }
+        });
+
         return card;
       }
       async function load(){
@@ -4661,6 +4758,7 @@
       };
       window.leaveMemoryWallPage=function(){
         fetchToken+=1;
+        window.closeMemoryWallCard?.();
         gsap.killTweensOf(['.memory-wall-header',continueBtn]);
       };
       continueBtn.addEventListener('click',goP6);
@@ -4773,6 +4871,7 @@
   let selectedScene = '';
   let selectedEmotion = '';
   let lastGeneratedQuote = '';
+  let cardViewMode = 'generated'; // generated | wall
   let isGenerating = false;
   let isReleasing = false;
   let formAdvancedToInput = false;
@@ -4920,7 +5019,31 @@
   }
 
   function buildPrompt(target, userInput, sceneTag, emotionTag) {
-    return `[System Instructions]\n你是一位溫柔的時光傾聽者。請根據使用者提供的「思念對象」、「自由隨筆」以及「情境與情感標籤」，為使用者潤飾並生成一段適合印在「時光小卡」上的溫暖短文。\n\n[文案生成規範]\n1. 字數限制：繁體中文 60 ~ 100 字之間，分為 2~3 個短句。\n2. 口吻風格：溫柔、治癒、微光感，句式帶有散文詩的停頓與留白。\n3. 合併邏輯：\n- 核心情節：以使用者的「自由隨筆」為故事主軸。\n- 視覺與氣氛：融合成對應「場景標籤」的意象（如香氣、晚風、光影）。\n- 情感昇華：結尾必須呼應「情感標籤」的意涵，並溫柔提到「思念對象」。\n4. 嚴禁事項：不要出現「這是一段文案：」等開頭，直接輸出可印製在卡片上的詩意本文。\n\n[Input Data]\n- 思念對象：${target}\n- 使用者隨筆：${userInput}\n- 場景標籤：${sceneTag || '未指定'}\n- 情感標籤：${emotionTag || '未指定'}\n\n[Output Format]\n直接輸出潤飾後的短文段落。`;
+    return `[任務]
+請把下列資料重新理解後，創作成一段適合印在「時光小卡」上的繁體中文短文。
+
+[重要原則]
+1. 「使用者隨筆」是記憶素材，不是待改寫原稿。請先理解意思，再重新組織敘事、句型與意象；不要逐句改寫，也不要直接搬用原句。
+2. 「場景標籤」與「情感標籤」只提供方向。不要把標籤文字直接塞進成品，請改用相近但重新創作的畫面、感受或比喻表達。
+3. 預設情境是「因時間、距離或生活變化而許久沒有見面」，未來仍可能再次相見。
+4. 除非使用者在隨筆中明確提到死亡或離世，否則禁止自行推定對方已死亡，也不要使用「天堂、離世、告別、再也見不到、最後一次、逝去、留下來的人」等暗示死亡或永別的語句。
+5. 可以保留必要的稱呼、人物關係、專有名詞與具體記憶事實，但其餘文字需重新創作。
+
+[成品規格]
+- 繁體中文 60～100 字。
+- 2～3 個短句。
+- 溫柔、自然、有微光感，但避免過度煽情。
+- 像一段對久未相見之人的思念，而不是悼念文。
+- 不要解釋創作過程，不要加標題，不要加引號，直接輸出卡片本文。
+
+[Input Data]
+- 思念對象：${target}
+- 使用者隨筆：${userInput}
+- 場景方向：${sceneTag || '未指定'}
+- 情感方向：${emotionTag || '未指定'}
+
+[Output]
+只輸出重新創作完成的短文。`;
   }
 
   async function generateAIQuote(target, userInput, sceneTag, emotionTag) {
@@ -5002,8 +5125,84 @@
       .to(els.loadingText, { autoAlpha: 1, y: 0, duration: .5, ease: 'power2.out' }, '-=.2');
   }
 
+  function setCardViewMode(mode = 'generated') {
+    cardViewMode = mode;
+    const isWallView = mode === 'wall';
+
+    els.ready.classList.toggle('is-wall-view', isWallView);
+    els.releaseBtn.style.display = isWallView ? 'none' : '';
+    els.releaseBtn.disabled = isWallView;
+
+    if (isWallView) {
+      els.sendStatus.textContent = '此卡片來自思念洸語牆，可閱讀完整內容並下載保存。';
+    }
+  }
+
+  function openReadyModal() {
+    els.modal.classList.add('is-open');
+    els.modal.setAttribute('aria-hidden', 'false');
+    if ('inert' in els.modal) els.modal.inert = false;
+    gsap.set(els.modal, { autoAlpha: 1 });
+    setPageAnimationLock(true);
+    setModalState('ready');
+
+    requestAnimationFrame(() => {
+      try { els.closeBtn.focus({ preventScroll: true }); } catch (_) {}
+    });
+  }
+
+  window.openMemoryWallCard = function openMemoryWallCard({
+    target = '一份思念',
+    quote = '',
+    meta = '',
+    date = ''
+  } = {}) {
+    if (!quote) return;
+
+    stopP5DissolveCanvas();
+    setCardViewMode('wall');
+
+    const metaParts = String(meta)
+      .split('/')
+      .map(item => item.trim())
+      .filter(Boolean);
+
+    els.cardTarget.textContent = `寄給 / ${target}`;
+    els.cardScene.textContent = `場景 / ${metaParts[0] || '未指定'}`;
+    els.cardEmotion.textContent = `情感 / ${metaParts[1] || '未指定'}`;
+    els.cardText.textContent = quote;
+    els.cardDate.textContent = date || formatDate();
+
+    openReadyModal();
+
+    gsap.fromTo(
+      els.ready,
+      { autoAlpha: 0 },
+      { autoAlpha: 1, duration: .28 }
+    );
+
+    gsap.fromTo(
+      els.card,
+      { autoAlpha: 0, scale: .90, y: 18, filter: 'blur(5px)' },
+      { autoAlpha: 1, scale: 1, y: 0, filter: 'blur(0px)', duration: .72, ease: 'power3.out' }
+    );
+
+    gsap.fromTo(
+      '.p5-card-actions',
+      { autoAlpha: 0, y: 10 },
+      { autoAlpha: 1, y: 0, duration: .45, delay: .35, ease: 'power2.out' }
+    );
+  };
+
+  window.closeMemoryWallCard = function closeMemoryWallCard() {
+    if (cardViewMode === 'wall' && els.modal.classList.contains('is-open')) {
+      closeModal(true);
+    }
+  };
+
   function showGeneratedCard(quote) {
     const target = getResolvedTarget();
+    setCardViewMode('generated');
     lastGeneratedQuote = quote;
     els.cardTarget.textContent = `寄給 / ${target}`;
     els.cardScene.textContent = `場景 / ${selectedScene || '未指定'}`;
@@ -5107,7 +5306,8 @@
         useCORS: true
       });
       const link = document.createElement('a');
-      link.download = `洸限_時光小卡_${formatDate().replace(/\./g, '-')}.png`;
+      const downloadDate = (els.cardDate.textContent || formatDate()).replace(/\./g, '-');
+      link.download = `洸限_時光小卡_${downloadDate}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (error) {
@@ -5231,6 +5431,8 @@
   }
 
   async function releaseCard() {
+    // 洸語牆開啟的歷史卡片只能閱讀／下載，不能再次寄出。
+    if (cardViewMode !== 'generated') return;
     if (isReleasing || !lastGeneratedQuote) return;
     isReleasing = true;
     els.releaseBtn.disabled = true;
@@ -5288,8 +5490,11 @@
     gsap.set(els.card, { clearProps: 'all' });
     gsap.set('.p5-card-actions, .p5-send-status, .p5-modal-close', { clearProps: 'all' });
     els.closeBtn.disabled = false;
-    els.releaseBtn.disabled = false;
     els.downloadBtn.disabled = false;
+
+    // 關閉後回復一般生成卡模式，避免 read-only 狀態殘留。
+    setCardViewMode('generated');
+    els.releaseBtn.disabled = false;
     setPageAnimationLock(false);
 
     requestAnimationFrame(() => {
