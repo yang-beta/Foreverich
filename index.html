@@ -196,11 +196,11 @@
         注意：
         不使用 transform 位移，避免與 GSAP 的 scale 動畫互相覆蓋。
       */
-      --lp-guang-width: clamp(78px, 8vw, 122px);
-      --lp-xian-width: clamp(78px, 8vw, 122px);
-      --lp-word-gap: clamp(4px, .6vw, 10px);
-      --lp-guang-inset: 4px;
-      --lp-xian-inset: 4px;
+      --lp-guang-width: clamp(39px, 4vw, 61px);
+      --lp-xian-width: clamp(39px, 4vw, 61px);
+      --lp-word-gap: clamp(2px, .4vw, 7px);
+      --lp-guang-inset: 8px;
+      --lp-xian-inset: 8px;
 
       position: relative;
       z-index: 2;
@@ -213,8 +213,8 @@
     }
 
     .logo-container {
-      width: 500px;
-      height: 500px;
+      width: 750px;
+      height: 750px;
       position: relative;
       z-index: 2;
       display: flex;
@@ -770,8 +770,8 @@
 
 
       .lp-logo-lockup {
-        --lp-guang-width: clamp(54px, 16vw, 78px);
-        --lp-xian-width: clamp(54px, 16vw, 78px);
+        --lp-guang-width: clamp(27px, 8vw, 39px);
+        --lp-xian-width: clamp(27px, 8vw, 39px);
         --lp-word-gap: 4px;
         --lp-guang-inset: 2px;
         --lp-xian-inset: 2px;
@@ -917,7 +917,7 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: .16;
+  opacity: .27;
 }
 .p5-entry-wave-bg .p5-horn {
   fill: none;
@@ -928,12 +928,16 @@
   transform-origin: 800px 450px;
 }
 .p5-entry-wave-bg .p5-horn-short {
-  opacity: .40;
+  opacity: .68;
+  stroke: rgba(224, 214, 204, .58);
 }
 .p5-entry-wave-bg .p5-horn-full {
-  opacity: .72;
+  opacity: .92;
+  stroke: rgba(224, 214, 204, .62);
   will-change: transform;
 }
+
+
 .p5-entry-wave-bg .p5-horn-full-left {
   animation: p5HornDriftLeft 11s ease-in-out infinite alternate;
 }
@@ -985,10 +989,10 @@
 
 .memory-wall-tree {
   position:absolute;
-  left:-5vw;
-  top:0;
-  width:min(66vw,960px);
-  height:100vh;
+  left:-11vw;
+  top:1.5vh;
+  width:min(74vw,1080px);
+  height:101vh;
   z-index:0;
   pointer-events:none;
   opacity:.86;
@@ -1036,12 +1040,18 @@
 }
 
 .memory-tree-hills path {
-  stroke:rgba(201,190,177,.12);
+  stroke:rgba(201,190,177,.17);
   stroke-width:1.05;
 }
 
-.memory-tree-hills path:nth-child(2n) {
-  stroke:rgba(242,152,80,.09);
+.memory-tree-hills path:nth-child(3n+1) {
+  stroke:rgba(242,152,80,.13);
+}
+.memory-tree-hills path:nth-child(3n+2) {
+  stroke:rgba(201,190,177,.12);
+}
+.memory-tree-hills path:nth-child(3n) {
+  stroke:rgba(242,168,82,.085);
 }
 
 .tree-roots path {
@@ -1161,9 +1171,9 @@
 
 @media (max-width:900px) {
   .memory-wall-tree {
-    left:-26vw;
-    width:98vw;
-    height:100vh;
+    left:-23vw;
+    width:112vw;
+    height:101vh;
     opacity:.62;
   }
 }
@@ -2058,7 +2068,252 @@
   .p5-card-action { flex: 1 1 100%; }
 }
 
-  </style>
+  
+/* =========================================================
+   洸語牆 Responsive Carousel
+   桌面：12 張維持 4x3。
+   平板：依高度顯示 2 或 3 排，超出的卡片橫向滑動。
+   手機：固定上下 2 張為一欄，其餘左右切換。
+   ========================================================= */
+.memory-wall-carousel {
+  position:relative;
+  width:100%;
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  align-items:stretch;
+}
+.memory-wall-carousel > .memory-wall-grid {
+  flex:1 1 auto;
+}
+.memory-wall-nav {
+  position:absolute;
+  top:50%;
+  z-index:20;
+  width:42px;
+  height:72px;
+  transform:translateY(-50%);
+  border:1px solid rgba(242,152,80,.26);
+  border-radius:999px;
+  background:rgba(18,18,18,.52);
+  color:rgba(255,211,170,.88);
+  font:300 2rem/1 serif;
+  display:none;
+  place-items:center;
+  cursor:pointer;
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+  box-shadow:0 0 18px rgba(0,0,0,.18);
+  transition:opacity .25s ease, background .25s ease, border-color .25s ease;
+}
+.memory-wall-nav:hover {
+  background:rgba(242,152,80,.13);
+  border-color:rgba(242,152,80,.52);
+}
+.memory-wall-nav:disabled {
+  opacity:.18;
+  pointer-events:none;
+}
+.memory-wall-nav-prev { left:7px; }
+.memory-wall-nav-next { right:7px; }
+
+@media (min-width:1101px) {
+  .memory-wall-carousel .memory-wall-grid {
+    overflow:visible;
+  }
+}
+
+/* 平板橫向翻頁 */
+@media (min-width:601px) and (max-width:1100px) {
+  .memory-wall-shell {
+    width:min(94vw,980px);
+    height:92vh;
+  }
+  .memory-wall-nav { display:grid; }
+  .memory-wall-carousel {
+    padding-inline:36px;
+  }
+  .memory-wall-carousel .memory-wall-grid {
+    --wall-rows:2;
+    display:grid !important;
+    grid-template-rows:repeat(var(--wall-rows), minmax(0,1fr)) !important;
+    grid-template-columns:none !important;
+    grid-auto-flow:column;
+    grid-auto-columns:calc((100% - 12px) / 2);
+    gap:12px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    scrollbar-width:none;
+    overscroll-behavior-x:contain;
+  }
+  .memory-wall-carousel .memory-wall-grid::-webkit-scrollbar { display:none; }
+  .memory-wall-card { scroll-snap-align:start; }
+}
+
+/* 較高的平板：3 排 */
+@media (min-width:601px) and (max-width:1100px) and (min-height:760px) {
+  .memory-wall-carousel .memory-wall-grid {
+    --wall-rows:3;
+  }
+}
+
+/* 手機：每一欄只看上下兩張 */
+@media (max-width:600px) {
+  .memory-wall-shell {
+    width:94vw;
+    height:94vh;
+  }
+  .memory-wall-header {
+    margin-bottom:12px;
+  }
+  .memory-wall-header p {
+    font-size:.7rem;
+  }
+  .memory-wall-nav {
+    display:grid;
+    width:36px;
+    height:64px;
+    background:rgba(18,18,18,.46);
+  }
+  .memory-wall-nav-prev { left:1px; }
+  .memory-wall-nav-next { right:1px; }
+  .memory-wall-carousel {
+    padding-inline:28px;
+  }
+  .memory-wall-carousel .memory-wall-grid {
+    display:grid !important;
+    grid-template-rows:repeat(2,minmax(0,1fr)) !important;
+    grid-template-columns:none !important;
+    grid-auto-flow:column;
+    grid-auto-columns:100%;
+    gap:9px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    scrollbar-width:none;
+    overscroll-behavior-x:contain;
+    touch-action:pan-x;
+  }
+  .memory-wall-carousel .memory-wall-grid::-webkit-scrollbar { display:none; }
+  .memory-wall-card {
+    scroll-snap-align:start;
+    min-height:0;
+  }
+  .memory-wall-continue {
+    margin-top:10px;
+  }
+}
+
+
+/* P5 最外圈：左右向外延伸約 30%，線寬不變 */
+.p5-horn-full-left ellipse:last-child,
+.p5-horn-full-right ellipse:last-child {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scaleX(1.3);
+  vector-effect: non-scaling-stroke;
+}
+
+
+/* P5 內層喇叭再向左右延伸 15% */
+.p5-entry-wave-bg .p5-horn-short-left,
+.p5-entry-wave-bg .p5-horn-short-right {
+  transform-box: view-box;
+  transform-origin: 800px 450px;
+  transform: scaleX(1.15);
+}
+
+
+#brandTransitionSection .p3-text-line {
+  font-size: 1.2rem;
+  line-height: 1.95;
+  letter-spacing: .2rem;
+}
+#brandTransitionSection .p3-copy {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.22em;
+}
+
+#brandTransitionSection .p3-text-line {
+  color: #E6E6E8;
+}
+
+#brandTransitionSection .p3-text-line .sub-part {
+  opacity: 0;
+}
+
+#brandTransitionSection .p3-text-line .sub-part + .sub-part {
+  margin-left: .12em;
+}
+
+/* =============================================================
+   P5 喇叭入場｜SVG 中央真正對稱揭露
+   ============================================================= */
+#messageEntrySection .p5-entry-wave-bg {
+  overflow: hidden;
+}
+
+/* reveal 完成前，外層 drift 暫停，避免造成單側移動錯覺 */
+#messageEntrySection:not(.is-horn-revealed) .p5-horn-full-left,
+#messageEntrySection:not(.is-horn-revealed) .p5-horn-full-right {
+  animation-play-state: paused !important;
+}
+
+#messageEntrySection.is-horn-revealed .p5-horn-full-left,
+#messageEntrySection.is-horn-revealed .p5-horn-full-right {
+  animation-play-state: running !important;
+}
+
+#messageEntrySection .p5-horn-short {
+  opacity: .68;
+}
+
+#messageEntrySection .p5-horn-full {
+  opacity: .92;
+}
+
+
+/* =============================================================
+   本次微調｜LP / P3 / P5
+   ============================================================= */
+
+/* LP：三行文字整組向 Logo 靠近，避免與 bottom:15% 的共用箭頭交疊。
+   只移動文字群，不改共用箭頭規則。 */
+#openingHero .interactive-area {
+  transform: translateY(-72px);
+}
+
+@media (max-width: 768px) {
+  #openingHero .interactive-area {
+    transform: translateY(-56px);
+  }
+}
+
+
+/* P5 獨立金光層：
+   底圖維持淡色，亮光本身不再被底圖 opacity 壓暗。 */
+#messageEntrySection .p5-horn-glow-layer {
+  pointer-events:none;
+}
+
+#messageEntrySection .p5-horn-glow ellipse {
+  fill:none;
+  stroke:rgba(255,193,108,0);
+  stroke-width:1.2;
+  opacity:0;
+  vector-effect:non-scaling-stroke;
+}
+
+#messageEntrySection:not(.is-horn-revealed) .p5-horn-glow-layer {
+  opacity:0;
+}
+
+</style>
 </head>
 <body>
 
@@ -2282,13 +2537,23 @@
       <div class="p3-content">
         <div class="p3-copy" id="brandTransitionText">
           <div class="ui-line-mask">
-            <div class="ui-line-content p3-text-line p3-text-1">那些沉澱在心底的回憶，從未散去 ――</div>
+            <div class="ui-line-content p3-text-line" data-enter-at="4.3">
+              那些沉澱在心底的回憶，從未散去 ――
+            </div>
           </div>
+
           <div class="ui-line-mask">
-            <div class="ui-line-content p3-text-line p3-text-2">中心，是你自己；向外則是父母、伴侶、摯友與毛孩延伸的紋理。</div>
+            <div class="ui-line-content p3-text-line story-line" data-enter-at="5.8" data-part-gap="1.5">
+              <span class="sub-part">中心，是你自己；</span>
+              <span class="sub-part">向外則是父母、伴侶、摯友與毛孩延伸的紋理。</span>
+            </div>
           </div>
+
           <div class="ui-line-mask">
-            <div class="ui-line-content p3-text-line p3-text-3">這延伸的痕跡，是你的情感地圖。他們圍繞著你，就像一朵綻放的曼陀羅。</div>
+            <div class="ui-line-content p3-text-line story-line" data-enter-at="8.3" data-part-gap="1.5">
+              <span class="sub-part">這延伸的痕跡，是你的情感地圖。</span>
+              <span class="sub-part">他們圍繞著你，就像一朵綻放的曼陀羅。</span>
+            </div>
           </div>
         </div>
       </div>
@@ -2370,11 +2635,26 @@
     <div class="section-page p5-entry-section" id="messageEntrySection">
 
       <svg class="p5-entry-wave-bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <g class="p5-horn p5-horn-short p5-horn-short-left"><ellipse cx="792.9" cy="450.0" rx="6.9" ry="17.4" transform="rotate(-0.11 792.9 450.0)"></ellipse><ellipse cx="785.4" cy="450.0" rx="10.0" ry="27.2" transform="rotate(-0.22 785.4 450.0)"></ellipse><ellipse cx="777.7" cy="450.0" rx="13.2" ry="37.3" transform="rotate(-0.33 777.7 450.0)"></ellipse><ellipse cx="770.0" cy="450.0" rx="16.3" ry="47.4" transform="rotate(-0.45 770.0 450.0)"></ellipse><ellipse cx="762.2" cy="450.0" rx="19.5" ry="57.6" transform="rotate(-0.56 762.2 450.0)"></ellipse><ellipse cx="754.4" cy="450.0" rx="22.8" ry="67.9" transform="rotate(-0.68 754.4 450.0)"></ellipse><ellipse cx="746.5" cy="450.0" rx="26.0" ry="78.3" transform="rotate(-0.79 746.5 450.0)"></ellipse><ellipse cx="738.6" cy="450.0" rx="29.3" ry="88.7" transform="rotate(-0.91 738.6 450.0)"></ellipse><ellipse cx="730.6" cy="450.0" rx="32.5" ry="99.2" transform="rotate(-1.03 730.6 450.0)"></ellipse><ellipse cx="722.6" cy="450.0" rx="35.8" ry="109.7" transform="rotate(-1.15 722.6 450.0)"></ellipse><ellipse cx="714.6" cy="450.0" rx="39.1" ry="120.2" transform="rotate(-1.27 714.6 450.0)"></ellipse><ellipse cx="706.5" cy="450.0" rx="42.4" ry="130.8" transform="rotate(-1.39 706.5 450.0)"></ellipse><ellipse cx="698.5" cy="450.0" rx="45.8" ry="141.4" transform="rotate(-1.51 698.5 450.0)"></ellipse><ellipse cx="690.4" cy="450.0" rx="49.1" ry="152.1" transform="rotate(-1.63 690.4 450.0)"></ellipse><ellipse cx="682.3" cy="450.0" rx="52.4" ry="162.7" transform="rotate(-1.75 682.3 450.0)"></ellipse><ellipse cx="674.1" cy="450.0" rx="55.8" ry="173.4" transform="rotate(-1.87 674.1 450.0)"></ellipse><ellipse cx="666.0" cy="450.0" rx="59.1" ry="184.1" transform="rotate(-1.99 666.0 450.0)"></ellipse><ellipse cx="657.8" cy="450.0" rx="62.5" ry="194.9" transform="rotate(-2.11 657.8 450.0)"></ellipse><ellipse cx="649.6" cy="450.0" rx="65.9" ry="205.6" transform="rotate(-2.23 649.6 450.0)"></ellipse><ellipse cx="641.4" cy="450.0" rx="69.2" ry="216.4" transform="rotate(-2.36 641.4 450.0)"></ellipse><ellipse cx="633.2" cy="450.0" rx="72.6" ry="227.2" transform="rotate(-2.48 633.2 450.0)"></ellipse><ellipse cx="625.0" cy="450.0" rx="76.0" ry="238.0" transform="rotate(-2.60 625.0 450.0)"></ellipse></g>
-        <g class="p5-horn p5-horn-short p5-horn-short-right"><ellipse cx="807.1" cy="450.0" rx="6.9" ry="17.4" transform="rotate(0.11 807.1 450.0)"></ellipse><ellipse cx="814.6" cy="450.0" rx="10.0" ry="27.2" transform="rotate(0.22 814.6 450.0)"></ellipse><ellipse cx="822.3" cy="450.0" rx="13.2" ry="37.3" transform="rotate(0.33 822.3 450.0)"></ellipse><ellipse cx="830.0" cy="450.0" rx="16.3" ry="47.4" transform="rotate(0.45 830.0 450.0)"></ellipse><ellipse cx="837.8" cy="450.0" rx="19.5" ry="57.6" transform="rotate(0.56 837.8 450.0)"></ellipse><ellipse cx="845.6" cy="450.0" rx="22.8" ry="67.9" transform="rotate(0.68 845.6 450.0)"></ellipse><ellipse cx="853.5" cy="450.0" rx="26.0" ry="78.3" transform="rotate(0.79 853.5 450.0)"></ellipse><ellipse cx="861.4" cy="450.0" rx="29.3" ry="88.7" transform="rotate(0.91 861.4 450.0)"></ellipse><ellipse cx="869.4" cy="450.0" rx="32.5" ry="99.2" transform="rotate(1.03 869.4 450.0)"></ellipse><ellipse cx="877.4" cy="450.0" rx="35.8" ry="109.7" transform="rotate(1.15 877.4 450.0)"></ellipse><ellipse cx="885.4" cy="450.0" rx="39.1" ry="120.2" transform="rotate(1.27 885.4 450.0)"></ellipse><ellipse cx="893.5" cy="450.0" rx="42.4" ry="130.8" transform="rotate(1.39 893.5 450.0)"></ellipse><ellipse cx="901.5" cy="450.0" rx="45.8" ry="141.4" transform="rotate(1.51 901.5 450.0)"></ellipse><ellipse cx="909.6" cy="450.0" rx="49.1" ry="152.1" transform="rotate(1.63 909.6 450.0)"></ellipse><ellipse cx="917.7" cy="450.0" rx="52.4" ry="162.7" transform="rotate(1.75 917.7 450.0)"></ellipse><ellipse cx="925.9" cy="450.0" rx="55.8" ry="173.4" transform="rotate(1.87 925.9 450.0)"></ellipse><ellipse cx="934.0" cy="450.0" rx="59.1" ry="184.1" transform="rotate(1.99 934.0 450.0)"></ellipse><ellipse cx="942.2" cy="450.0" rx="62.5" ry="194.9" transform="rotate(2.11 942.2 450.0)"></ellipse><ellipse cx="950.4" cy="450.0" rx="65.9" ry="205.6" transform="rotate(2.23 950.4 450.0)"></ellipse><ellipse cx="958.6" cy="450.0" rx="69.2" ry="216.4" transform="rotate(2.36 958.6 450.0)"></ellipse><ellipse cx="966.8" cy="450.0" rx="72.6" ry="227.2" transform="rotate(2.48 966.8 450.0)"></ellipse><ellipse cx="975.0" cy="450.0" rx="76.0" ry="238.0" transform="rotate(2.60 975.0 450.0)"></ellipse></g>
-        <g class="p5-horn p5-horn-full p5-horn-full-left"><ellipse cx="778.2" cy="450.0" rx="13.5" ry="18.5" transform="rotate(-0.08 778.2 450.0)"></ellipse><ellipse cx="755.3" cy="450.0" rx="23.5" ry="29.5" transform="rotate(-0.16 755.3 450.0)"></ellipse><ellipse cx="732.0" cy="450.0" rx="33.6" ry="40.8" transform="rotate(-0.24 732.0 450.0)"></ellipse><ellipse cx="708.5" cy="450.0" rx="43.9" ry="52.1" transform="rotate(-0.32 708.5 450.0)"></ellipse><ellipse cx="684.7" cy="450.0" rx="54.2" ry="63.6" transform="rotate(-0.41 684.7 450.0)"></ellipse><ellipse cx="660.7" cy="450.0" rx="64.7" ry="75.1" transform="rotate(-0.49 660.7 450.0)"></ellipse><ellipse cx="636.6" cy="450.0" rx="75.2" ry="86.7" transform="rotate(-0.58 636.6 450.0)"></ellipse><ellipse cx="612.4" cy="450.0" rx="85.7" ry="98.4" transform="rotate(-0.66 612.4 450.0)"></ellipse><ellipse cx="588.1" cy="450.0" rx="96.3" ry="110.1" transform="rotate(-0.75 588.1 450.0)"></ellipse><ellipse cx="563.7" cy="450.0" rx="107.0" ry="121.9" transform="rotate(-0.83 563.7 450.0)"></ellipse><ellipse cx="539.2" cy="450.0" rx="117.6" ry="133.7" transform="rotate(-0.92 539.2 450.0)"></ellipse><ellipse cx="514.6" cy="450.0" rx="128.3" ry="145.5" transform="rotate(-1.01 514.6 450.0)"></ellipse><ellipse cx="490.0" cy="450.0" rx="139.1" ry="157.4" transform="rotate(-1.09 490.0 450.0)"></ellipse><ellipse cx="465.3" cy="450.0" rx="149.9" ry="169.3" transform="rotate(-1.18 465.3 450.0)"></ellipse><ellipse cx="440.5" cy="450.0" rx="160.7" ry="181.2" transform="rotate(-1.27 440.5 450.0)"></ellipse><ellipse cx="415.6" cy="450.0" rx="171.5" ry="193.2" transform="rotate(-1.36 415.6 450.0)"></ellipse><ellipse cx="390.8" cy="450.0" rx="182.3" ry="205.2" transform="rotate(-1.44 390.8 450.0)"></ellipse><ellipse cx="365.8" cy="450.0" rx="193.2" ry="217.2" transform="rotate(-1.53 365.8 450.0)"></ellipse><ellipse cx="340.8" cy="450.0" rx="204.1" ry="229.3" transform="rotate(-1.62 340.8 450.0)"></ellipse><ellipse cx="315.8" cy="450.0" rx="215.0" ry="241.3" transform="rotate(-1.71 315.8 450.0)"></ellipse><ellipse cx="290.7" cy="450.0" rx="225.9" ry="253.4" transform="rotate(-1.80 290.7 450.0)"></ellipse><ellipse cx="265.6" cy="450.0" rx="236.9" ry="265.5" transform="rotate(-1.89 265.6 450.0)"></ellipse><ellipse cx="240.4" cy="450.0" rx="247.8" ry="277.6" transform="rotate(-1.97 240.4 450.0)"></ellipse><ellipse cx="215.2" cy="450.0" rx="258.8" ry="289.8" transform="rotate(-2.06 215.2 450.0)"></ellipse><ellipse cx="190.0" cy="450.0" rx="269.8" ry="302.0" transform="rotate(-2.15 190.0 450.0)"></ellipse><ellipse cx="164.7" cy="450.0" rx="280.8" ry="314.1" transform="rotate(-2.24 164.7 450.0)"></ellipse><ellipse cx="139.4" cy="450.0" rx="291.8" ry="326.3" transform="rotate(-2.33 139.4 450.0)"></ellipse><ellipse cx="114.1" cy="450.0" rx="302.9" ry="338.5" transform="rotate(-2.42 114.1 450.0)"></ellipse><ellipse cx="88.7" cy="450.0" rx="313.9" ry="350.8" transform="rotate(-2.51 88.7 450.0)"></ellipse><ellipse cx="63.3" cy="450.0" rx="325.0" ry="363.0" transform="rotate(-2.60 63.3 450.0)"></ellipse></g>
-        <g class="p5-horn p5-horn-full p5-horn-full-right"><ellipse cx="821.8" cy="450.0" rx="13.5" ry="18.5" transform="rotate(0.08 821.8 450.0)"></ellipse><ellipse cx="844.7" cy="450.0" rx="23.5" ry="29.5" transform="rotate(0.16 844.7 450.0)"></ellipse><ellipse cx="868.0" cy="450.0" rx="33.6" ry="40.8" transform="rotate(0.24 868.0 450.0)"></ellipse><ellipse cx="891.5" cy="450.0" rx="43.9" ry="52.1" transform="rotate(0.32 891.5 450.0)"></ellipse><ellipse cx="915.3" cy="450.0" rx="54.2" ry="63.6" transform="rotate(0.41 915.3 450.0)"></ellipse><ellipse cx="939.3" cy="450.0" rx="64.7" ry="75.1" transform="rotate(0.49 939.3 450.0)"></ellipse><ellipse cx="963.4" cy="450.0" rx="75.2" ry="86.7" transform="rotate(0.58 963.4 450.0)"></ellipse><ellipse cx="987.6" cy="450.0" rx="85.7" ry="98.4" transform="rotate(0.66 987.6 450.0)"></ellipse><ellipse cx="1011.9" cy="450.0" rx="96.3" ry="110.1" transform="rotate(0.75 1011.9 450.0)"></ellipse><ellipse cx="1036.3" cy="450.0" rx="107.0" ry="121.9" transform="rotate(0.83 1036.3 450.0)"></ellipse><ellipse cx="1060.8" cy="450.0" rx="117.6" ry="133.7" transform="rotate(0.92 1060.8 450.0)"></ellipse><ellipse cx="1085.4" cy="450.0" rx="128.3" ry="145.5" transform="rotate(1.01 1085.4 450.0)"></ellipse><ellipse cx="1110.0" cy="450.0" rx="139.1" ry="157.4" transform="rotate(1.09 1110.0 450.0)"></ellipse><ellipse cx="1134.7" cy="450.0" rx="149.9" ry="169.3" transform="rotate(1.18 1134.7 450.0)"></ellipse><ellipse cx="1159.5" cy="450.0" rx="160.7" ry="181.2" transform="rotate(1.27 1159.5 450.0)"></ellipse><ellipse cx="1184.4" cy="450.0" rx="171.5" ry="193.2" transform="rotate(1.36 1184.4 450.0)"></ellipse><ellipse cx="1209.2" cy="450.0" rx="182.3" ry="205.2" transform="rotate(1.44 1209.2 450.0)"></ellipse><ellipse cx="1234.2" cy="450.0" rx="193.2" ry="217.2" transform="rotate(1.53 1234.2 450.0)"></ellipse><ellipse cx="1259.2" cy="450.0" rx="204.1" ry="229.3" transform="rotate(1.62 1259.2 450.0)"></ellipse><ellipse cx="1284.2" cy="450.0" rx="215.0" ry="241.3" transform="rotate(1.71 1284.2 450.0)"></ellipse><ellipse cx="1309.3" cy="450.0" rx="225.9" ry="253.4" transform="rotate(1.80 1309.3 450.0)"></ellipse><ellipse cx="1334.4" cy="450.0" rx="236.9" ry="265.5" transform="rotate(1.89 1334.4 450.0)"></ellipse><ellipse cx="1359.6" cy="450.0" rx="247.8" ry="277.6" transform="rotate(1.97 1359.6 450.0)"></ellipse><ellipse cx="1384.8" cy="450.0" rx="258.8" ry="289.8" transform="rotate(2.06 1384.8 450.0)"></ellipse><ellipse cx="1410.0" cy="450.0" rx="269.8" ry="302.0" transform="rotate(2.15 1410.0 450.0)"></ellipse><ellipse cx="1435.3" cy="450.0" rx="280.8" ry="314.1" transform="rotate(2.24 1435.3 450.0)"></ellipse><ellipse cx="1460.6" cy="450.0" rx="291.8" ry="326.3" transform="rotate(2.33 1460.6 450.0)"></ellipse><ellipse cx="1485.9" cy="450.0" rx="302.9" ry="338.5" transform="rotate(2.42 1485.9 450.0)"></ellipse><ellipse cx="1511.3" cy="450.0" rx="313.9" ry="350.8" transform="rotate(2.51 1511.3 450.0)"></ellipse><ellipse cx="1536.7" cy="450.0" rx="325.0" ry="363.0" transform="rotate(2.60 1536.7 450.0)"></ellipse></g>
-      </svg>
+        <defs>
+          <clipPath id="p5HornRevealClip" clipPathUnits="userSpaceOnUse">
+            <rect id="p5HornRevealRect" x="800" y="0" width="0" height="900"></rect>
+          </clipPath>
+        </defs>
+        <g class="p5-horn p5-horn-short p5-horn-short-left" clip-path="url(#p5HornRevealClip)"><ellipse cx="792.9" cy="450.0" rx="6.9" ry="17.4" transform="rotate(-0.11 792.9 450.0)"></ellipse><ellipse cx="785.4" cy="450.0" rx="10.0" ry="27.2" transform="rotate(-0.22 785.4 450.0)"></ellipse><ellipse cx="777.7" cy="450.0" rx="13.2" ry="37.3" transform="rotate(-0.33 777.7 450.0)"></ellipse><ellipse cx="770.0" cy="450.0" rx="16.3" ry="47.4" transform="rotate(-0.45 770.0 450.0)"></ellipse><ellipse cx="762.2" cy="450.0" rx="19.5" ry="57.6" transform="rotate(-0.56 762.2 450.0)"></ellipse><ellipse cx="754.4" cy="450.0" rx="22.8" ry="67.9" transform="rotate(-0.68 754.4 450.0)"></ellipse><ellipse cx="746.5" cy="450.0" rx="26.0" ry="78.3" transform="rotate(-0.79 746.5 450.0)"></ellipse><ellipse cx="738.6" cy="450.0" rx="29.3" ry="88.7" transform="rotate(-0.91 738.6 450.0)"></ellipse><ellipse cx="730.6" cy="450.0" rx="32.5" ry="99.2" transform="rotate(-1.03 730.6 450.0)"></ellipse><ellipse cx="722.6" cy="450.0" rx="35.8" ry="109.7" transform="rotate(-1.15 722.6 450.0)"></ellipse><ellipse cx="714.6" cy="450.0" rx="39.1" ry="120.2" transform="rotate(-1.27 714.6 450.0)"></ellipse><ellipse cx="706.5" cy="450.0" rx="42.4" ry="130.8" transform="rotate(-1.39 706.5 450.0)"></ellipse><ellipse cx="698.5" cy="450.0" rx="45.8" ry="141.4" transform="rotate(-1.51 698.5 450.0)"></ellipse><ellipse cx="690.4" cy="450.0" rx="49.1" ry="152.1" transform="rotate(-1.63 690.4 450.0)"></ellipse><ellipse cx="682.3" cy="450.0" rx="52.4" ry="162.7" transform="rotate(-1.75 682.3 450.0)"></ellipse><ellipse cx="674.1" cy="450.0" rx="55.8" ry="173.4" transform="rotate(-1.87 674.1 450.0)"></ellipse><ellipse cx="666.0" cy="450.0" rx="59.1" ry="184.1" transform="rotate(-1.99 666.0 450.0)"></ellipse><ellipse cx="657.8" cy="450.0" rx="62.5" ry="194.9" transform="rotate(-2.11 657.8 450.0)"></ellipse><ellipse cx="649.6" cy="450.0" rx="65.9" ry="205.6" transform="rotate(-2.23 649.6 450.0)"></ellipse><ellipse cx="641.4" cy="450.0" rx="69.2" ry="216.4" transform="rotate(-2.36 641.4 450.0)"></ellipse><ellipse cx="633.2" cy="450.0" rx="72.6" ry="227.2" transform="rotate(-2.48 633.2 450.0)"></ellipse><ellipse cx="625.0" cy="450.0" rx="76.0" ry="238.0" transform="rotate(-2.60 625.0 450.0)"></ellipse></g>
+        <g class="p5-horn p5-horn-short p5-horn-short-right" clip-path="url(#p5HornRevealClip)"><ellipse cx="807.1" cy="450.0" rx="6.9" ry="17.4" transform="rotate(0.11 807.1 450.0)"></ellipse><ellipse cx="814.6" cy="450.0" rx="10.0" ry="27.2" transform="rotate(0.22 814.6 450.0)"></ellipse><ellipse cx="822.3" cy="450.0" rx="13.2" ry="37.3" transform="rotate(0.33 822.3 450.0)"></ellipse><ellipse cx="830.0" cy="450.0" rx="16.3" ry="47.4" transform="rotate(0.45 830.0 450.0)"></ellipse><ellipse cx="837.8" cy="450.0" rx="19.5" ry="57.6" transform="rotate(0.56 837.8 450.0)"></ellipse><ellipse cx="845.6" cy="450.0" rx="22.8" ry="67.9" transform="rotate(0.68 845.6 450.0)"></ellipse><ellipse cx="853.5" cy="450.0" rx="26.0" ry="78.3" transform="rotate(0.79 853.5 450.0)"></ellipse><ellipse cx="861.4" cy="450.0" rx="29.3" ry="88.7" transform="rotate(0.91 861.4 450.0)"></ellipse><ellipse cx="869.4" cy="450.0" rx="32.5" ry="99.2" transform="rotate(1.03 869.4 450.0)"></ellipse><ellipse cx="877.4" cy="450.0" rx="35.8" ry="109.7" transform="rotate(1.15 877.4 450.0)"></ellipse><ellipse cx="885.4" cy="450.0" rx="39.1" ry="120.2" transform="rotate(1.27 885.4 450.0)"></ellipse><ellipse cx="893.5" cy="450.0" rx="42.4" ry="130.8" transform="rotate(1.39 893.5 450.0)"></ellipse><ellipse cx="901.5" cy="450.0" rx="45.8" ry="141.4" transform="rotate(1.51 901.5 450.0)"></ellipse><ellipse cx="909.6" cy="450.0" rx="49.1" ry="152.1" transform="rotate(1.63 909.6 450.0)"></ellipse><ellipse cx="917.7" cy="450.0" rx="52.4" ry="162.7" transform="rotate(1.75 917.7 450.0)"></ellipse><ellipse cx="925.9" cy="450.0" rx="55.8" ry="173.4" transform="rotate(1.87 925.9 450.0)"></ellipse><ellipse cx="934.0" cy="450.0" rx="59.1" ry="184.1" transform="rotate(1.99 934.0 450.0)"></ellipse><ellipse cx="942.2" cy="450.0" rx="62.5" ry="194.9" transform="rotate(2.11 942.2 450.0)"></ellipse><ellipse cx="950.4" cy="450.0" rx="65.9" ry="205.6" transform="rotate(2.23 950.4 450.0)"></ellipse><ellipse cx="958.6" cy="450.0" rx="69.2" ry="216.4" transform="rotate(2.36 958.6 450.0)"></ellipse><ellipse cx="966.8" cy="450.0" rx="72.6" ry="227.2" transform="rotate(2.48 966.8 450.0)"></ellipse><ellipse cx="975.0" cy="450.0" rx="76.0" ry="238.0" transform="rotate(2.60 975.0 450.0)"></ellipse></g>
+        <g class="p5-horn p5-horn-full p5-horn-full-left" clip-path="url(#p5HornRevealClip)"><ellipse cx="778.2" cy="450.0" rx="13.5" ry="18.5" transform="rotate(-0.08 778.2 450.0)"></ellipse><ellipse cx="755.3" cy="450.0" rx="23.5" ry="29.5" transform="rotate(-0.16 755.3 450.0)"></ellipse><ellipse cx="732.0" cy="450.0" rx="33.6" ry="40.8" transform="rotate(-0.24 732.0 450.0)"></ellipse><ellipse cx="708.5" cy="450.0" rx="43.9" ry="52.1" transform="rotate(-0.32 708.5 450.0)"></ellipse><ellipse cx="684.7" cy="450.0" rx="54.2" ry="63.6" transform="rotate(-0.41 684.7 450.0)"></ellipse><ellipse cx="660.7" cy="450.0" rx="64.7" ry="75.1" transform="rotate(-0.49 660.7 450.0)"></ellipse><ellipse cx="636.6" cy="450.0" rx="75.2" ry="86.7" transform="rotate(-0.58 636.6 450.0)"></ellipse><ellipse cx="612.4" cy="450.0" rx="85.7" ry="98.4" transform="rotate(-0.66 612.4 450.0)"></ellipse><ellipse cx="588.1" cy="450.0" rx="96.3" ry="110.1" transform="rotate(-0.75 588.1 450.0)"></ellipse><ellipse cx="563.7" cy="450.0" rx="107.0" ry="121.9" transform="rotate(-0.83 563.7 450.0)"></ellipse><ellipse cx="539.2" cy="450.0" rx="117.6" ry="133.7" transform="rotate(-0.92 539.2 450.0)"></ellipse><ellipse cx="514.6" cy="450.0" rx="128.3" ry="145.5" transform="rotate(-1.01 514.6 450.0)"></ellipse><ellipse cx="490.0" cy="450.0" rx="139.1" ry="157.4" transform="rotate(-1.09 490.0 450.0)"></ellipse><ellipse cx="465.3" cy="450.0" rx="149.9" ry="169.3" transform="rotate(-1.18 465.3 450.0)"></ellipse><ellipse cx="440.5" cy="450.0" rx="160.7" ry="181.2" transform="rotate(-1.27 440.5 450.0)"></ellipse><ellipse cx="415.6" cy="450.0" rx="171.5" ry="193.2" transform="rotate(-1.36 415.6 450.0)"></ellipse><ellipse cx="390.8" cy="450.0" rx="182.3" ry="205.2" transform="rotate(-1.44 390.8 450.0)"></ellipse><ellipse cx="365.8" cy="450.0" rx="193.2" ry="217.2" transform="rotate(-1.53 365.8 450.0)"></ellipse><ellipse cx="340.8" cy="450.0" rx="204.1" ry="229.3" transform="rotate(-1.62 340.8 450.0)"></ellipse><ellipse cx="315.8" cy="450.0" rx="215.0" ry="241.3" transform="rotate(-1.71 315.8 450.0)"></ellipse><ellipse cx="290.7" cy="450.0" rx="225.9" ry="253.4" transform="rotate(-1.80 290.7 450.0)"></ellipse><ellipse cx="265.6" cy="450.0" rx="236.9" ry="265.5" transform="rotate(-1.89 265.6 450.0)"></ellipse><ellipse cx="240.4" cy="450.0" rx="247.8" ry="277.6" transform="rotate(-1.97 240.4 450.0)"></ellipse><ellipse cx="215.2" cy="450.0" rx="258.8" ry="289.8" transform="rotate(-2.06 215.2 450.0)"></ellipse><ellipse cx="190.0" cy="450.0" rx="269.8" ry="302.0" transform="rotate(-2.15 190.0 450.0)"></ellipse><ellipse cx="164.7" cy="450.0" rx="280.8" ry="314.1" transform="rotate(-2.24 164.7 450.0)"></ellipse><ellipse cx="139.4" cy="450.0" rx="291.8" ry="326.3" transform="rotate(-2.33 139.4 450.0)"></ellipse><ellipse cx="114.1" cy="450.0" rx="302.9" ry="338.5" transform="rotate(-2.42 114.1 450.0)"></ellipse><ellipse cx="88.7" cy="450.0" rx="313.9" ry="350.8" transform="rotate(-2.51 88.7 450.0)"></ellipse><ellipse cx="63.3" cy="450.0" rx="325.0" ry="363.0" transform="rotate(-2.60 63.3 450.0)"></ellipse></g>
+        <g class="p5-horn p5-horn-full p5-horn-full-right" clip-path="url(#p5HornRevealClip)"><ellipse cx="821.8" cy="450.0" rx="13.5" ry="18.5" transform="rotate(0.08 821.8 450.0)"></ellipse><ellipse cx="844.7" cy="450.0" rx="23.5" ry="29.5" transform="rotate(0.16 844.7 450.0)"></ellipse><ellipse cx="868.0" cy="450.0" rx="33.6" ry="40.8" transform="rotate(0.24 868.0 450.0)"></ellipse><ellipse cx="891.5" cy="450.0" rx="43.9" ry="52.1" transform="rotate(0.32 891.5 450.0)"></ellipse><ellipse cx="915.3" cy="450.0" rx="54.2" ry="63.6" transform="rotate(0.41 915.3 450.0)"></ellipse><ellipse cx="939.3" cy="450.0" rx="64.7" ry="75.1" transform="rotate(0.49 939.3 450.0)"></ellipse><ellipse cx="963.4" cy="450.0" rx="75.2" ry="86.7" transform="rotate(0.58 963.4 450.0)"></ellipse><ellipse cx="987.6" cy="450.0" rx="85.7" ry="98.4" transform="rotate(0.66 987.6 450.0)"></ellipse><ellipse cx="1011.9" cy="450.0" rx="96.3" ry="110.1" transform="rotate(0.75 1011.9 450.0)"></ellipse><ellipse cx="1036.3" cy="450.0" rx="107.0" ry="121.9" transform="rotate(0.83 1036.3 450.0)"></ellipse><ellipse cx="1060.8" cy="450.0" rx="117.6" ry="133.7" transform="rotate(0.92 1060.8 450.0)"></ellipse><ellipse cx="1085.4" cy="450.0" rx="128.3" ry="145.5" transform="rotate(1.01 1085.4 450.0)"></ellipse><ellipse cx="1110.0" cy="450.0" rx="139.1" ry="157.4" transform="rotate(1.09 1110.0 450.0)"></ellipse><ellipse cx="1134.7" cy="450.0" rx="149.9" ry="169.3" transform="rotate(1.18 1134.7 450.0)"></ellipse><ellipse cx="1159.5" cy="450.0" rx="160.7" ry="181.2" transform="rotate(1.27 1159.5 450.0)"></ellipse><ellipse cx="1184.4" cy="450.0" rx="171.5" ry="193.2" transform="rotate(1.36 1184.4 450.0)"></ellipse><ellipse cx="1209.2" cy="450.0" rx="182.3" ry="205.2" transform="rotate(1.44 1209.2 450.0)"></ellipse><ellipse cx="1234.2" cy="450.0" rx="193.2" ry="217.2" transform="rotate(1.53 1234.2 450.0)"></ellipse><ellipse cx="1259.2" cy="450.0" rx="204.1" ry="229.3" transform="rotate(1.62 1259.2 450.0)"></ellipse><ellipse cx="1284.2" cy="450.0" rx="215.0" ry="241.3" transform="rotate(1.71 1284.2 450.0)"></ellipse><ellipse cx="1309.3" cy="450.0" rx="225.9" ry="253.4" transform="rotate(1.80 1309.3 450.0)"></ellipse><ellipse cx="1334.4" cy="450.0" rx="236.9" ry="265.5" transform="rotate(1.89 1334.4 450.0)"></ellipse><ellipse cx="1359.6" cy="450.0" rx="247.8" ry="277.6" transform="rotate(1.97 1359.6 450.0)"></ellipse><ellipse cx="1384.8" cy="450.0" rx="258.8" ry="289.8" transform="rotate(2.06 1384.8 450.0)"></ellipse><ellipse cx="1410.0" cy="450.0" rx="269.8" ry="302.0" transform="rotate(2.15 1410.0 450.0)"></ellipse><ellipse cx="1435.3" cy="450.0" rx="280.8" ry="314.1" transform="rotate(2.24 1435.3 450.0)"></ellipse><ellipse cx="1460.6" cy="450.0" rx="291.8" ry="326.3" transform="rotate(2.33 1460.6 450.0)"></ellipse><ellipse cx="1485.9" cy="450.0" rx="302.9" ry="338.5" transform="rotate(2.42 1485.9 450.0)"></ellipse><ellipse cx="1511.3" cy="450.0" rx="313.9" ry="350.8" transform="rotate(2.51 1511.3 450.0)"></ellipse><ellipse cx="1536.7" cy="450.0" rx="325.0" ry="363.0" transform="rotate(2.60 1536.7 450.0)"></ellipse></g>
+      
+        <!-- P5 獨立流光層：不受底圖 opacity 影響 -->
+        <g class="p5-horn-glow-layer" clip-path="url(#p5HornRevealClip)">
+          <g class="p5-horn-glow p5-horn-glow-left">
+<ellipse cx="778.2" cy="450.0" rx="13.5" ry="18.5" transform="rotate(-0.08 778.2 450.0)"></ellipse><ellipse cx="755.3" cy="450.0" rx="23.5" ry="29.5" transform="rotate(-0.16 755.3 450.0)"></ellipse><ellipse cx="732.0" cy="450.0" rx="33.6" ry="40.8" transform="rotate(-0.24 732.0 450.0)"></ellipse><ellipse cx="708.5" cy="450.0" rx="43.9" ry="52.1" transform="rotate(-0.32 708.5 450.0)"></ellipse><ellipse cx="684.7" cy="450.0" rx="54.2" ry="63.6" transform="rotate(-0.41 684.7 450.0)"></ellipse><ellipse cx="660.7" cy="450.0" rx="64.7" ry="75.1" transform="rotate(-0.49 660.7 450.0)"></ellipse><ellipse cx="636.6" cy="450.0" rx="75.2" ry="86.7" transform="rotate(-0.58 636.6 450.0)"></ellipse><ellipse cx="612.4" cy="450.0" rx="85.7" ry="98.4" transform="rotate(-0.66 612.4 450.0)"></ellipse><ellipse cx="588.1" cy="450.0" rx="96.3" ry="110.1" transform="rotate(-0.75 588.1 450.0)"></ellipse><ellipse cx="563.7" cy="450.0" rx="107.0" ry="121.9" transform="rotate(-0.83 563.7 450.0)"></ellipse><ellipse cx="539.2" cy="450.0" rx="117.6" ry="133.7" transform="rotate(-0.92 539.2 450.0)"></ellipse><ellipse cx="514.6" cy="450.0" rx="128.3" ry="145.5" transform="rotate(-1.01 514.6 450.0)"></ellipse><ellipse cx="490.0" cy="450.0" rx="139.1" ry="157.4" transform="rotate(-1.09 490.0 450.0)"></ellipse><ellipse cx="465.3" cy="450.0" rx="149.9" ry="169.3" transform="rotate(-1.18 465.3 450.0)"></ellipse><ellipse cx="440.5" cy="450.0" rx="160.7" ry="181.2" transform="rotate(-1.27 440.5 450.0)"></ellipse><ellipse cx="415.6" cy="450.0" rx="171.5" ry="193.2" transform="rotate(-1.36 415.6 450.0)"></ellipse><ellipse cx="390.8" cy="450.0" rx="182.3" ry="205.2" transform="rotate(-1.44 390.8 450.0)"></ellipse><ellipse cx="365.8" cy="450.0" rx="193.2" ry="217.2" transform="rotate(-1.53 365.8 450.0)"></ellipse><ellipse cx="340.8" cy="450.0" rx="204.1" ry="229.3" transform="rotate(-1.62 340.8 450.0)"></ellipse><ellipse cx="315.8" cy="450.0" rx="215.0" ry="241.3" transform="rotate(-1.71 315.8 450.0)"></ellipse><ellipse cx="290.7" cy="450.0" rx="225.9" ry="253.4" transform="rotate(-1.80 290.7 450.0)"></ellipse><ellipse cx="265.6" cy="450.0" rx="236.9" ry="265.5" transform="rotate(-1.89 265.6 450.0)"></ellipse><ellipse cx="240.4" cy="450.0" rx="247.8" ry="277.6" transform="rotate(-1.97 240.4 450.0)"></ellipse><ellipse cx="215.2" cy="450.0" rx="258.8" ry="289.8" transform="rotate(-2.06 215.2 450.0)"></ellipse><ellipse cx="190.0" cy="450.0" rx="269.8" ry="302.0" transform="rotate(-2.15 190.0 450.0)"></ellipse><ellipse cx="164.7" cy="450.0" rx="280.8" ry="314.1" transform="rotate(-2.24 164.7 450.0)"></ellipse><ellipse cx="139.4" cy="450.0" rx="291.8" ry="326.3" transform="rotate(-2.33 139.4 450.0)"></ellipse><ellipse cx="114.1" cy="450.0" rx="302.9" ry="338.5" transform="rotate(-2.42 114.1 450.0)"></ellipse><ellipse cx="88.7" cy="450.0" rx="313.9" ry="350.8" transform="rotate(-2.51 88.7 450.0)"></ellipse><ellipse cx="63.3" cy="450.0" rx="325.0" ry="363.0" transform="rotate(-2.60 63.3 450.0)"></ellipse>
+          </g>
+          <g class="p5-horn-glow p5-horn-glow-right">
+<ellipse cx="821.8" cy="450.0" rx="13.5" ry="18.5" transform="rotate(0.08 821.8 450.0)"></ellipse><ellipse cx="844.7" cy="450.0" rx="23.5" ry="29.5" transform="rotate(0.16 844.7 450.0)"></ellipse><ellipse cx="868.0" cy="450.0" rx="33.6" ry="40.8" transform="rotate(0.24 868.0 450.0)"></ellipse><ellipse cx="891.5" cy="450.0" rx="43.9" ry="52.1" transform="rotate(0.32 891.5 450.0)"></ellipse><ellipse cx="915.3" cy="450.0" rx="54.2" ry="63.6" transform="rotate(0.41 915.3 450.0)"></ellipse><ellipse cx="939.3" cy="450.0" rx="64.7" ry="75.1" transform="rotate(0.49 939.3 450.0)"></ellipse><ellipse cx="963.4" cy="450.0" rx="75.2" ry="86.7" transform="rotate(0.58 963.4 450.0)"></ellipse><ellipse cx="987.6" cy="450.0" rx="85.7" ry="98.4" transform="rotate(0.66 987.6 450.0)"></ellipse><ellipse cx="1011.9" cy="450.0" rx="96.3" ry="110.1" transform="rotate(0.75 1011.9 450.0)"></ellipse><ellipse cx="1036.3" cy="450.0" rx="107.0" ry="121.9" transform="rotate(0.83 1036.3 450.0)"></ellipse><ellipse cx="1060.8" cy="450.0" rx="117.6" ry="133.7" transform="rotate(0.92 1060.8 450.0)"></ellipse><ellipse cx="1085.4" cy="450.0" rx="128.3" ry="145.5" transform="rotate(1.01 1085.4 450.0)"></ellipse><ellipse cx="1110.0" cy="450.0" rx="139.1" ry="157.4" transform="rotate(1.09 1110.0 450.0)"></ellipse><ellipse cx="1134.7" cy="450.0" rx="149.9" ry="169.3" transform="rotate(1.18 1134.7 450.0)"></ellipse><ellipse cx="1159.5" cy="450.0" rx="160.7" ry="181.2" transform="rotate(1.27 1159.5 450.0)"></ellipse><ellipse cx="1184.4" cy="450.0" rx="171.5" ry="193.2" transform="rotate(1.36 1184.4 450.0)"></ellipse><ellipse cx="1209.2" cy="450.0" rx="182.3" ry="205.2" transform="rotate(1.44 1209.2 450.0)"></ellipse><ellipse cx="1234.2" cy="450.0" rx="193.2" ry="217.2" transform="rotate(1.53 1234.2 450.0)"></ellipse><ellipse cx="1259.2" cy="450.0" rx="204.1" ry="229.3" transform="rotate(1.62 1259.2 450.0)"></ellipse><ellipse cx="1284.2" cy="450.0" rx="215.0" ry="241.3" transform="rotate(1.71 1284.2 450.0)"></ellipse><ellipse cx="1309.3" cy="450.0" rx="225.9" ry="253.4" transform="rotate(1.80 1309.3 450.0)"></ellipse><ellipse cx="1334.4" cy="450.0" rx="236.9" ry="265.5" transform="rotate(1.89 1334.4 450.0)"></ellipse><ellipse cx="1359.6" cy="450.0" rx="247.8" ry="277.6" transform="rotate(1.97 1359.6 450.0)"></ellipse><ellipse cx="1384.8" cy="450.0" rx="258.8" ry="289.8" transform="rotate(2.06 1384.8 450.0)"></ellipse><ellipse cx="1410.0" cy="450.0" rx="269.8" ry="302.0" transform="rotate(2.15 1410.0 450.0)"></ellipse><ellipse cx="1435.3" cy="450.0" rx="280.8" ry="314.1" transform="rotate(2.24 1435.3 450.0)"></ellipse><ellipse cx="1460.6" cy="450.0" rx="291.8" ry="326.3" transform="rotate(2.33 1460.6 450.0)"></ellipse><ellipse cx="1485.9" cy="450.0" rx="302.9" ry="338.5" transform="rotate(2.42 1485.9 450.0)"></ellipse><ellipse cx="1511.3" cy="450.0" rx="313.9" ry="350.8" transform="rotate(2.51 1511.3 450.0)"></ellipse><ellipse cx="1536.7" cy="450.0" rx="325.0" ry="363.0" transform="rotate(2.60 1536.7 450.0)"></ellipse>
+          </g>
+        </g>
+</svg>
       <button class="skip-anim-btn" id="p5EntrySkipBtn">Skip 略過動畫 ✕</button>
       <div class="p5-entry-content">
         <div class="p5-entry-copy">
@@ -2528,12 +2808,18 @@
 
           <!-- 山坡底景：靜態，不參與動畫 -->
           <g class="memory-tree-hills">
-            <path d="M-40 846 C65 800 140 814 224 842 C309 870 392 857 475 826 C565 793 650 803 820 850"/>
-            <path d="M-55 864 C52 824 134 832 217 858 C302 884 389 876 480 846 C580 813 665 824 825 872"/>
-            <path d="M-70 884 C38 850 123 850 210 875 C300 900 392 898 488 869 C590 838 682 851 838 894"/>
-            <path d="M40 824 C108 790 164 789 224 808 C282 826 332 830 388 812"/>
-            <path d="M408 820 C474 785 535 777 602 796 C661 813 707 822 790 815"/>
-            <path d="M78 892 C150 869 214 872 282 894"/>
+            <path data-hill-index="0" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="1" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="2" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="3" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="4" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="5" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="6" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="7" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="8" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="9" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="10" d="M0 900 C200 860 400 880 760 900"/>
+            <path data-hill-index="11" d="M0 900 C200 860 400 880 760 900"/>
           </g>
 
           <g class="memory-tree-base">
@@ -2743,9 +3029,9 @@
               <path d="M454 320 C503 303 544 277 580 240"/>
               <path d="M484 266 C529 244 561 216 590 177"/>
               <path d="M358 316 C386 275 402 234 410 190"/>
-              <path d="M410 190 C440 157 470 124 493 88"/>
+              <path d="M410 190 C431 166 449 144 463 119"/>
               <path d="M314 279 C285 241 274 204 279 162"/>
-              <path d="M279 162 C254 128 232 98 207 67"/>
+              <path d="M279 162 C262 137 246 116 230 94"/>
               <path d="M321 239 C347 205 360 169 362 128"/>
               <path d="M362 128 C350 97 348 70 354 34"/>
               <path d="M298 214 C276 178 252 155 218 134"/>
@@ -2754,11 +3040,11 @@
               <path d="M537 407 C574 433 604 459 630 492"/>
               <path d="M598 335 C638 342 675 356 713 380"/>
               <path d="M580 240 C622 221 655 196 688 160"/>
-              <path d="M548 168 C582 141 607 111 628 76"/>
+              <path d="M548 168 C570 149 587 128 600 105"/>
               <path d="M176 276 C136 292 102 316 67 347"/>
               <path d="M118 290 C80 279 48 259 17 231"/>
-              <path d="M207 67 C174 77 143 94 111 118"/>
-              <path d="M423 42 C455 66 478 91 499 121"/>
+              <path d="M207 67 C184 75 164 86 145 101"/>
+              <path d="M423 42 C443 58 457 75 468 94"/>
             </g>
 
             <!-- 前層葉：最後畫，會覆蓋部分枝條 -->
@@ -2955,8 +3241,12 @@
           <div class="ui-line-mask"><div class="ui-line-content memory-wall-title">思念洸語牆</div></div>
           <p>十二道最近留下的思念，在這裡安靜發光。</p>
         </header>
-        <div class="memory-wall-grid" id="memoryWallGrid" aria-live="polite">
-          <div class="memory-wall-loading">正在拾起最近的思念微光……</div>
+        <div class="memory-wall-carousel">
+          <button type="button" class="memory-wall-nav memory-wall-nav-prev" id="memoryWallPrevBtn" aria-label="查看前面的留言">‹</button>
+          <div class="memory-wall-grid" id="memoryWallGrid" aria-live="polite">
+            <div class="memory-wall-loading">正在拾起最近的思念微光……</div>
+          </div>
+          <button type="button" class="memory-wall-nav memory-wall-nav-next" id="memoryWallNextBtn" aria-label="查看後面的留言">›</button>
         </div>
         <button type="button" class="memory-wall-continue" id="memoryWallContinueBtn">返回留言板・寫下個人思念</button>
       </div>
@@ -3302,14 +3592,14 @@
           Math.abs(index - p1TopGlowRing);
 
         const topGlowCurrent =
-          Math.max(0, 1 - topDistance / 3.0) * endFade;
+          Math.max(0, 1 - topDistance / 2.35) * endFade;
 
         // 下一輪第一圈提前淡入
         const topNextDistance =
           Math.abs(index - p1NextTopGlowRing);
 
         const topGlowNext =
-          Math.max(0, 1 - topNextDistance / 3.0) * nextCycleFade;
+          Math.max(0, 1 - topNextDistance / 2.35) * nextCycleFade;
 
         const topGlow =
           Math.max(topGlowCurrent, topGlowNext);
@@ -3317,17 +3607,18 @@
         if (topGlow > 0) {
           bgCtx.save();
 
+          // 光的核心比暈更清楚，接近洸語牆樹枝上的流動金光。
           bgCtx.strokeStyle =
-            `rgba(242, 168, 82, ${0.025 + topGlow * 0.075})`;
+            `rgba(247, 184, 96, ${0.09 + topGlow * 0.29})`;
 
           bgCtx.lineWidth =
-            Math.max(0.9 * BG_DPR, 0.9);
+            Math.max((0.88 + topGlow * 0.24) * BG_DPR, 0.95);
 
           bgCtx.shadowColor =
-            `rgba(242, 152, 80, ${0.08 + topGlow * 0.16})`;
+            `rgba(242, 152, 80, ${0.06 + topGlow * 0.17})`;
 
           bgCtx.shadowBlur =
-            (3 + topGlow * 9) * BG_DPR;
+            (1.5 + topGlow * 3.0) * BG_DPR;
 
           bgCtx.beginPath();
           bgCtx.arc(
@@ -3350,14 +3641,14 @@
           Math.abs(index - p1BottomGlowRing);
 
         const bottomGlowCurrent =
-          Math.max(0, 1 - bottomDistance / 3.0) * endFade;
+          Math.max(0, 1 - bottomDistance / 2.35) * endFade;
 
         // 下一輪最外圈提前淡入
         const bottomNextDistance =
           Math.abs(index - p1NextBottomGlowRing);
 
         const bottomGlowNext =
-          Math.max(0, 1 - bottomNextDistance / 3.0) * nextCycleFade;
+          Math.max(0, 1 - bottomNextDistance / 2.35) * nextCycleFade;
 
         const bottomGlow =
           Math.max(bottomGlowCurrent, bottomGlowNext);
@@ -3366,16 +3657,16 @@
           bgCtx.save();
 
           bgCtx.strokeStyle =
-            `rgba(242, 168, 82, ${0.025 + bottomGlow * 0.075})`;
+            `rgba(247, 184, 96, ${0.09 + bottomGlow * 0.29})`;
 
           bgCtx.lineWidth =
-            Math.max(0.9 * BG_DPR, 0.9);
+            Math.max((0.88 + bottomGlow * 0.24) * BG_DPR, 0.95);
 
           bgCtx.shadowColor =
-            `rgba(242, 152, 80, ${0.08 + bottomGlow * 0.16})`;
+            `rgba(242, 152, 80, ${0.06 + bottomGlow * 0.17})`;
 
           bgCtx.shadowBlur =
-            (3 + bottomGlow * 9) * BG_DPR;
+            (1.5 + bottomGlow * 3.0) * BG_DPR;
 
           bgCtx.beginPath();
           bgCtx.arc(
@@ -3394,15 +3685,33 @@
 
       p1RingGeometry.forEach((ring, index) => {
         /*
+          P1 入場：
+          beamDownProgress 原本就是 1.6 秒。
+          現在把它映射成「內圈 -> 外圈」逐圈生成，
+          而不是 20 圈同時出現。
+        */
+        const ringT =
+          p1CircleCount <= 1
+            ? 0
+            : index / (p1CircleCount - 1);
+
+        // 每一圈稍微重疊，整體仍在約 1.6 秒內完成。
+        const revealWindow = 0.26;
+        const ringRevealRaw =
+          (appear - ringT * 0.76) / revealWindow;
+        const ringRevealClamped =
+          Math.max(0, Math.min(1, ringRevealRaw));
+        const ringReveal =
+          ringRevealClamped *
+          ringRevealClamped *
+          (3 - 2 * ringRevealClamped);
+
+        if (ringReveal <= 0.001) return;
+
+        /*
           反向配對：
-
-          上方第 1 圈  -> 下方第 20 圈
-          上方第 2 圈  -> 下方第 19 圈
-          ...
-          上方第 20 圈 -> 下方第 1 圈
-
-          上方圓的「6 點鐘位置」
-          直接等於對應下方圓的「12 點鐘位置」。
+          上方第 1 圈 -> 下方第 20 圈，
+          幾何關係不變；只有「顯示順序」改成由內往外。
         */
         const pairedBottomIndex =
           p1CircleCount - 1 - index;
@@ -3413,41 +3722,46 @@
         const topBottomPointY =
           pairedBottom.shiftedBottomTopPointY;
 
-        // 上方正圓圓心 = 配對接觸點 - 自己的半徑
         const topCenterY =
           topBottomPointY - ring.r;
 
-        // -------------------------
+        const bottomCenterY =
+          ring.shiftedBottomTopPointY + ring.r;
+
+        bgCtx.save();
+
+        // 線條在生成時同步淡入。
+        bgCtx.globalAlpha = ringReveal;
+
+        // 每一圈不是瞬間整圈出現，而是由既有起點把弧線畫完。
+        const visibleArcLength =
+          ring.arcLength * ringReveal;
+
         // 上方組
-        // -------------------------
         bgCtx.beginPath();
         bgCtx.arc(
           centerX,
           topCenterY,
           ring.r,
           P1_TOP_START_ANGLE,
-          P1_TOP_START_ANGLE + ring.arcLength,
+          P1_TOP_START_ANGLE + visibleArcLength,
           false
         );
         bgCtx.stroke();
 
-        // -------------------------
         // 下方組
-        // 下方位置維持上一版，不再改動。
-        // -------------------------
-        const bottomCenterY =
-          ring.shiftedBottomTopPointY + ring.r;
-
         bgCtx.beginPath();
         bgCtx.arc(
           centerX,
           bottomCenterY,
           ring.r,
           P1_BOTTOM_START_ANGLE,
-          P1_BOTTOM_START_ANGLE + ring.arcLength,
+          P1_BOTTOM_START_ANGLE + visibleArcLength,
           false
         );
         bgCtx.stroke();
+
+        bgCtx.restore();
       });
 
 
@@ -4015,6 +4329,10 @@
     let brandTransitionCenter = { x: 0, y: 0 };
     let brandTransitionMaxRadius = 0;
 
+    // 原本 5 圈保持既有間距，再向外增加 3 圈。
+    const BRAND_TRANSITION_BASE_RING_COUNT = 5;
+    const BRAND_TRANSITION_RING_COUNT = 8;
+
     function resizeBrandTransitionCanvas() {
       brandTransitionCanvas.width = window.innerWidth * DPR;
       brandTransitionCanvas.height = window.innerHeight * DPR;
@@ -4028,17 +4346,33 @@
 
     function buildBrandTransitionParticles() {
       const points = [];
-      const ringCount = 5;
-      const petalsPerRing = [30, 46, 62, 78, 96];
+      const ringCount = BRAND_TRANSITION_RING_COUNT;
+      const petalsPerRing = [30, 46, 62, 78, 96, 106, 116, 126];
 
       for (let ring = 0; ring < ringCount; ring += 1) {
-        const radius = brandTransitionMaxRadius * ((ring + 1) / ringCount);
+        // 前 5 圈位置完全不變，第 6~8 圈沿相同間距向外延伸。
+        const radius =
+          brandTransitionMaxRadius *
+          ((ring + 1) / BRAND_TRANSITION_BASE_RING_COUNT);
         const count = petalsPerRing[ring];
 
         for (let i = 0; i < count; i += 1) {
           const angle = (i / count) * Math.PI * 2;
-          const wave = Math.sin(angle * (ring + 3)) * radius * 0.09;
-          const targetRadius = radius + wave;
+          const lobeBoost = ring >= 7 ? 2 : (ring >= 5 ? 1 : 0);
+
+          // 右側保留既有節奏；左側加入第二組相位波，
+          // 讓花瓣有局部交疊、不再像等距規則圓環。
+          const isLeftHalf = Math.cos(angle) < 0;
+          const primaryWave =
+            Math.sin(angle * (ring + 3 + lobeBoost)) * radius * 0.09;
+          const overlapWave = isLeftHalf
+            ? Math.sin(
+                angle * (ring + 4 + lobeBoost) +
+                ring * 0.58
+              ) * radius * 0.045
+            : 0;
+
+          const targetRadius = radius + primaryWave + overlapWave;
           points.push({
             ring,
             angle,
@@ -4088,8 +4422,19 @@
       ctx.translate(-brandTransitionCenter.x, -brandTransitionCenter.y);
 
       brandTransitionParticles.forEach((particle) => {
-        const ringRevealStart = particle.ring / 5;
-        const ringReveal = gsap.utils.clamp(0, 1, (brandTransitionState.drawProgress - ringRevealStart) * 5);
+        const ringRevealStart =
+          particle.ring < BRAND_TRANSITION_BASE_RING_COUNT
+            ? particle.ring / 6.2
+            : 0.58 + (particle.ring - BRAND_TRANSITION_BASE_RING_COUNT) * 0.055;
+
+        const revealSpeed =
+          particle.ring < BRAND_TRANSITION_BASE_RING_COUNT ? 5.6 : 4.8;
+
+        const ringReveal = gsap.utils.clamp(
+          0,
+          1,
+          (brandTransitionState.drawProgress - ringRevealStart) * revealSpeed
+        );
         const collapseX = particle.startX + (brandTransitionCenter.x - particle.startX) * brandTransitionState.implode;
         const collapseY = particle.startY + (brandTransitionCenter.y - particle.startY) * brandTransitionState.implode;
         const x = collapseX + (particle.targetX - collapseX) * ringReveal;
@@ -4170,9 +4515,16 @@
       const x = (clientX - rect.left) * DPR;
       const y = (clientY - rect.top) * DPR;
       const distance = Math.hypot(x - brandTransitionCenter.x, y - brandTransitionCenter.y);
-      const ringWidth = brandTransitionMaxRadius / 5;
-      brandTransitionHoverRing = distance <= brandTransitionMaxRadius
-        ? Math.min(4, Math.floor(distance / ringWidth))
+      const ringWidth =
+        brandTransitionMaxRadius / BRAND_TRANSITION_BASE_RING_COUNT;
+      const fullMandalaRadius =
+        ringWidth * BRAND_TRANSITION_RING_COUNT;
+
+      brandTransitionHoverRing = distance <= fullMandalaRadius
+        ? Math.min(
+            BRAND_TRANSITION_RING_COUNT - 1,
+            Math.floor(distance / ringWidth)
+          )
         : -1;
     }
 
@@ -4184,12 +4536,38 @@
       brandTransitionHoverRing = -1;
     }, { passive: true });
 
+    function addBrandTransitionTextAnimations(timeline) {
+      const textLines = gsap.utils.toArray('#brandTransitionText .p3-text-line');
+
+      textLines.forEach((line) => {
+        const enterAt = Number(line.dataset.enterAt || 0);
+        const partGap = Number(line.dataset.partGap || 1.5);
+        const parts = gsap.utils.toArray(line.querySelectorAll('.sub-part'));
+
+        timeline.to(
+          line,
+          { opacity: 1, y: 0, duration: 1, ease: 'power2.out' },
+          enterAt
+        );
+
+        parts.forEach((part, partIndex) => {
+          timeline.to(
+            part,
+            { opacity: 1, duration: 1, ease: 'power2.out' },
+            enterAt + partIndex * partGap
+          );
+        });
+      });
+    }
+
     function resetBrandTransitionPage() {
       brandTransitionTL?.kill();
       brandTransitionPulseTween?.kill();
       brandTransitionPulseTween = null;
       gsap.killTweensOf(brandTransitionState);
-      gsap.killTweensOf('#brandTransitionSection .p3-text-line');
+      gsap.killTweensOf(
+        '#brandTransitionSection .p3-text-line, #brandTransitionSection .p3-text-line .sub-part'
+      );
       gsap.killTweensOf('#brandTransitionSkipBtn');
 
       Object.assign(brandTransitionState, {
@@ -4204,6 +4582,7 @@
       isBrandTransitionInteractive = false;
       brandTransitionHoverRing = -1;
       gsap.set('#brandTransitionSection .p3-text-line', { opacity: 0, y: 20 });
+      gsap.set('#brandTransitionSection .p3-text-line .sub-part', { opacity: 0 });
       gsap.set('#brandTransitionSkipBtn', { opacity: 1, pointerEvents: 'auto' });
       document.getElementById('brandTransitionSkipBtn').classList.add('show');
 
@@ -4222,28 +4601,63 @@
       brandTransitionTL = gsap.timeline();
 
       brandTransitionTL
-        // 收束拉長至 5.3 秒，讓粒子移動路徑能被明確辨識；文字不必等收束完成。
-        .to(brandTransitionState, { implode: 1, duration: 5.3, ease: 'power2.inOut' }, 0)
-        // 第一段文字維持約 4～5 秒出現，與仍在進行的收束動畫重疊，避免整頁節奏過長。
-        .to('.p3-text-1', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 4.3)
-        // 收束完成後才由中心光點向外長出曼陀羅。
-        .to(brandTransitionState, { rotation: Math.PI * 0.35, drawProgress: 0.4, duration: 1.5, ease: 'power2.out' }, 5.3)
-        .to('.p3-text-2', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 5.8)
-        .to(brandTransitionState, { rotation: Math.PI * 0.7, drawProgress: 0.8, duration: 1.5, ease: 'power2.out' }, 6.8)
-        .to('.p3-text-3', { opacity: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 7.3)
-        .to(brandTransitionState, { rotation: Math.PI, drawProgress: 1, duration: 1.5, ease: 'power2.out' }, 8.3)
-        .call(() => {
-          isBrandTransitionInteractive = true;
-          setPageAnimationLock(false);
-          brandTransitionPulseTween = gsap.to(brandTransitionState, {
-            pulse: Math.PI * 2,
-            duration: 2.8,
-            repeat: -1,
-            ease: 'none'
-          });
-          animateArrow(document.getElementById('brandTransitionSection'));
-          gsap.to('#brandTransitionSkipBtn', { opacity: 0, pointerEvents: 'none', duration: 0.4 });
-        }, null, 9.8);
+        .to(
+          brandTransitionState,
+          { implode: 1, duration: 5.3, ease: 'power2.inOut' },
+          0
+        )
+        .to(
+          brandTransitionState,
+          {
+            rotation: Math.PI * 0.35,
+            drawProgress: 0.42,
+            duration: 1.45,
+            ease: 'power2.out'
+          },
+          5.3
+        )
+        .to(
+          brandTransitionState,
+          {
+            rotation: Math.PI * 0.72,
+            drawProgress: 0.82,
+            duration: 1.65,
+            ease: 'power1.inOut'
+          },
+          6.55
+        )
+        .to(
+          brandTransitionState,
+          {
+            rotation: Math.PI,
+            drawProgress: 1,
+            duration: 1.75,
+            ease: 'power1.out'
+          },
+          7.95
+        );
+
+      addBrandTransitionTextAnimations(brandTransitionTL);
+
+      brandTransitionTL.call(() => {
+        isBrandTransitionInteractive = true;
+        setPageAnimationLock(false);
+
+        brandTransitionPulseTween = gsap.to(brandTransitionState, {
+          pulse: Math.PI * 2,
+          duration: 2.8,
+          repeat: -1,
+          ease: 'none'
+        });
+
+        animateArrow(document.getElementById('brandTransitionSection'));
+
+        gsap.to('#brandTransitionSkipBtn', {
+          opacity: 0,
+          pointerEvents: 'none',
+          duration: 0.4
+        });
+      }, null, 10.8);
     }
 
     function skipBrandTransitionAnimation() {
@@ -4251,6 +4665,7 @@
       brandTransitionTL.pause();
       gsap.set(brandTransitionState, { implode: 1, drawProgress: 1, rotation: Math.PI, opacity: 1, scale: 1 });
       gsap.set('#brandTransitionSection .p3-text-line', { opacity: 1, y: 0 });
+      gsap.set('#brandTransitionSection .p3-text-line .sub-part', { opacity: 1 });
       isBrandTransitionInteractive = true;
       setPageAnimationLock(false);
       brandTransitionPulseTween?.kill();
@@ -4366,8 +4781,10 @@
 
     function p4TerrainShape(px, depth, time) {
       /*
-        整體坡形 = 上一個獨立測試版約 50% 起伏。
-        局部凹凸維持較大的尺寸差異，因此仍然清楚可見。
+        P4 基礎坡面：
+        - 原本大型坡形保留。
+        - 額外疊一層低頻、平滑的波浪，讓底層不再像平面。
+        - 局部凸起／凹陷獨立維持 1.80 倍，不再被基礎波浪倍率影響。
       */
       const broad =
         Math.sin(px * Math.PI * 3.05 + time) * 0.013;
@@ -4403,12 +4820,35 @@
         0.005 *
         depth;
 
+      /*
+        新增「底層平面波浪」：
+        低頻、長波長，只有緩升緩降，不形成新的局部坑洞。
+        depth 有些微相位差，所以 45 條線不會完全平行複製。
+      */
+      const baseWave =
+        Math.sin(
+          px * Math.PI * 2 * 1.12 +
+          depth * 0.82 -
+          time * 0.22
+        ) *
+        0.0135;
+
+      const baseWave2 =
+        Math.sin(
+          px * Math.PI * 2 * 0.56 -
+          depth * 0.46 +
+          time * 0.12
+        ) *
+        0.007;
+
       let local = 0;
       for (const feature of p4TerrainFeatures) {
         local += p4TerrainLocalFeature(px, depth, feature);
       }
 
-      // 極淡微地形，只破除過度平整，不形成額外坑洞
+      // 局部凸起／凹陷維持使用者指定的 1.80 倍。
+      local *= 1.80;
+
       const micro =
         Math.sin(px * Math.PI * 10.5 + depth * 5.8 + time * 0.16) *
         Math.sin(px * Math.PI * 4.7 - depth * 3.7) *
@@ -4423,6 +4863,8 @@
         broadValley2 +
         depthWave +
         secondary +
+        baseWave +
+        baseWave2 +
         local +
         micro
       );
@@ -4516,13 +4958,13 @@
         // 本輪掃光
         const currentDistance = Math.abs(i - glowLine);
         const currentGlow =
-          Math.max(0, 1 - currentDistance / 3.2) *
+          Math.max(0, 1 - currentDistance / 2.35) *
           currentFade;
 
         // 下一輪最上層提前淡入
         const nextDistance = Math.abs(i - 0);
         const nextGlow =
-          Math.max(0, 1 - nextDistance / 3.2) *
+          Math.max(0, 1 - nextDistance / 2.35) *
           nextFade;
 
         const glow = Math.max(currentGlow, nextGlow);
@@ -4537,14 +4979,19 @@
             else ctx.lineTo(x, y);
           }
 
+          // 清楚的金色核心線 + 小範圍柔光，
+          // 視覺語言比照洸語牆樹的流光。
           ctx.strokeStyle =
-            `rgba(242, 168, 82, ${0.05 + glow * 0.20})`;
+            `rgba(247, 184, 96, ${0.24 + glow * 0.62})`;
 
-          ctx.lineWidth = 1.0;
+          ctx.lineWidth =
+            1.05 + glow * 0.48;
+
           ctx.shadowColor =
-            `rgba(242, 152, 80, ${0.10 + glow * 0.22})`;
+            `rgba(242, 152, 80, ${0.16 + glow * 0.38})`;
 
-          ctx.shadowBlur = 4 + glow * 9;
+          ctx.shadowBlur =
+            2.5 + glow * 5.5;
           ctx.stroke();
           ctx.restore();
         }
@@ -5326,15 +5773,16 @@
       const skipBtn = document.getElementById('p5EntrySkipBtn');
       const writeBtn = document.getElementById('p5WriteMemoryBtn');
       const wallBtn = document.getElementById('p5ViewWallBtn');
+      const revealRect = document.getElementById('p5HornRevealRect');
       let tl = null;
 
       // P5 外層喇叭｜中央 -> 左右兩側淡金掃光
       // 只處理 outer horns，不改 inner horns。
       const p5OuterLeft = Array.from(
-        page.querySelectorAll('.p5-horn-full-left ellipse')
+        page.querySelectorAll('.p5-horn-glow-left ellipse')
       );
       const p5OuterRight = Array.from(
-        page.querySelectorAll('.p5-horn-full-right ellipse')
+        page.querySelectorAll('.p5-horn-glow-right ellipse')
       );
 
       let p5HornGlowRafId = null;
@@ -5347,9 +5795,21 @@
 
       function clearP5HornGlow() {
         [...p5OuterLeft, ...p5OuterRight].forEach((ellipse) => {
-          ellipse.style.removeProperty('stroke');
-          ellipse.style.removeProperty('filter');
-          ellipse.style.removeProperty('opacity');
+          ellipse.style.stroke = 'rgba(255,193,108,0)';
+          ellipse.style.opacity = '0';
+          ellipse.style.filter = 'none';
+        });
+      }
+
+      function restartP5HornDrift() {
+        const driftGroups = page.querySelectorAll(
+          '.p5-horn-full-left, .p5-horn-full-right'
+        );
+
+        driftGroups.forEach((group) => {
+          group.style.animation = 'none';
+          void group.getBoundingClientRect();
+          group.style.removeProperty('animation');
         });
       }
 
@@ -5379,11 +5839,11 @@
         for (let i = 0; i < count; i += 1) {
           const currentDistance = Math.abs(i - glowIndex);
           const currentGlow =
-            Math.max(0, 1 - currentDistance / 3.2) * currentFade;
+            Math.max(0, 1 - currentDistance / 1.75) * currentFade;
 
           const nextDistance = Math.abs(i);
           const nextGlow =
-            Math.max(0, 1 - nextDistance / 3.2) * nextFade;
+            Math.max(0, 1 - nextDistance / 1.75) * nextFade;
 
           const glow = Math.max(currentGlow, nextGlow);
 
@@ -5397,14 +5857,16 @@
               return;
             }
 
+            // 獨立 glow layer：像樹枝流光一樣有清楚光芯，
+            // 只附帶小範圍柔光，不受底圖 opacity 影響。
             ellipse.style.stroke =
-              `rgba(242, 168, 82, ${0.44 + glow * 0.42})`;
+              `rgba(255, 198, 116, ${0.42 + glow * 0.58})`;
 
             ellipse.style.opacity =
-              `${0.82 + glow * 0.18}`;
+              `${0.26 + glow * 0.74}`;
 
             ellipse.style.filter =
-              `drop-shadow(0 0 ${2 + glow * 7}px rgba(242, 152, 80, ${0.10 + glow * 0.28}))`;
+              `drop-shadow(0 0 ${2 + glow * 5}px rgba(242, 152, 80, ${0.18 + glow * 0.42}))`;
           };
 
           // 同一個 index = 距離中央相同，因此左右同步往外。
@@ -5416,7 +5878,7 @@
       }
 
       function startP5HornGlow() {
-        stopP5HornGlow();
+        if (p5HornGlowRafId !== null) return;
         clearP5HornGlow();
 
         if (!p5OuterLeft.length || !p5OuterRight.length) return;
@@ -5445,6 +5907,16 @@
       function reset() {
         tl?.kill(); tl=null;
         stopP5HornGlow();
+
+        page.classList.remove('is-horn-revealed');
+
+        gsap.killTweensOf(revealRect);
+        gsap.set(revealRect, {
+          attr: {
+            x: 800,
+            width: 0
+          }
+        });
         gsap.killTweensOf([...lines, options, skipBtn]);
         gsap.set(lines,{y:'115%',autoAlpha:0});
         gsap.set(options,{y:18,autoAlpha:0});
@@ -5454,7 +5926,11 @@
       }
       window.enterP5EntryPage = function() {
         reset();
-        startP5HornGlow();
+
+        // 每次重新進入 P5 都從相同的視覺狀態開始。
+        clearP5HornGlow();
+        // 先維持 horn 本身靜止，只讓中央遮罩向左右展開。
+        page.classList.remove('is-horn-revealed');
         setPageAnimationLock(true);
         tl = gsap.timeline({
           onComplete() {
@@ -5463,15 +5939,46 @@
             gsap.to(skipBtn,{autoAlpha:0,pointerEvents:'none',duration:.3});
           }
         })
+        // SVG 座標系：x 由中心 800 往左移，同時 width 往左右增加。
+        .to(
+          revealRect,
+          {
+            attr: {
+              x: 0,
+              width: 1600
+            },
+            duration: 2.55,
+            ease: 'power2.inOut',
+            onComplete() {
+              page.classList.add('is-horn-revealed');
+
+              // 完整揭露後才開啟外層 drift 與金色掃光。
+              clearP5HornGlow();
+              restartP5HornDrift();
+              startP5HornGlow();
+            }
+          },
+          0
+        )
         .to(skipBtn,{autoAlpha:1,pointerEvents:'auto',duration:.35},.12)
-        .to(lines[0],{y:'0%',autoAlpha:1,duration:1,ease:'power2.out'},.25)
-        .to(lines[1],{y:'0%',autoAlpha:1,duration:1,ease:'power2.out'},'+=.65')
+        .to(
+          lines,
+          {
+            y:'0%',
+            autoAlpha:1,
+            duration:1,
+            ease:'power2.out',
+            stagger:1.65
+          },
+          .25
+        )
         .to(options,{y:0,autoAlpha:1,duration:.75,ease:'power2.out'},'+=.75')
         .call(readyOptions);
       };
       window.leaveP5EntryPage = function() {
         tl?.kill(); tl=null;
         stopP5HornGlow();
+        page.classList.remove('is-horn-revealed');
         gsap.killTweensOf([...lines,options,skipBtn]);
         setPageAnimationLock(false);
       };
@@ -5498,6 +6005,140 @@
       const continueBtn=document.getElementById('memoryWallContinueBtn');
       if(!page||!grid||!continueBtn) return;
       let fetchToken=0;
+
+      const prevBtn=document.getElementById('memoryWallPrevBtn');
+      const nextBtn=document.getElementById('memoryWallNextBtn');
+
+      function randomizeTreeHills(){
+        const paths = page.querySelectorAll('.memory-tree-hills path');
+        if(!paths.length) return;
+
+        paths.forEach((path,index)=>{
+          const startX = -90 + Math.random() * 170;
+
+          // 每條線右側終點明顯不同，避免整排被同一位置切齊。
+          const endX =
+            430 +
+            Math.random() * 410 +
+            (index % 4 === 0 ? 70 : 0);
+
+          const baseY =
+            792 +
+            index * 9.2 +
+            (Math.random() - .5) * 15;
+
+          const segmentCount =
+            3 + Math.floor(Math.random() * 3);
+
+          let x = startX;
+          let y = baseY;
+          let d = `M ${x.toFixed(1)} ${y.toFixed(1)}`;
+
+          for(let seg=0; seg<segmentCount; seg++){
+            const remaining = segmentCount - seg;
+            const avgWidth = (endX - x) / remaining;
+
+            const nextX =
+              seg === segmentCount - 1
+                ? endX
+                : x + avgWidth * (.72 + Math.random() * .52);
+
+            const amp =
+              9 + Math.random() * 30;
+
+            const direction =
+              Math.random() > .5 ? 1 : -1;
+
+            const nextY =
+              baseY +
+              direction *
+              amp *
+              (.28 + Math.random() * .72);
+
+            const c1x =
+              x + (nextX - x) * (.18 + Math.random() * .20);
+
+            const c2x =
+              x + (nextX - x) * (.62 + Math.random() * .24);
+
+            const c1y =
+              y +
+              direction *
+              amp *
+              (.45 + Math.random() * .65);
+
+            const c2y =
+              nextY -
+              direction *
+              amp *
+              (.28 + Math.random() * .52);
+
+            d +=
+              ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}` +
+              ` ${c2x.toFixed(1)} ${c2y.toFixed(1)}` +
+              ` ${nextX.toFixed(1)} ${nextY.toFixed(1)}`;
+
+            x = nextX;
+            y = nextY;
+          }
+
+          path.setAttribute('d', d);
+          path.style.opacity =
+            `${0.55 + Math.random() * 0.45}`;
+        });
+      }
+
+      function randomizeTreeBranches(){
+        const svg=page.querySelector('.memory-wall-tree svg');
+        if(!svg) return;
+        const paths=svg.querySelectorAll('.tree-secondary-branches path');
+        paths.forEach((path,index)=>{
+          if(!path.dataset.baseD) path.dataset.baseD=path.getAttribute('d')||'';
+          const base=path.dataset.baseD;
+          let numberIndex=0;
+          const varied=base.replace(/-?\d+(?:\.\d+)?/g,(match)=>{
+            const value=Number(match);
+            /* x/y 控制點只做小幅偏移，越靠樹冠稍大；
+               不碰主幹與主枝，因此整棵樹仍保持原本輪廓。 */
+            const amp=(index%3===0?7:5);
+            const delta=(Math.random()*2-1)*amp;
+            numberIndex+=1;
+            return (value+delta).toFixed(1);
+          });
+          path.setAttribute('d',varied);
+        });
+      }
+
+      function updateWallNav(){
+        if(!prevBtn||!nextBtn) return;
+        const overflow=grid.scrollWidth>grid.clientWidth+4;
+        prevBtn.style.display=overflow?'grid':'none';
+        nextBtn.style.display=overflow?'grid':'none';
+        if(!overflow) return;
+        prevBtn.disabled=grid.scrollLeft<=3;
+        nextBtn.disabled=grid.scrollLeft+grid.clientWidth>=grid.scrollWidth-3;
+      }
+
+      function wallPageStep(){
+        const first=grid.querySelector('.memory-wall-card');
+        if(!first) return Math.max(240,grid.clientWidth*.9);
+        const styles=getComputedStyle(grid);
+        const gap=parseFloat(styles.columnGap||styles.gap)||0;
+        return first.getBoundingClientRect().width+gap;
+      }
+
+      prevBtn?.addEventListener('click',()=>{
+        grid.scrollBy({left:-wallPageStep(),behavior:'smooth'});
+      });
+      nextBtn?.addEventListener('click',()=>{
+        grid.scrollBy({left:wallPageStep(),behavior:'smooth'});
+      });
+      grid.addEventListener('scroll',()=>requestAnimationFrame(updateWallNav),{passive:true});
+      randomizeTreeBranches();
+      randomizeTreeHills();
+
+      // 統一交給全站 handleResize() 呼叫。
+      window.resizeMemoryWallLayout = updateWallNav;
 
       function goP6(){
         const target=document.getElementById('messageCardSection');
@@ -5580,6 +6221,8 @@
             const el=document.createElement('div'); el.className='memory-wall-empty'; el.textContent='牆上還沒有思念，等待第一道微光。'; grid.appendChild(el); return;
           }
           data.slice(0,12).forEach(item=>grid.appendChild(createCard(item)));
+          grid.scrollLeft=0;
+          requestAnimationFrame(updateWallNav);
         }catch(error){
           console.error('洸語牆讀取失敗:',error);
           if(token!==fetchToken) return;
@@ -5588,6 +6231,7 @@
       }
       window.enterMemoryWallPage=function(){
         load();
+        requestAnimationFrame(updateWallNav);
         page.classList.add('is-tree-glowing');
         gsap.fromTo('.memory-wall-header',{autoAlpha:0,y:14},{autoAlpha:1,y:0,duration:.7,ease:'power2.out'});
         gsap.fromTo(continueBtn,{autoAlpha:0,y:10},{autoAlpha:1,y:0,duration:.55,delay:.35,ease:'power2.out'});
@@ -5609,6 +6253,7 @@
       resizeBrandTransitionCanvas();
       resizeP4Canvases();
       window.resizeP5Canvases?.();
+      window.resizeMemoryWallLayout?.();
     }
 
     function handleResize() {
