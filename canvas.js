@@ -109,14 +109,6 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       if (p1PersonImageSourceIndex < p1PersonImageSources.length) {
         p1PersonImage.src = p1PersonImageSources[p1PersonImageSourceIndex];
 
-    // =============================================================
-    // P1 人物顯示設定｜未來只需要調整這一區
-    // =============================================================
-    const PERSON_SIZE = 0.074;              // 人物大小
-    const PERSON_OPACITY = 0.10;            // 人物透明度 10%
-    const PERSON_Y_OFFSET = 20 * BG_DPR;    // 正值往下，負值往上
-    const SHADOW_OPACITY = 0.22;            // 暖色地面投影強度
-
       }
     };
 
@@ -125,6 +117,20 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // P1 背景是全螢幕 Canvas，比 LP 的 40vh 波浪負擔高。
     // 僅降低此 Canvas 的內部渲染倍率，不影響 CSS 顯示尺寸。
     const BG_DPR = Math.min(window.devicePixelRatio || 1, 1.1);
+
+    // =============================================================
+    // P1 人物顯示設定｜未來只需要調整這一區
+    // -------------------------------------------------------------
+    // PERSON_SIZE      人物大小
+    // PERSON_OPACITY   人物透明度
+    // PERSON_Y_OFFSET  垂直位移：正值往下、負值往上
+    // SHADOW_OPACITY   暖色地面投影強度
+    // =============================================================
+    const PERSON_SIZE = 0.074;
+    const PERSON_OPACITY = 0.10;
+    const PERSON_Y_OFFSET = 20 * BG_DPR;
+    const SHADOW_OPACITY = 0.22;
+
     let isBgCanvasRendering = true;
 
     function resizeBgCanvas() {
