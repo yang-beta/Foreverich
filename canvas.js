@@ -92,6 +92,27 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // =============================================================
     const bgCanvas = document.getElementById('mandalaCanvas');
     const bgCtx = bgCanvas.getContext('2d', { alpha: false });
+    // P1 人物 PNG
+    // 優先讀取 img/man-s.png；若目前放在網站根目錄，則自動 fallback。
+    const p1PersonImage = new Image();
+    const p1PersonImageSources = ['img/man-s.png', './man-s.png'];
+    let p1PersonImageSourceIndex = 0;
+    let p1PersonImageReady = false;
+
+    p1PersonImage.onload = () => {
+      p1PersonImageReady = true;
+    };
+
+    p1PersonImage.onerror = () => {
+      p1PersonImageReady = false;
+      p1PersonImageSourceIndex += 1;
+      if (p1PersonImageSourceIndex < p1PersonImageSources.length) {
+        p1PersonImage.src = p1PersonImageSources[p1PersonImageSourceIndex];
+      }
+    };
+
+    p1PersonImage.src = p1PersonImageSources[p1PersonImageSourceIndex];
+
     // P1 背景是全螢幕 Canvas，比 LP 的 40vh 波浪負擔高。
     // 僅降低此 Canvas 的內部渲染倍率，不影響 CSS 顯示尺寸。
     const BG_DPR = Math.min(window.devicePixelRatio || 1, 1.1);
@@ -516,185 +537,85 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
 
       /*
-        P1 人物剪影 V4
-        參考使用者提供的正面行走男性輪廓：
-        - 頭部略窄、肩線自然下斜
-        - 手臂貼近身體後向外微張
-        - 改為正面站立，左右兩腿保留清楚間隙
-        - 保持簡化 Canvas silhouette，不追求照片級細節
+        P1 人物｜改用 man-s.png
+        -------------------------------------------------------------
+        定位問題的真正原因不是文字把人物往下壓。
+        舊版雖然 personContactY 已經是紅線高度，但 Canvas 人形以紅線
+        當「局部座標原點」後，腿仍繼續往下畫，因此腳底自然低於紅線。
+
+        新版直接讓 PNG 的「圖片底部」= personContactY。
+        所以人物腳底會真正落在紅線上，文字不參與人物座標計算。
       */
-      // P1 人物位置：左右固定置中；腳底上移到截圖紅線高度。
-      // 使用上方組最外圈的 6 點鐘底端作為人物腳底接觸點。
       const personContactY =
         p1RingGeometry[p1CircleCount - 1]
           .shiftedBottomTopPointY;
 
+      // 人物永遠保持畫面水平正中央。
       const personX = centerX;
+
+      // 人物不需要大；只控制高度，寬度依 PNG 原始比例計算。
       const personH =
         Math.max(
-          34 * BG_DPR,
-          Math.min(W, H) * 0.064
+          44 * BG_DPR,
+          Math.min(W, H) * 0.092
         );
 
       const personReveal = Math.max(0, Math.min(1, animationParams.personProgress));
       const personEase = personReveal * personReveal * (3 - 2 * personReveal);
-      const personGlow =
-        (0.72 + 0.18 * (0.5 + 0.5 * Math.sin(globalTime * 0.010))) * personEase;
 
-      if (personEase > 0.001) {
+      if (personEase > 0.001 && p1PersonImageReady) {
+        const naturalW = p1PersonImage.naturalWidth || 30;
+        const naturalH = p1PersonImage.naturalHeight || 80;
+        const personW = personH * (naturalW / naturalH);
+
+        // 精準定位：
+        // X：人物中心 = 畫面中心
+        // Y：PNG 最底部 = 紅線
+        const personDrawX = personX - personW / 2;
+        const personDrawY = personContactY - personH;
+
         bgCtx.save();
 
-        // 前方照射的投影：從人物腳底往畫面後方（上方）延伸。
-        // 使用低透明度 + blur，避免形成硬黑三角。
-        const shadowLength = personH * 0.78;
+        // 保留「人物前方有光源」所形成的淡陰影。
+        const shadowLength = personH * 0.72;
         const shadowGradient = bgCtx.createLinearGradient(
           personX, personContactY,
           personX, personContactY - shadowLength
         );
-        shadowGradient.addColorStop(0, `rgba(6, 6, 6, ${0.44 * personEase})`);
-        shadowGradient.addColorStop(0.42, `rgba(6, 6, 6, ${0.20 * personEase})`);
+        shadowGradient.addColorStop(0, `rgba(6, 6, 6, ${0.30 * personEase})`);
+        shadowGradient.addColorStop(0.45, `rgba(6, 6, 6, ${0.14 * personEase})`);
         shadowGradient.addColorStop(1, 'rgba(6, 6, 6, 0)');
 
         bgCtx.save();
         bgCtx.fillStyle = shadowGradient;
-        bgCtx.filter = `blur(${3.5 * BG_DPR}px)`;
+        bgCtx.filter = `blur(${3 * BG_DPR}px)`;
         bgCtx.beginPath();
-        bgCtx.moveTo(personX - personH * 0.075, personContactY - 1 * BG_DPR);
-        bgCtx.lineTo(personX + personH * 0.075, personContactY - 1 * BG_DPR);
-        bgCtx.lineTo(personX + personH * 0.34, personContactY - shadowLength);
+        bgCtx.moveTo(personX - personW * 0.28, personContactY);
+        bgCtx.lineTo(personX + personW * 0.28, personContactY);
+        bgCtx.lineTo(personX + personW * 1.05, personContactY - shadowLength);
         bgCtx.quadraticCurveTo(
           personX,
-          personContactY - shadowLength * 1.06,
-          personX - personH * 0.34,
+          personContactY - shadowLength * 1.04,
+          personX - personW * 1.05,
           personContactY - shadowLength
         );
         bgCtx.closePath();
         bgCtx.fill();
         bgCtx.restore();
 
-        bgCtx.translate(personX, personContactY);
-        // 人物本體透明度降為上一版的 60%。
-        bgCtx.globalAlpha = (personEase) * 0.60;
-        bgCtx.fillStyle = `rgba(205, 193, 181, ${0.38 * personGlow})`;
-        bgCtx.shadowColor = coralRgba('main', 0.22 * personGlow);
-        bgCtx.shadowBlur = 8 * BG_DPR;
+        // 人物透明度 = 50%。
+        // personEase 僅保留原本「慢慢出現」的動畫。
+        bgCtx.globalAlpha = 0.50 * personEase;
+        bgCtx.shadowColor = coralRgba('main', 0.14 * personEase);
+        bgCtx.shadowBlur = 5 * BG_DPR;
 
-        // 頭：較接近參考圖的直立橢圓與微收下巴。
-        bgCtx.beginPath();
-        bgCtx.ellipse(0, -personH * 0.855, personH * 0.092, personH * 0.118, 0, 0, Math.PI * 2);
-        bgCtx.fill();
-
-        // 頸部 + 軀幹：肩、胸、腰、臀都有明確收放。
-        bgCtx.beginPath();
-        bgCtx.moveTo(-personH * 0.050, -personH * 0.745);
-        bgCtx.bezierCurveTo(-personH * 0.115, -personH * 0.730, -personH * 0.175, -personH * 0.690, -personH * 0.195, -personH * 0.620);
-        // 胸廓
-        bgCtx.bezierCurveTo(-personH * 0.205, -personH * 0.535, -personH * 0.188, -personH * 0.425, -personH * 0.160, -personH * 0.330);
-        // 腰部內收
-        bgCtx.bezierCurveTo(-personH * 0.145, -personH * 0.270, -personH * 0.138, -personH * 0.220, -personH * 0.145, -personH * 0.175);
-        // 左臀重新外擴
-        bgCtx.bezierCurveTo(-personH * 0.158, -personH * 0.135, -personH * 0.150, -personH * 0.105, -personH * 0.128, -personH * 0.082);
-        bgCtx.bezierCurveTo(-personH * 0.095, -personH * 0.060, -personH * 0.055, -personH * 0.052, -personH * 0.030, -personH * 0.052);
-        bgCtx.lineTo(personH * 0.030, -personH * 0.052);
-        bgCtx.bezierCurveTo(personH * 0.055, -personH * 0.052, personH * 0.095, -personH * 0.060, personH * 0.128, -personH * 0.082);
-        // 右臀
-        bgCtx.bezierCurveTo(personH * 0.150, -personH * 0.105, personH * 0.158, -personH * 0.135, personH * 0.145, -personH * 0.175);
-        // 腰部
-        bgCtx.bezierCurveTo(personH * 0.138, -personH * 0.220, personH * 0.145, -personH * 0.270, personH * 0.160, -personH * 0.330);
-        bgCtx.bezierCurveTo(personH * 0.188, -personH * 0.425, personH * 0.205, -personH * 0.535, personH * 0.195, -personH * 0.620);
-        bgCtx.bezierCurveTo(personH * 0.175, -personH * 0.690, personH * 0.115, -personH * 0.730, personH * 0.050, -personH * 0.745);
-        bgCtx.closePath();
-        bgCtx.fill();
-
-        // 左腿：大腿較寬，膝部收窄，小腿略展；中間保留清楚縫隙。
-        bgCtx.beginPath();
-        bgCtx.moveTo(-personH * 0.128, -personH * 0.090);
-        bgCtx.bezierCurveTo(-personH * 0.135, personH * 0.030, -personH * 0.128, personH * 0.155, -personH * 0.112, personH * 0.265);
-        bgCtx.bezierCurveTo(-personH * 0.102, personH * 0.350, -personH * 0.096, personH * 0.430, -personH * 0.086, personH * 0.492);
-        bgCtx.bezierCurveTo(-personH * 0.078, personH * 0.525, -personH * 0.045, personH * 0.530, -personH * 0.024, personH * 0.502);
-        bgCtx.lineTo(-personH * 0.026, personH * 0.245);
-        bgCtx.bezierCurveTo(-personH * 0.030, personH * 0.115, -personH * 0.035, personH * 0.005, -personH * 0.038, -personH * 0.070);
-        bgCtx.closePath();
-        bgCtx.fill();
-
-        // 左鞋：略向外，讓站姿更穩。
-        bgCtx.beginPath();
-        bgCtx.moveTo(-personH * 0.086, personH * 0.475);
-        bgCtx.bezierCurveTo(-personH * 0.105, personH * 0.495, -personH * 0.112, personH * 0.520, -personH * 0.095, personH * 0.530);
-        bgCtx.lineTo(-personH * 0.020, personH * 0.530);
-        bgCtx.lineTo(-personH * 0.024, personH * 0.492);
-        bgCtx.closePath();
-        bgCtx.fill();
-
-        // 右腿
-        bgCtx.beginPath();
-        bgCtx.moveTo(personH * 0.038, -personH * 0.070);
-        bgCtx.bezierCurveTo(personH * 0.035, personH * 0.005, personH * 0.030, personH * 0.115, personH * 0.026, personH * 0.245);
-        bgCtx.lineTo(personH * 0.024, personH * 0.502);
-        bgCtx.bezierCurveTo(personH * 0.045, personH * 0.530, personH * 0.078, personH * 0.525, personH * 0.086, personH * 0.492);
-        bgCtx.bezierCurveTo(personH * 0.096, personH * 0.430, personH * 0.102, personH * 0.350, personH * 0.112, personH * 0.265);
-        bgCtx.bezierCurveTo(personH * 0.128, personH * 0.155, personH * 0.135, personH * 0.030, personH * 0.128, -personH * 0.090);
-        bgCtx.closePath();
-        bgCtx.fill();
-
-        // 右鞋
-        bgCtx.beginPath();
-        bgCtx.moveTo(personH * 0.086, personH * 0.475);
-        bgCtx.bezierCurveTo(personH * 0.105, personH * 0.495, personH * 0.112, personH * 0.520, personH * 0.095, personH * 0.530);
-        bgCtx.lineTo(personH * 0.020, personH * 0.530);
-        bgCtx.lineTo(personH * 0.024, personH * 0.492);
-        bgCtx.closePath();
-        bgCtx.fill();
-
-        // 左臂：肩膀自然垂下，手掌略向外。
-        bgCtx.beginPath();
-        bgCtx.moveTo(-personH * 0.155, -personH * 0.665);
-        bgCtx.bezierCurveTo(-personH * 0.205, -personH * 0.610, -personH * 0.220, -personH * 0.505, -personH * 0.235, -personH * 0.405);
-        bgCtx.bezierCurveTo(-personH * 0.248, -personH * 0.330, -personH * 0.255, -personH * 0.270, -personH * 0.245, -personH * 0.230);
-        bgCtx.bezierCurveTo(-personH * 0.235, -personH * 0.200, -personH * 0.214, -personH * 0.205, -personH * 0.205, -personH * 0.240);
-        bgCtx.lineTo(-personH * 0.185, -personH * 0.405);
-        bgCtx.bezierCurveTo(-personH * 0.175, -personH * 0.505, -personH * 0.165, -personH * 0.590, -personH * 0.125, -personH * 0.635);
-        bgCtx.closePath();
-        bgCtx.fill();
-
-        // 右臂。
-        bgCtx.beginPath();
-        bgCtx.moveTo(personH * 0.155, -personH * 0.665);
-        bgCtx.bezierCurveTo(personH * 0.205, -personH * 0.610, personH * 0.220, -personH * 0.505, personH * 0.235, -personH * 0.405);
-        bgCtx.bezierCurveTo(personH * 0.248, -personH * 0.330, personH * 0.255, -personH * 0.270, personH * 0.245, -personH * 0.230);
-        bgCtx.bezierCurveTo(personH * 0.235, -personH * 0.200, personH * 0.214, -personH * 0.205, personH * 0.205, -personH * 0.240);
-        bgCtx.lineTo(personH * 0.185, -personH * 0.405);
-        bgCtx.bezierCurveTo(personH * 0.175, -personH * 0.505, personH * 0.165, -personH * 0.590, personH * 0.125, -personH * 0.635);
-        bgCtx.closePath();
-        bgCtx.fill();
-
-        // 左手：掌心、拇指與其餘手指分叉，維持小尺寸剪影可讀性。
-        bgCtx.beginPath();
-        bgCtx.moveTo(-personH * 0.245, -personH * 0.245);
-        bgCtx.bezierCurveTo(-personH * 0.270, -personH * 0.230, -personH * 0.274, -personH * 0.198, -personH * 0.262, -personH * 0.174);
-        bgCtx.lineTo(-personH * 0.250, -personH * 0.138);
-        bgCtx.quadraticCurveTo(-personH * 0.242, -personH * 0.126, -personH * 0.237, -personH * 0.142);
-        bgCtx.lineTo(-personH * 0.239, -personH * 0.180);
-        bgCtx.lineTo(-personH * 0.226, -personH * 0.135);
-        bgCtx.quadraticCurveTo(-personH * 0.218, -personH * 0.123, -personH * 0.214, -personH * 0.141);
-        bgCtx.lineTo(-personH * 0.218, -personH * 0.187);
-        bgCtx.bezierCurveTo(-personH * 0.198, -personH * 0.190, -personH * 0.191, -personH * 0.207, -personH * 0.204, -personH * 0.222);
-        bgCtx.closePath();
-        bgCtx.fill();
-
-        // 右手
-        bgCtx.beginPath();
-        bgCtx.moveTo(personH * 0.245, -personH * 0.245);
-        bgCtx.bezierCurveTo(personH * 0.270, -personH * 0.230, personH * 0.274, -personH * 0.198, personH * 0.262, -personH * 0.174);
-        bgCtx.lineTo(personH * 0.250, -personH * 0.138);
-        bgCtx.quadraticCurveTo(personH * 0.242, -personH * 0.126, personH * 0.237, -personH * 0.142);
-        bgCtx.lineTo(personH * 0.239, -personH * 0.180);
-        bgCtx.lineTo(personH * 0.226, -personH * 0.135);
-        bgCtx.quadraticCurveTo(personH * 0.218, -personH * 0.123, personH * 0.214, -personH * 0.141);
-        bgCtx.lineTo(personH * 0.218, -personH * 0.187);
-        bgCtx.bezierCurveTo(personH * 0.198, -personH * 0.190, personH * 0.191, -personH * 0.207, personH * 0.204, -personH * 0.222);
-        bgCtx.closePath();
-        bgCtx.fill();
+        bgCtx.drawImage(
+          p1PersonImage,
+          personDrawX,
+          personDrawY,
+          personW,
+          personH
+        );
 
         bgCtx.restore();
       }
