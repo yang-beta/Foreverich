@@ -78,6 +78,26 @@
     return data;
   }
 
+  async function sendPasswordReset(email) {
+    if (!client) {
+      throw new Error("Supabase 尚未設定。");
+    }
+
+    const redirectTo = new URL(
+      "./setup-password.html",
+      window.location.href
+    ).href;
+
+    const { data, error } =
+      await client.auth.resetPasswordForEmail(
+        email,
+        { redirectTo }
+      );
+
+    if (error) throw error;
+    return data;
+  }
+
   async function signOut() {
     if (client) {
       await client.auth.signOut();
@@ -87,7 +107,7 @@
   window.CmsAuth = Object.freeze({
     requireAdmin,
     signIn,
+    sendPasswordReset,
     signOut
   });
 })();
-

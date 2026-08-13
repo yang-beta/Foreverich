@@ -26,6 +26,11 @@
   const passwordInput = document.getElementById("loginPassword");
   const loginStatus = document.getElementById("loginStatus");
 
+  const resetPanel = document.getElementById("resetPanel");
+  const resetForm = document.getElementById("resetForm");
+  const resetEmailInput = document.getElementById("resetEmail");
+  const resetStatus = document.getElementById("resetStatus");
+
   const fieldsRoot = document.getElementById("fieldsRoot");
   const cmsStatus = document.getElementById("cmsStatus");
   const userLabel = document.getElementById("adminUserLabel");
@@ -38,6 +43,11 @@
     loginStatus.classList.toggle("is-error", isError);
   }
 
+  function setResetStatus(message, isError = false) {
+    resetStatus.textContent = message || "";
+    resetStatus.classList.toggle("is-error", isError);
+  }
+
   function setCmsStatus(message, isError = false) {
     cmsStatus.textContent = message || "";
     cmsStatus.classList.toggle("is-error", isError);
@@ -45,11 +55,23 @@
 
   function showLogin() {
     loginPanel.hidden = false;
+    resetPanel.hidden = true;
     cmsPanel.hidden = true;
+  }
+
+  function showReset() {
+    loginPanel.hidden = true;
+    resetPanel.hidden = false;
+    cmsPanel.hidden = true;
+
+    if (!resetEmailInput.value && emailInput.value) {
+      resetEmailInput.value = emailInput.value;
+    }
   }
 
   function showCms() {
     loginPanel.hidden = true;
+    resetPanel.hidden = true;
     cmsPanel.hidden = false;
     userLabel.textContent = currentUser?.email || "";
   }
@@ -197,6 +219,22 @@
     await loadPageContent();
   }
 
+  function showAuthReturnMessage() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("password") === "updated") {
+      setLoginStatus(
+        "密碼已設定完成，請用 Email + 新密碼登入。"
+      );
+
+      history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+      );
+    }
+  }
+
   async function boot() {
     if (!client) {
       setLoginStatus(
@@ -214,6 +252,8 @@
 
       if (admin.reason !== "not_signed_in") {
         setLoginStatus(admin.reason, true);
+      } else {
+        showAuthReturnMessage();
       }
 
       return;
@@ -246,6 +286,42 @@
       console.error(error);
       setLoginStatus(
         error.message || "登入失敗，請確認帳號密碼。",
+        true
+      );
+    }
+  });
+
+  document.getElementById("showResetBtn")
+    .addEventListener("click", () => {
+      setResetStatus("");
+      showReset();
+    });
+
+  document.getElementById("backToLoginBtn")
+    .addEventListener("click", () => {
+      setResetStatus("");
+      showLogin();
+    });
+
+  resetForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const email = resetEmailInput.value.trim();
+
+    if (!email) return;
+
+    setResetStatus("正在寄送重設密碼 Email…");
+
+    try {
+      await window.CmsAuth.sendPasswordReset(email);
+
+      setResetStatus(
+        "已送出。請到 Email 點擊重設密碼連結，連結會回到 /admin/setup-password.html。"
+      );
+    } catch (error) {
+      console.error(error);
+      setResetStatus(
+        error.message || "重設密碼 Email 寄送失敗。",
         true
       );
     }
@@ -303,4 +379,3 @@
 
   boot();
 })();
-

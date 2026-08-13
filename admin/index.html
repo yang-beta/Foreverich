@@ -47,9 +47,53 @@
           <button class="primary-btn" type="submit">
             登入管理後台
           </button>
+
+          <button
+            class="text-link-btn"
+            id="showResetBtn"
+            type="button"
+          >
+            忘記密碼？
+          </button>
         </form>
 
         <div class="status" id="loginStatus"></div>
+      </div>
+    </section>
+
+    <section class="auth-panel" id="resetPanel" hidden>
+      <div class="panel-card login-card">
+        <div class="panel-label">PASSWORD RECOVERY</div>
+        <h2>忘記管理密碼</h2>
+        <p>
+          輸入管理 Email，我們會透過 Supabase 寄出重設連結。
+        </p>
+
+        <form id="resetForm">
+          <label>
+            Email
+            <input
+              id="resetEmail"
+              type="email"
+              autocomplete="email"
+              required
+            >
+          </label>
+
+          <button class="primary-btn" type="submit">
+            寄送重設密碼 Email
+          </button>
+
+          <button
+            class="text-link-btn"
+            id="backToLoginBtn"
+            type="button"
+          >
+            回登入頁
+          </button>
+        </form>
+
+        <div class="status" id="resetStatus"></div>
       </div>
     </section>
 
@@ -132,4 +176,3 @@
   <script src="./js/admin.js"></script>
 </body>
 </html>
-

@@ -53,4 +53,3 @@
     return (SITE_PALETTE[level] || SITE_PALETTE.main).hex;
   };
 })();
-

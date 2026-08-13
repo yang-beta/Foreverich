@@ -243,3 +243,26 @@ textarea:focus {
   }
 }
 
+
+/* =============================================================
+   AUTH SECONDARY ACTIONS
+   ============================================================= */
+.text-link-btn {
+  border: 0;
+  background: transparent;
+  color: rgba(255,176,136,.78);
+  cursor: pointer;
+  padding: 5px 8px;
+  justify-self: center;
+}
+
+.text-link-btn:hover {
+  color: var(--coral-main);
+  text-decoration: underline;
+}
+
+.auth-secondary-links {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}

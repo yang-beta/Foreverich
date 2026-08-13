@@ -40,8 +40,26 @@
           stopLoadingCanvas();
           startBackgroundCanvas();
           stopSandCanvas();
-          // 每次重新進入 P1 都從初始狀態重播光束與文字。
-          playBannerBeamAnimation();
+
+          /*
+            CMS 與動畫解耦：
+            第一次進 P1 時先等已發布文字套用完成，
+            再啟動既有 GSAP Timeline。
+            SiteContent.ready 最多等待 2 秒，因此 CMS 網路異常
+            不會讓展場頁面永久卡住。
+          */
+          const playP1WhenContentReady = () => {
+            const activePage = pageElements[currentPageIndex];
+
+            // 若等待 CMS 期間使用者已離開 P1，就不要背景播放動畫。
+            if (activePage?.id !== 'heroSection') return;
+
+            playBannerBeamAnimation();
+          };
+
+          Promise.resolve(window.SiteContent?.ready)
+            .then(playP1WhenContentReady)
+            .catch(playP1WhenContentReady);
         },
         leave() {
           // 離頁後不讓 P1 Timeline 在背景繼續跑；返回時會重新建立。
@@ -1623,4 +1641,3 @@
     }
     ctx.restore();
   }
-
