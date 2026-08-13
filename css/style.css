@@ -2370,3 +2370,20 @@
   .lp-side-word-guang { margin-right: clamp(-145px, -25vw, -82px); }
   .lp-side-word-xian  { margin-left:  clamp(-145px, -25vw, -82px); }
 }
+
+
+/* =============================================================
+   V4｜LP 洸 / 限與可見 Logo 的視覺距離
+   -------------------------------------------------------------
+   SVG 的 viewBox 本身左右有大量透明空間，所以不能把 flex gap
+   當成肉眼看到的距離。這裡直接補償 SVG 留白，目標約 20–30px。
+   ============================================================= */
+@media (min-width: 769px) {
+  .lp-side-word-guang { margin-right: -250px; }
+  .lp-side-word-xian  { margin-left:  -250px; }
+}
+
+@media (max-width: 768px) {
+  .lp-side-word-guang { margin-right: -80px; }
+  .lp-side-word-xian  { margin-left:  -80px; }
+}

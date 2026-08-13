@@ -124,14 +124,17 @@
 
       bannerTimeline = gsap.timeline();
 
-      // P1 V3 入場順序：
-      // 0.0–2.0s 線條逐圈畫出 → 2.0–2.8s 人物淡入
-      // → 2.8s 起珊瑚色流光 / 粒子 → 3.05s 起文字。
+      // P1 V4 入場順序：
+      // 0.0–3.0s：只畫圓圈線條。
+      // 3.0s：文字立即開始。
+      // 3.10s 起：人物慢慢淡入。
+      // 3.30s 起：珊瑚杏流光 / 粒子慢慢加入。
+      // 讓「線條完成 → 文字 → 人與光」形成清楚的視覺層級。
       bannerTimeline
-        .to(animationParams, { beamDownProgress: 1, duration: 2.0, ease: "power2.inOut" }, 0)
-        .to(animationParams, { personProgress: 1, duration: 0.8, ease: "power2.out" }, 2.0)
-        .to(animationParams, { horizonSpreadProgress: 1, duration: 1.0, ease: "power2.out" }, 2.8)
-        .to(animationParams, { particleGlowProgress: 1, duration: 1.0, ease: "power1.out" }, 2.8);
+        .to(animationParams, { beamDownProgress: 1, duration: 3.0, ease: "power2.inOut" }, 0)
+        .to(animationParams, { personProgress: 1, duration: 1.5, ease: "power2.out" }, 3.10)
+        .to(animationParams, { horizonSpreadProgress: 1, duration: 1.8, ease: "power2.out" }, 3.30)
+        .to(animationParams, { particleGlowProgress: 1, duration: 1.8, ease: "power1.out" }, 3.30);
       
       const bqParts = gsap.utils.toArray('.bq-part');
       gsap.set(bqParts, { y: "115%", opacity: 0 });
@@ -142,7 +145,7 @@
           opacity: 1,
           duration: 1.4,
           ease: "power2.out"
-        }, index === 0 ? 3.05 : "+=1.5");
+        }, index === 0 ? 3.00 : "+=1.5");
       });
 
       bannerTimeline.call(() => animateArrow(document.getElementById('heroSection')));
