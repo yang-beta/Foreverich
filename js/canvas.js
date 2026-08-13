@@ -573,7 +573,10 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         // Y：PNG 最底部 = 紅線
         const personDrawX = personX - personW / 2;
         const personDrawY = personContactY - personH;
-
+        const PERSON_Y_OFFSET = 20 * BG_DPR;
+        const personDrawY =
+        personContactY - personH + PERSON_Y_OFFSET;
+          
         bgCtx.save();
 
         // 保留「人物前方有光源」所形成的淡陰影。
