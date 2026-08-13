@@ -102,7 +102,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       bgCanvas.height = Math.round(window.innerHeight * BG_DPR);
     }
 
-    let animationParams = { beamDownProgress: 0, horizonSpreadProgress: 0, particleGlowProgress: 0 };
+    let animationParams = { beamDownProgress: 0, personProgress: 0, horizonSpreadProgress: 0, particleGlowProgress: 0 };
     const coralParticles = Array.from({ length: 46 }, () => ({
       x: Math.random() * window.innerWidth * BG_DPR,
       y: Math.random() * window.innerHeight * BG_DPR,
@@ -277,6 +277,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       */
       const p1GlowProgress =
         ((globalTime * 0.00225) % 1 + 1) % 1;
+      const p1CoralReveal = Math.max(0, Math.min(1, animationParams.particleGlowProgress));
 
       /*
         首尾交叉淡化：
@@ -351,7 +352,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           Math.max(0, 1 - topNextDistance / 2.35) * nextCycleFade;
 
         const topGlow =
-          Math.max(topGlowCurrent, topGlowNext);
+          Math.max(topGlowCurrent, topGlowNext) * p1CoralReveal;
 
         if (topGlow > 0) {
           bgCtx.save();
@@ -400,7 +401,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           Math.max(0, 1 - bottomNextDistance / 2.35) * nextCycleFade;
 
         const bottomGlow =
-          Math.max(bottomGlowCurrent, bottomGlowNext);
+          Math.max(bottomGlowCurrent, bottomGlowNext) * p1CoralReveal;
 
         if (bottomGlow > 0) {
           bgCtx.save();
@@ -515,103 +516,86 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
 
       /*
-        上方組最內圈 6 點鐘位置的人形剪影。
-        直接 Canvas 繪製，不使用圖片資源。
+        P1 人物剪影 V3
+        參考使用者提供的正面行走男性輪廓：
+        - 頭部略窄、肩線自然下斜
+        - 手臂貼近身體後向外微張
+        - 雙腿有前後步態，不再是粗糙幾何塊
+        - 保持簡化 Canvas silhouette，不追求照片級細節
       */
       const personContactY =
         p1RingGeometry[p1CircleCount - 1]
           .shiftedBottomTopPointY;
 
       const personX = centerX;
-
-      // 尺寸直接跟 Canvas 尺寸走，避免 DPR 重複放大
       const personH =
         Math.max(
-          28 * BG_DPR,
-          Math.min(W, H) * 0.045
+          34 * BG_DPR,
+          Math.min(W, H) * 0.055
         );
 
+      const personReveal = Math.max(0, Math.min(1, animationParams.personProgress));
+      const personEase = personReveal * personReveal * (3 - 2 * personReveal);
       const personGlow =
-        0.72 +
-        0.18 *
-        (0.5 + 0.5 * Math.sin(globalTime * 0.010));
+        (0.72 + 0.18 * (0.5 + 0.5 * Math.sin(globalTime * 0.010))) * personEase;
 
-      bgCtx.save();
-      bgCtx.translate(personX, personContactY);
+      if (personEase > 0.001) {
+        bgCtx.save();
+        bgCtx.translate(personX, personContactY);
+        bgCtx.globalAlpha = personEase;
+        bgCtx.fillStyle = `rgba(205, 193, 181, ${0.38 * personGlow})`;
+        bgCtx.shadowColor = coralRgba('main', 0.22 * personGlow);
+        bgCtx.shadowBlur = 8 * BG_DPR;
 
-      // 人物直接使用與圈圈一致的淡金色填滿，不使用外框線。
-      bgCtx.fillStyle =
-        `rgba(205, 193, 181, ${0.30 * personGlow})`;
+        // 頭：較接近參考圖的直立橢圓與微收下巴。
+        bgCtx.beginPath();
+        bgCtx.ellipse(0, -personH * 0.855, personH * 0.092, personH * 0.118, 0, 0, Math.PI * 2);
+        bgCtx.fill();
 
-      bgCtx.shadowColor =
-        coralRgba('main', 0.18 * personGlow);
+        // 頸部 + 軀幹 + 雙腿，以單一連續輪廓讓肩腰與步態更自然。
+        bgCtx.beginPath();
+        bgCtx.moveTo(-personH * 0.050, -personH * 0.745); // 左頸
+        bgCtx.bezierCurveTo(-personH * 0.105, -personH * 0.725, -personH * 0.155, -personH * 0.690, -personH * 0.178, -personH * 0.620);
+        bgCtx.bezierCurveTo(-personH * 0.205, -personH * 0.510, -personH * 0.190, -personH * 0.390, -personH * 0.158, -personH * 0.300);
+        bgCtx.bezierCurveTo(-personH * 0.145, -personH * 0.245, -personH * 0.135, -personH * 0.195, -personH * 0.126, -personH * 0.150);
+        // 左腿（較直）
+        bgCtx.bezierCurveTo(-personH * 0.118, -personH * 0.040, -personH * 0.105,  personH * 0.090, -personH * 0.090,  personH * 0.215);
+        bgCtx.bezierCurveTo(-personH * 0.082,  personH * 0.305, -personH * 0.073,  personH * 0.385, -personH * 0.055,  personH * 0.455);
+        bgCtx.bezierCurveTo(-personH * 0.040,  personH * 0.505, -personH * 0.018,  personH * 0.515,  personH * 0.005,  personH * 0.488);
+        // 右腿（跨步向前，腳尖略突出）
+        bgCtx.bezierCurveTo( personH * 0.025,  personH * 0.430,  personH * 0.045,  personH * 0.350,  personH * 0.052,  personH * 0.270);
+        bgCtx.bezierCurveTo( personH * 0.058,  personH * 0.190,  personH * 0.065,  personH * 0.105,  personH * 0.078,  personH * 0.025);
+        bgCtx.bezierCurveTo( personH * 0.090, -personH * 0.050,  personH * 0.108, -personH * 0.100,  personH * 0.126, -personH * 0.150);
+        bgCtx.bezierCurveTo( personH * 0.135, -personH * 0.195,  personH * 0.145, -personH * 0.245,  personH * 0.158, -personH * 0.300);
+        bgCtx.bezierCurveTo( personH * 0.190, -personH * 0.390,  personH * 0.205, -personH * 0.510,  personH * 0.178, -personH * 0.620);
+        bgCtx.bezierCurveTo( personH * 0.155, -personH * 0.690,  personH * 0.105, -personH * 0.725,  personH * 0.050, -personH * 0.745);
+        bgCtx.closePath();
+        bgCtx.fill();
 
-      bgCtx.shadowBlur =
-        7 * BG_DPR;
+        // 左臂：肩膀自然垂下，手掌略向外。
+        bgCtx.beginPath();
+        bgCtx.moveTo(-personH * 0.155, -personH * 0.665);
+        bgCtx.bezierCurveTo(-personH * 0.205, -personH * 0.610, -personH * 0.220, -personH * 0.505, -personH * 0.235, -personH * 0.405);
+        bgCtx.bezierCurveTo(-personH * 0.248, -personH * 0.330, -personH * 0.255, -personH * 0.270, -personH * 0.245, -personH * 0.230);
+        bgCtx.bezierCurveTo(-personH * 0.235, -personH * 0.200, -personH * 0.214, -personH * 0.205, -personH * 0.205, -personH * 0.240);
+        bgCtx.lineTo(-personH * 0.185, -personH * 0.405);
+        bgCtx.bezierCurveTo(-personH * 0.175, -personH * 0.505, -personH * 0.165, -personH * 0.590, -personH * 0.125, -personH * 0.635);
+        bgCtx.closePath();
+        bgCtx.fill();
 
-      // 頭
-      bgCtx.beginPath();
-      bgCtx.arc(
-        0,
-        -personH * 0.78,
-        personH * 0.105,
-        0,
-        Math.PI * 2
-      );
-      bgCtx.fill();
+        // 右臂。
+        bgCtx.beginPath();
+        bgCtx.moveTo(personH * 0.155, -personH * 0.665);
+        bgCtx.bezierCurveTo(personH * 0.205, -personH * 0.610, personH * 0.220, -personH * 0.505, personH * 0.235, -personH * 0.405);
+        bgCtx.bezierCurveTo(personH * 0.248, -personH * 0.330, personH * 0.255, -personH * 0.270, personH * 0.245, -personH * 0.230);
+        bgCtx.bezierCurveTo(personH * 0.235, -personH * 0.200, personH * 0.214, -personH * 0.205, personH * 0.205, -personH * 0.240);
+        bgCtx.lineTo(personH * 0.185, -personH * 0.405);
+        bgCtx.bezierCurveTo(personH * 0.175, -personH * 0.505, personH * 0.165, -personH * 0.590, personH * 0.125, -personH * 0.635);
+        bgCtx.closePath();
+        bgCtx.fill();
 
-      // 身體
-      bgCtx.beginPath();
-      bgCtx.moveTo(
-        -personH * 0.085,
-        -personH * 0.64
-      );
-      bgCtx.quadraticCurveTo(
-        -personH * 0.13,
-        -personH * 0.38,
-        -personH * 0.16,
-        -personH * 0.08
-      );
-      bgCtx.lineTo(
-        -personH * 0.105,
-        0
-      );
-      bgCtx.lineTo(
-        personH * 0.105,
-        0
-      );
-      bgCtx.lineTo(
-        personH * 0.16,
-        -personH * 0.08
-      );
-      bgCtx.quadraticCurveTo(
-        personH * 0.13,
-        -personH * 0.38,
-        personH * 0.085,
-        -personH * 0.64
-      );
-      bgCtx.closePath();
-      bgCtx.fill();
-
-      // 手臂：改為填滿的小型多邊形，不再使用描邊線。
-      bgCtx.beginPath();
-
-      // 左手
-      bgCtx.moveTo(-personH * 0.075, -personH * 0.56);
-      bgCtx.lineTo(-personH * 0.115, -personH * 0.54);
-      bgCtx.lineTo(-personH * 0.225, -personH * 0.285);
-      bgCtx.lineTo(-personH * 0.185, -personH * 0.265);
-      bgCtx.closePath();
-
-      // 右手
-      bgCtx.moveTo(personH * 0.075, -personH * 0.56);
-      bgCtx.lineTo(personH * 0.115, -personH * 0.54);
-      bgCtx.lineTo(personH * 0.225, -personH * 0.285);
-      bgCtx.lineTo(personH * 0.185, -personH * 0.265);
-      bgCtx.closePath();
-
-      bgCtx.fill();
-
+        bgCtx.restore();
+      }
       bgCtx.restore();
 
       bgCtx.restore();

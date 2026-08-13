@@ -100,6 +100,7 @@
 
       Object.assign(animationParams, {
         beamDownProgress: 0,
+        personProgress: 0,
         horizonSpreadProgress: 0,
         particleGlowProgress: 0
       });
@@ -122,9 +123,15 @@
       isBeamAnimated = true;
 
       bannerTimeline = gsap.timeline();
-      bannerTimeline.to(animationParams, { beamDownProgress: 1, duration: 1.6, ease: "power2.inOut" })
-      .to(animationParams, { horizonSpreadProgress: 1, duration: 1.4, ease: "power2.out" }, "-=0.2")
-      .to(animationParams, { particleGlowProgress: 1, duration: 1.2, ease: "power1.out" }, "-=0.4");
+
+      // P1 V3 入場順序：
+      // 0.0–2.0s 線條逐圈畫出 → 2.0–2.8s 人物淡入
+      // → 2.8s 起珊瑚色流光 / 粒子 → 3.05s 起文字。
+      bannerTimeline
+        .to(animationParams, { beamDownProgress: 1, duration: 2.0, ease: "power2.inOut" }, 0)
+        .to(animationParams, { personProgress: 1, duration: 0.8, ease: "power2.out" }, 2.0)
+        .to(animationParams, { horizonSpreadProgress: 1, duration: 1.0, ease: "power2.out" }, 2.8)
+        .to(animationParams, { particleGlowProgress: 1, duration: 1.0, ease: "power1.out" }, 2.8);
       
       const bqParts = gsap.utils.toArray('.bq-part');
       gsap.set(bqParts, { y: "115%", opacity: 0 });
@@ -135,7 +142,7 @@
           opacity: 1,
           duration: 1.4,
           ease: "power2.out"
-        }, index === 0 ? "-=0.4" : "+=1.5");
+        }, index === 0 ? 3.05 : "+=1.5");
       });
 
       bannerTimeline.call(() => animateArrow(document.getElementById('heroSection')));
@@ -151,6 +158,7 @@
         bannerTimeline.progress(1);
       } else {
         animationParams.beamDownProgress = 1;
+        animationParams.personProgress = 1;
         animationParams.horizonSpreadProgress = 1;
         animationParams.particleGlowProgress = 1;
         gsap.set(".bq-part", { y: "0%", opacity: 1 });

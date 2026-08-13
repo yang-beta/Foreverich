@@ -2347,3 +2347,26 @@
   .lp-side-word-guang{margin-right:clamp(-88px,-16vw,-48px)}
   .lp-side-word-xian{margin-left:clamp(-88px,-16vw,-48px)}
 }
+
+
+/* =============================================================
+   V3｜LP 微調
+   1) 左右「洸 / 限」再縮短約 2/3 視覺距離（保留約 1/3）
+   2) 開場文字在 GSAP 初始化前先保持隱藏，避免載入時閃現約 1 秒
+   ============================================================= */
+#openingHero #line1,
+#openingHero #line2,
+#openingHero #line3 {
+  opacity: 0;
+  transform: translateY(200%);
+}
+
+@media (min-width: 769px) {
+  .lp-side-word-guang { margin-right: clamp(-300px, -19vw, -215px); }
+  .lp-side-word-xian  { margin-left:  clamp(-300px, -19vw, -215px); }
+}
+
+@media (max-width: 768px) {
+  .lp-side-word-guang { margin-right: clamp(-145px, -25vw, -82px); }
+  .lp-side-word-xian  { margin-left:  clamp(-145px, -25vw, -82px); }
+}
