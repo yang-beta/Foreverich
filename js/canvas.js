@@ -557,7 +557,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       const personH =
         Math.max(
           44 * BG_DPR,
-          Math.min(W, H) * 0.092
+          Math.min(W, H) * 0.074
         );
 
       const personReveal = Math.max(0, Math.min(1, animationParams.personProgress));
@@ -603,9 +603,9 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         bgCtx.fill();
         bgCtx.restore();
 
-        // 人物透明度 = 50%。
+        // 人物透明度 = 30%。
         // personEase 僅保留原本「慢慢出現」的動畫。
-        bgCtx.globalAlpha = 0.50 * personEase;
+        bgCtx.globalAlpha = 0.30 * personEase;
         bgCtx.shadowColor = coralRgba('main', 0.14 * personEase);
         bgCtx.shadowBlur = 5 * BG_DPR;
 
