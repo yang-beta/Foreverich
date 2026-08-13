@@ -108,6 +108,15 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       p1PersonImageSourceIndex += 1;
       if (p1PersonImageSourceIndex < p1PersonImageSources.length) {
         p1PersonImage.src = p1PersonImageSources[p1PersonImageSourceIndex];
+
+    // =============================================================
+    // P1 人物顯示設定｜未來只需要調整這一區
+    // =============================================================
+    const PERSON_SIZE = 0.074;              // 人物大小
+    const PERSON_OPACITY = 0.10;            // 人物透明度 10%
+    const PERSON_Y_OFFSET = 20 * BG_DPR;    // 正值往下，負值往上
+    const SHADOW_OPACITY = 0.22;            // 暖色地面投影強度
+
       }
     };
 
@@ -557,7 +566,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       const personH =
         Math.max(
           44 * BG_DPR,
-          Math.min(W, H) * 0.092
+          Math.min(W, H) * PERSON_SIZE
         );
 
       const personReveal = Math.max(0, Math.min(1, animationParams.personProgress));
@@ -572,40 +581,118 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         // X：人物中心 = 畫面中心
         // Y：PNG 最底部 = 紅線
         const personDrawX = personX - personW / 2;
-        const personDrawY = personContactY - personH;
+
+        // PERSON_Y_OFFSET > 0：往下；< 0：往上
+        const personDrawY =
+          personContactY - personH + PERSON_Y_OFFSET;
+
+        // 人物實際腳底位置，陰影也以此為基準。
+        const personFootY =
+          personContactY + PERSON_Y_OFFSET;
 
         bgCtx.save();
 
-        // 保留「人物前方有光源」所形成的淡陰影。
-        const shadowLength = personH * 0.72;
-        const shadowGradient = bgCtx.createLinearGradient(
-          personX, personContactY,
-          personX, personContactY - shadowLength
+        // ---------------------------------------------------------
+        // 地面暖色暗影
+        // ---------------------------------------------------------
+        // 從人物腳底向左下 / 右下攤開。
+        // 使用 Deep Coral，避免黑色陰影在深色背景裡完全消失。
+        bgCtx.save();
+
+        const shadowCenterX = personX;
+        const shadowCenterY =
+          personFootY + personH * 0.050;
+
+        const shadowRadiusX = personW * 1.65;
+        const shadowRadiusY = personH * 0.090;
+
+        const groundShadow = bgCtx.createRadialGradient(
+          shadowCenterX,
+          shadowCenterY,
+          0,
+          shadowCenterX,
+          shadowCenterY,
+          shadowRadiusX
         );
-        shadowGradient.addColorStop(0, `rgba(6, 6, 6, ${0.30 * personEase})`);
-        shadowGradient.addColorStop(0.45, `rgba(6, 6, 6, ${0.14 * personEase})`);
-        shadowGradient.addColorStop(1, 'rgba(6, 6, 6, 0)');
 
-        bgCtx.save();
-        bgCtx.fillStyle = shadowGradient;
-        bgCtx.filter = `blur(${3 * BG_DPR}px)`;
+        groundShadow.addColorStop(
+          0,
+          coralRgba(
+            'deep',
+            SHADOW_OPACITY * 0.95 * personEase
+          )
+        );
+
+        groundShadow.addColorStop(
+          0.38,
+          coralRgba(
+            'deep',
+            SHADOW_OPACITY * 0.62 * personEase
+          )
+        );
+
+        groundShadow.addColorStop(
+          0.72,
+          coralRgba(
+            'deep',
+            SHADOW_OPACITY * 0.24 * personEase
+          )
+        );
+
+        groundShadow.addColorStop(
+          1,
+          coralRgba('deep', 0)
+        );
+
+        bgCtx.fillStyle = groundShadow;
+        bgCtx.filter = `blur(${2.2 * BG_DPR}px)`;
+
+        // 中央橢圓
         bgCtx.beginPath();
-        bgCtx.moveTo(personX - personW * 0.28, personContactY);
-        bgCtx.lineTo(personX + personW * 0.28, personContactY);
-        bgCtx.lineTo(personX + personW * 1.05, personContactY - shadowLength);
-        bgCtx.quadraticCurveTo(
-          personX,
-          personContactY - shadowLength * 1.04,
-          personX - personW * 1.05,
-          personContactY - shadowLength
+        bgCtx.ellipse(
+          shadowCenterX,
+          shadowCenterY,
+          shadowRadiusX,
+          shadowRadiusY,
+          0,
+          0,
+          Math.PI * 2
         );
-        bgCtx.closePath();
         bgCtx.fill();
+
+        // 左下延伸
+        bgCtx.globalAlpha = 0.72;
+        bgCtx.beginPath();
+        bgCtx.ellipse(
+          shadowCenterX - personW * 0.74,
+          shadowCenterY + personH * 0.030,
+          shadowRadiusX * 0.74,
+          shadowRadiusY * 0.78,
+          -0.10,
+          0,
+          Math.PI * 2
+        );
+        bgCtx.fill();
+
+        // 右下延伸
+        bgCtx.beginPath();
+        bgCtx.ellipse(
+          shadowCenterX + personW * 0.74,
+          shadowCenterY + personH * 0.030,
+          shadowRadiusX * 0.74,
+          shadowRadiusY * 0.78,
+          0.10,
+          0,
+          Math.PI * 2
+        );
+        bgCtx.fill();
+
         bgCtx.restore();
 
-        // 人物透明度 = 50%。
+        // 人物透明度由 PERSON_OPACITY 集中控制。
         // personEase 僅保留原本「慢慢出現」的動畫。
-        bgCtx.globalAlpha = 0.50 * personEase;
+        bgCtx.globalAlpha =
+          PERSON_OPACITY * personEase;
         bgCtx.shadowColor = coralRgba('main', 0.14 * personEase);
         bgCtx.shadowBlur = 5 * BG_DPR;
 
