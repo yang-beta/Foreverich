@@ -1,45 +1,428 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "namespace": "everich",
   "pages": {
+    "lp": {
+      "label": "LP｜開場",
+      "fields": {
+        "line_01": {
+          "label": "主標｜第1行",
+          "type": "text",
+          "value": "回憶",
+          "maxLength": 60
+        },
+        "line_02": {
+          "label": "主標｜第2行",
+          "type": "text",
+          "value": "從這裡",
+          "maxLength": 60
+        },
+        "line_03": {
+          "label": "主標｜第3行",
+          "type": "text",
+          "value": "開始",
+          "maxLength": 60
+        }
+      }
+    },
     "p1": {
-      "label": "Page 01",
+      "label": "P1｜生命提問",
       "fields": {
         "question_01_part_01": {
           "label": "第一組｜第一句",
           "type": "text",
           "value": "你的生命中，有沒有一個人 ――",
-          "maxLength": 60
+          "maxLength": 80
         },
         "question_01_part_02": {
           "label": "第一組｜第二句",
           "type": "text",
           "value": "讓你，成就了今天的自己？",
-          "maxLength": 60
+          "maxLength": 80
         },
         "question_02_part_01": {
           "label": "第二組｜第一句",
           "type": "text",
           "value": "某一段回憶，每當想起 ――",
-          "maxLength": 60
+          "maxLength": 80
         },
         "question_02_part_02": {
           "label": "第二組｜第二句",
           "type": "text",
           "value": "都會，默默地露出微笑？",
-          "maxLength": 60
+          "maxLength": 80
         },
         "question_03_part_01": {
           "label": "第三組｜第一句",
           "type": "text",
           "value": "有沒有一份陪伴，即使過了很久 ――",
-          "maxLength": 60
+          "maxLength": 80
         },
         "question_03_part_02": {
           "label": "第三組｜第二句",
           "type": "text",
           "value": "依然，溫暖著你？",
+          "maxLength": 80
+        }
+      }
+    },
+    "p2": {
+      "label": "P2｜沙畫故事",
+      "fields": {
+        "story_part_01": {
+          "label": "故事段落｜01",
+          "type": "text",
+          "value": "也許，是那位一直遞上肩膀，",
+          "maxLength": 100
+        },
+        "story_part_02": {
+          "label": "故事段落｜02",
+          "type": "text",
+          "value": "比你還相信你自己的――摯友！",
+          "maxLength": 100
+        },
+        "story_part_03": {
+          "label": "故事段落｜03",
+          "type": "text",
+          "value": "或是，無論你飛多高，",
+          "maxLength": 100
+        },
+        "story_part_04": {
+          "label": "故事段落｜04",
+          "type": "text",
+          "value": "只在乎你累不累的――家人！",
+          "maxLength": 100
+        },
+        "story_part_05": {
+          "label": "故事段落｜05",
+          "type": "text",
+          "value": "也可能是，怕你吃不飽、",
+          "maxLength": 100
+        },
+        "story_part_06": {
+          "label": "故事段落｜06",
+          "type": "text",
+          "value": "過不好的――長輩嘮叨！",
+          "maxLength": 100
+        },
+        "story_part_07": {
+          "label": "故事段落｜07",
+          "type": "text",
+          "value": "還有那，無論多晚，總在門口等待、",
+          "maxLength": 100
+        },
+        "story_part_08": {
+          "label": "故事段落｜08",
+          "type": "text",
+          "value": "把你當作全世界的毛孩！",
+          "maxLength": 100
+        },
+        "final_part_01": {
+          "label": "結尾｜第一段",
+          "type": "text",
+          "value": "回憶，雖然會慢慢消逝",
+          "maxLength": 100
+        },
+        "final_part_02": {
+          "label": "結尾｜第二段",
+          "type": "text",
+          "value": "卻也會沉澱在心靈中某個深處",
+          "maxLength": 100
+        }
+      }
+    },
+    "p3": {
+      "label": "P3｜情感地圖",
+      "fields": {
+        "line_01": {
+          "label": "第一句",
+          "type": "text",
+          "value": "那些沉澱在心底的回憶，從未散去 ――",
+          "maxLength": 140
+        },
+        "line_02a": {
+          "label": "第二句｜前段",
+          "type": "text",
+          "value": "中心，是你自己；",
+          "maxLength": 100
+        },
+        "line_02b": {
+          "label": "第二句｜後段",
+          "type": "text",
+          "value": "向外則是父母、伴侶、摯友與毛孩延伸的紋理。",
+          "maxLength": 140
+        },
+        "line_03a": {
+          "label": "第三句｜前段",
+          "type": "text",
+          "value": "這延伸的痕跡，是你的情感地圖。",
+          "maxLength": 120
+        },
+        "line_03b": {
+          "label": "第三句｜後段",
+          "type": "text",
+          "value": "他們圍繞著你，就像一朵綻放的曼陀羅。",
+          "maxLength": 140
+        }
+      }
+    },
+    "p4": {
+      "label": "P4｜感官體驗",
+      "fields": {
+        "header_01": {
+          "label": "頁首｜第1句",
+          "type": "text",
+          "value": "如果思念有形狀，你希望再次看見、聽見或感受什麼？",
+          "maxLength": 140
+        },
+        "header_02": {
+          "label": "頁首｜第2句",
+          "type": "text",
+          "value": "透過科技的微光，我們試著捕捉時光的餘溫 ――",
+          "maxLength": 140
+        },
+        "card_01_title": {
+          "label": "感官卡 1｜標題",
+          "type": "text",
+          "value": "✦ 歲月輪廓（視覺）",
           "maxLength": 60
+        },
+        "card_01_description": {
+          "label": "感官卡 1｜說明",
+          "type": "textarea",
+          "value": "將一張泛黃的照片，化為沙畫與曼陀羅的光束流轉。",
+          "maxLength": 220
+        },
+        "card_02_title": {
+          "label": "感官卡 2｜標題",
+          "type": "text",
+          "value": "✦ 記憶餘音（聽覺）",
+          "maxLength": 60
+        },
+        "card_02_description": {
+          "label": "感官卡 2｜說明",
+          "type": "textarea",
+          "value": "擷取熟悉的語氣與聲線，輕聲說出那句未竟的問候。",
+          "maxLength": 220
+        },
+        "card_03_title": {
+          "label": "感官卡 3｜標題",
+          "type": "text",
+          "value": "✦ 時光留香（嗅覺）",
+          "maxLength": 60
+        },
+        "card_03_description": {
+          "label": "感官卡 3｜說明",
+          "type": "textarea",
+          "value": "描述記憶裡的味道與畫面（如阿嬤的粽香），勾勒出溫暖的歲月景象。",
+          "maxLength": 220
+        },
+        "card_04_title": {
+          "label": "感官卡 4｜標題",
+          "type": "text",
+          "value": "✦ 歲月溫熱（觸覺）",
+          "maxLength": 60
+        },
+        "card_04_description": {
+          "label": "感官卡 4｜說明",
+          "type": "textarea",
+          "value": "描述掌心裡殘留的溫度，重現那雙曾緊握過你的手、與溫暖的擁抱。",
+          "maxLength": 220
+        },
+        "footer": {
+          "label": "頁尾句",
+          "type": "text",
+          "value": "讓記憶裡的影像、聲音與溫度，再次為你溫柔重現。",
+          "maxLength": 160
+        }
+      }
+    },
+    "p5": {
+      "label": "P5｜寄語入口",
+      "fields": {
+        "entry_line_01": {
+          "label": "入口文案｜第1句",
+          "type": "text",
+          "value": "把那些來不及說的話、忘不掉的情景，留在這裡吧。",
+          "maxLength": 160
+        },
+        "entry_line_02": {
+          "label": "入口文案｜第2句",
+          "type": "text",
+          "value": "寫下你的思念碎片，我們為你梳理成一張寄往時光的卡片。",
+          "maxLength": 160
+        },
+        "option_a_title": {
+          "label": "選項 A｜標題",
+          "type": "text",
+          "value": "寫下個人思念",
+          "maxLength": 100
+        },
+        "option_a_note": {
+          "label": "選項 A｜說明",
+          "type": "text",
+          "value": "把此刻想說的話，凝聚成一張時光卡片",
+          "maxLength": 100
+        },
+        "option_b_title": {
+          "label": "選項 B｜標題",
+          "type": "text",
+          "value": "觀看思念洸語牆",
+          "maxLength": 100
+        },
+        "option_b_note": {
+          "label": "選項 B｜說明",
+          "type": "text",
+          "value": "看看最近留下的十二道思念微光",
+          "maxLength": 100
+        }
+      }
+    },
+    "p6": {
+      "label": "P6｜留言與卡片",
+      "fields": {
+        "target_question": {
+          "label": "步驟 01｜問題",
+          "type": "text",
+          "value": "這張卡片，你想寄給誰？",
+          "maxLength": 100
+        },
+        "custom_target_label": {
+          "label": "自訂對象｜提示",
+          "type": "text",
+          "value": "你想怎麼稱呼這個對象？",
+          "maxLength": 80
+        },
+        "memory_question": {
+          "label": "步驟 02｜問題",
+          "type": "text",
+          "value": "寫下你的思念碎片……",
+          "maxLength": 100
+        },
+        "memory_note": {
+          "label": "步驟 02｜字數說明",
+          "type": "text",
+          "value": "10–80 字即可。不需要完整，只要是真實浮現的片段。",
+          "maxLength": 140
+        },
+        "tags_question": {
+          "label": "步驟 03｜問題",
+          "type": "text",
+          "value": "為這段記憶錨定一種情感基調",
+          "maxLength": 120
+        },
+        "generate_button": {
+          "label": "生成按鈕",
+          "type": "text",
+          "value": "凝聚思念 ‧ 生成卡片",
+          "maxLength": 80
+        },
+        "loading_title": {
+          "label": "AI 等待｜標題",
+          "type": "text",
+          "value": "正在為你凝結時光的微光．．．",
+          "maxLength": 100
+        },
+        "loading_note": {
+          "label": "AI 等待｜說明",
+          "type": "text",
+          "value": "你的文字正在被輕輕梳理，請稍候。",
+          "maxLength": 120
+        },
+        "download_button": {
+          "label": "卡片｜下載按鈕",
+          "type": "text",
+          "value": "下載時光小卡",
+          "maxLength": 80
+        },
+        "release_button": {
+          "label": "卡片｜寄出按鈕",
+          "type": "text",
+          "value": "寄出思念（隨沙而去）",
+          "maxLength": 80
+        },
+        "restart_button": {
+          "label": "結尾｜重新體驗按鈕",
+          "type": "text",
+          "value": "重新體驗",
+          "maxLength": 60
+        },
+        "wall_button": {
+          "label": "結尾｜洸語牆按鈕",
+          "type": "text",
+          "value": "前往洸語牆",
+          "maxLength": 60
+        },
+        "memory_placeholder": {
+          "label": "步驟 02｜輸入提示",
+          "type": "textarea",
+          "value": "例如：想念阿嬤包的粽子香、想念那次一起看海的晚風，或是想對你說聲謝謝……",
+          "maxLength": 180
+        },
+        "outro_01": {
+          "label": "結尾｜第1句",
+          "type": "text",
+          "value": "消逝，不是遺忘，而是將這份愛永遠安放於心。",
+          "maxLength": 140
+        },
+        "outro_02": {
+          "label": "結尾｜第2句",
+          "type": "text",
+          "value": "帶著這份溫暖，繼續走向明天的旅程。",
+          "maxLength": 140
+        }
+      }
+    },
+    "wall": {
+      "label": "洸語牆",
+      "fields": {
+        "title": {
+          "label": "標題",
+          "type": "text",
+          "value": "思念洸語牆",
+          "maxLength": 60
+        },
+        "subtitle": {
+          "label": "副標",
+          "type": "textarea",
+          "value": "十二道最近留下的思念，在這裡安靜發光。",
+          "maxLength": 140
+        },
+        "continue_button": {
+          "label": "返回留言板按鈕",
+          "type": "text",
+          "value": "返回留言板・寫下個人思念",
+          "maxLength": 80
+        },
+        "loading": {
+          "label": "讀取中提示",
+          "type": "text",
+          "value": "正在拾起最近的思念微光……",
+          "maxLength": 100
+        },
+        "empty": {
+          "label": "無留言提示",
+          "type": "text",
+          "value": "牆上還沒有思念，等待第一道微光。",
+          "maxLength": 120
+        },
+        "error": {
+          "label": "讀取失敗提示",
+          "type": "text",
+          "value": "目前暫時無法讀取洸語牆，請稍後再試。",
+          "maxLength": 120
+        },
+        "default_quote": {
+          "label": "留言預設備援文字",
+          "type": "text",
+          "value": "一束沒有被說出口的思念。",
+          "maxLength": 120
+        },
+        "default_meta": {
+          "label": "留言預設署名",
+          "type": "text",
+          "value": "洸限 · 時光寄語",
+          "maxLength": 80
         }
       }
     }

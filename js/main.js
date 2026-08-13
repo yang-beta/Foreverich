@@ -255,14 +255,11 @@
 
             // 獨立 glow layer：像樹枝流光一樣有清楚光芯，
             // 只附帶小範圍柔光，不受底圖 opacity 影響。
-            ellipse.style.stroke =
-              coralRgba('main', 0.42 + glow * 0.58);
-
-            ellipse.style.opacity =
-              `${0.26 + glow * 0.74}`;
-
+            ellipse.style.stroke = coralRgba('main', 1);
+            ellipse.style.opacity = '1';
             ellipse.style.filter =
-              `drop-shadow(0 0 ${2 + glow * 5}px ${coralRgba('main', 0.18 + glow * 0.42)})`;
+              `drop-shadow(0 0 ${3 + glow * 7}px ${coralRgba('main', 0.30 + glow * 0.48)})
+               drop-shadow(0 0 ${7 + glow * 10}px ${coralRgba('glow', 0.10 + glow * 0.20)})`;
           };
 
           // 同一個 index = 距離中央相同，因此左右同步往外。
@@ -575,11 +572,11 @@
 
         const quote=document.createElement('div');
         quote.className='memory-wall-quote';
-        quote.textContent=d.quote||'一束沒有被說出口的思念。';
+        quote.textContent=d.quote||window.SiteContent?.get?.('wall.default_quote','一束沒有被說出口的思念。');
 
         const foot=document.createElement('div');
         foot.className='memory-wall-foot';
-        foot.textContent=d.meta||'洸限 · 時光寄語';
+        foot.textContent=d.meta||window.SiteContent?.get?.('wall.default_meta','洸限 · 時光寄語');
 
         card.append(meta,quote,foot);
 
@@ -587,7 +584,7 @@
           if(typeof window.openMemoryWallCard!=='function') return;
           window.openMemoryWallCard({
             target:d.target||'一份思念',
-            quote:d.quote||'一束沒有被說出口的思念。',
+            quote:d.quote||window.SiteContent?.get?.('wall.default_quote','一束沒有被說出口的思念。'),
             meta:d.meta||'',
             date:date.textContent||''
           });
@@ -605,7 +602,7 @@
       }
       async function load(){
         const token=++fetchToken;
-        grid.innerHTML='<div class="memory-wall-loading">正在拾起最近的思念微光……</div>';
+        grid.innerHTML=`<div class="memory-wall-loading">${window.SiteContent?.get?.('wall.loading','正在拾起最近的思念微光……')}</div>`;
         try{
           const client=window.getRemembranceSupabaseClient?.();
           if(!client) throw new Error('SUPABASE_CLIENT_UNAVAILABLE');
@@ -614,7 +611,7 @@
           if(token!==fetchToken) return;
           grid.replaceChildren();
           if(!data?.length){
-            const el=document.createElement('div'); el.className='memory-wall-empty'; el.textContent='牆上還沒有思念，等待第一道微光。'; grid.appendChild(el); return;
+            const el=document.createElement('div'); el.className='memory-wall-empty'; el.textContent=window.SiteContent?.get?.('wall.empty','牆上還沒有思念，等待第一道微光。'); grid.appendChild(el); return;
           }
           data.slice(0,12).forEach(item=>grid.appendChild(createCard(item)));
           grid.scrollLeft=0;
@@ -622,7 +619,7 @@
         }catch(error){
           console.error('洸語牆讀取失敗:',error);
           if(token!==fetchToken) return;
-          grid.innerHTML='<div class="memory-wall-error">目前暫時無法讀取洸語牆，請稍後再試。</div>';
+          grid.innerHTML=`<div class="memory-wall-error">${window.SiteContent?.get?.('wall.error','目前暫時無法讀取洸語牆，請稍後再試。')}</div>`;
         }
       }
       window.enterMemoryWallPage=function(){

@@ -2337,3 +2337,13 @@
 }
 
 .st0 { fill: var(--coral-main); }
+
+/* LP｜左右字靠近 Logo：不修改 GSAP transform */
+@media (min-width:769px){
+  .lp-side-word-guang{margin-right:clamp(-185px,-12vw,-125px)}
+  .lp-side-word-xian{margin-left:clamp(-185px,-12vw,-125px)}
+}
+@media (max-width:768px){
+  .lp-side-word-guang{margin-right:clamp(-88px,-16vw,-48px)}
+  .lp-side-word-xian{margin-left:clamp(-88px,-16vw,-48px)}
+}

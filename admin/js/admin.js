@@ -16,7 +16,8 @@
 (() => {
   "use strict";
 
-  const PAGE_KEY = "p1";
+  const CMS_PAGES=[{key:"lp",label:"LP｜開場"},{key:"p1",label:"P1｜生命提問"},{key:"p2",label:"P2｜沙畫故事"},{key:"p3",label:"P3｜情感地圖"},{key:"p4",label:"P4｜感官體驗"},{key:"p5",label:"P5｜寄語入口"},{key:"p6",label:"P6｜留言與卡片"},{key:"wall",label:"洸語牆"}];
+  let currentPageKey="p1";
   const client = window.EverichSupabase;
 
   const loginPanel = document.getElementById("loginPanel");
@@ -31,7 +32,9 @@
   const resetEmailInput = document.getElementById("resetEmail");
   const resetStatus = document.getElementById("resetStatus");
 
-  const fieldsRoot = document.getElementById("fieldsRoot");
+  const fieldsRoot=document.getElementById("fieldsRoot");
+  const pageTabs=document.getElementById("cmsPageTabs");
+  const pageSelect=document.getElementById("cmsPageSelect");
   const cmsStatus = document.getElementById("cmsStatus");
   const userLabel = document.getElementById("adminUserLabel");
 
@@ -76,13 +79,26 @@
     userLabel.textContent = currentUser?.email || "";
   }
 
+  function renderPageNavigation(){
+    pageTabs.innerHTML="";pageSelect.innerHTML="";
+    CMS_PAGES.forEach(page=>{
+      const tab=document.createElement("button");tab.type="button";tab.className="cms-page-tab";tab.textContent=page.label;
+      tab.classList.toggle("is-active",page.key===currentPageKey);tab.addEventListener("click",()=>switchPage(page.key));pageTabs.appendChild(tab);
+      const option=document.createElement("option");option.value=page.key;option.textContent=page.label;pageSelect.appendChild(option);
+    });pageSelect.value=currentPageKey;
+  }
+  async function switchPage(pageKey){
+    if(!CMS_PAGES.some(page=>page.key===pageKey))return;
+    currentPageKey=pageKey;renderPageNavigation();setCmsStatus("正在讀取頁面內容…");await loadPageContent();setCmsStatus("");
+  }
+
   async function loadPageContent() {
     const { data, error } = await client
       .from("cms_content")
       .select(
         "content_key,page_key,label,content_type,draft_value,published_value,display_order"
       )
-      .eq("page_key", PAGE_KEY)
+      .eq("page_key", currentPageKey)
       .order("display_order", { ascending: true });
 
     if (error) throw error;
@@ -145,7 +161,7 @@
 
         return {
           content_key: input.dataset.contentKey,
-          page_key: PAGE_KEY,
+          page_key: currentPageKey,
           label: source.label,
           content_type: source.content_type,
           draft_value: input.value.trim(),
@@ -326,6 +342,8 @@
       );
     }
   });
+
+  pageSelect.addEventListener("change",()=>switchPage(pageSelect.value));
 
   document.getElementById("saveDraftBtn")
     .addEventListener("click", async () => {

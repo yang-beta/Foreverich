@@ -266,3 +266,14 @@ textarea:focus {
   justify-content: center;
   margin-top: 16px;
 }
+
+.cms-page-nav-wrap{position:sticky;top:0;z-index:20;margin:0 0 20px;padding:10px 0 12px;background:rgba(26,26,26,.94);backdrop-filter:blur(12px)}
+.cms-page-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px}
+.cms-page-tab{flex:0 0 auto;border:1px solid rgba(255,176,136,.22);border-radius:999px;background:transparent;color:rgba(230,230,232,.78);padding:9px 14px;cursor:pointer;white-space:nowrap}
+.cms-page-tab.is-active{color:#1a1a1a;background:var(--coral-main);border-color:var(--coral-main)}
+.cms-page-select-label,.cms-page-select{display:none}
+@media(max-width:640px){
+ .cms-page-tabs{display:none}.cms-page-select-label{display:block;margin-bottom:7px;font-size:12px;color:rgba(230,230,232,.7)}
+ .cms-page-select{display:block;width:100%;min-height:46px;border:1px solid rgba(255,176,136,.35);border-radius:12px;background:#222;color:#E6E6E8;padding:0 12px;font-size:16px}
+ .cms-toolbar{align-items:flex-start;gap:14px}.toolbar-actions{width:100%}
+}

@@ -1,178 +1,110 @@
 <!DOCTYPE html>
+
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>洸限｜CMS 管理後台</title>
-  <link rel="stylesheet" href="./css/admin.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>洸限｜CMS 管理後台</title>
+<link href="./css/admin.css" rel="stylesheet"/>
 </head>
 <body>
-  <main class="admin-shell">
-    <header class="admin-header">
-      <div>
-        <div class="admin-kicker">GUANG XIAN · CMS</div>
-        <h1>網站內容管理</h1>
-      </div>
-    </header>
-
-    <section class="auth-panel" id="loginPanel" hidden>
-      <div class="panel-card login-card">
-        <div class="panel-label">ADMIN LOGIN</div>
-        <h2>管理帳號登入</h2>
-        <p>
+<main class="admin-shell">
+<header class="admin-header">
+<div>
+<div class="admin-kicker">GUANG XIAN · CMS</div>
+<h1>網站內容管理</h1>
+</div>
+</header>
+<section class="auth-panel" hidden="" id="loginPanel">
+<div class="panel-card login-card">
+<div class="panel-label">ADMIN LOGIN</div>
+<h2>管理帳號登入</h2>
+<p>
           使用 Supabase Auth 的 Email / Password 登入。
         </p>
-
-        <form id="loginForm">
-          <label>
+<form id="loginForm">
+<label>
             Email
-            <input
-              id="loginEmail"
-              type="email"
-              autocomplete="username"
-              required
-            >
-          </label>
-
-          <label>
+            <input autocomplete="username" id="loginEmail" required="" type="email"/>
+</label>
+<label>
             Password
-            <input
-              id="loginPassword"
-              type="password"
-              autocomplete="current-password"
-              required
-            >
-          </label>
-
-          <button class="primary-btn" type="submit">
+            <input autocomplete="current-password" id="loginPassword" required="" type="password"/>
+</label>
+<button class="primary-btn" type="submit">
             登入管理後台
           </button>
-
-          <button
-            class="text-link-btn"
-            id="showResetBtn"
-            type="button"
-          >
+<button class="text-link-btn" id="showResetBtn" type="button">
             忘記密碼？
           </button>
-        </form>
-
-        <div class="status" id="loginStatus"></div>
-      </div>
-    </section>
-
-    <section class="auth-panel" id="resetPanel" hidden>
-      <div class="panel-card login-card">
-        <div class="panel-label">PASSWORD RECOVERY</div>
-        <h2>忘記管理密碼</h2>
-        <p>
+</form>
+<div class="status" id="loginStatus"></div>
+</div>
+</section>
+<section class="auth-panel" hidden="" id="resetPanel">
+<div class="panel-card login-card">
+<div class="panel-label">PASSWORD RECOVERY</div>
+<h2>忘記管理密碼</h2>
+<p>
           輸入管理 Email，我們會透過 Supabase 寄出重設連結。
         </p>
-
-        <form id="resetForm">
-          <label>
+<form id="resetForm">
+<label>
             Email
-            <input
-              id="resetEmail"
-              type="email"
-              autocomplete="email"
-              required
-            >
-          </label>
-
-          <button class="primary-btn" type="submit">
+            <input autocomplete="email" id="resetEmail" required="" type="email"/>
+</label>
+<button class="primary-btn" type="submit">
             寄送重設密碼 Email
           </button>
-
-          <button
-            class="text-link-btn"
-            id="backToLoginBtn"
-            type="button"
-          >
+<button class="text-link-btn" id="backToLoginBtn" type="button">
             回登入頁
           </button>
-        </form>
-
-        <div class="status" id="resetStatus"></div>
-      </div>
-    </section>
-
-    <section class="cms-panel" id="cmsPanel" hidden>
-      <div class="cms-toolbar">
-        <div>
-          <div class="panel-label">PAGE 01</div>
-          <h2>P1｜文字內容</h2>
-          <p class="signed-in">
+</form>
+<div class="status" id="resetStatus"></div>
+</div>
+</section>
+<section class="cms-panel" hidden="" id="cmsPanel">
+<div class="cms-toolbar">
+<div>
+<div class="panel-label">CONTENT CMS</div>
+<h2>全站文字內容</h2>
+<p class="signed-in">
             登入：
             <span id="adminUserLabel"></span>
-          </p>
-        </div>
-
-        <div class="toolbar-actions">
-          <a
-            class="ghost-btn"
-            href="../index.html"
-            target="_blank"
-          >
+</p>
+</div>
+<div class="toolbar-actions">
+<a class="ghost-btn" href="../index.html" target="_blank">
             開啟前台
           </a>
-
-          <button
-            class="ghost-btn"
-            id="logoutBtn"
-            type="button"
-          >
+<button class="ghost-btn" id="logoutBtn" type="button">
             登出
           </button>
-        </div>
-      </div>
-
-      <div class="help-box">
-        <strong>草稿</strong> 不會出現在前台。
+</div>
+</div><div class="cms-page-nav-wrap"><label class="cms-page-select-label" for="cmsPageSelect">編輯頁面</label><select class="cms-page-select" id="cmsPageSelect"></select><nav class="cms-page-tabs" id="cmsPageTabs"></nav></div>
+<div class="help-box">
+<strong>草稿</strong> 不會出現在前台。
         按下 <strong>發布</strong> 後，
         `site_content_public` 才會更新。
       </div>
-
-      <div id="fieldsRoot"></div>
-
-      <div class="cms-actions">
-        <button
-          class="ghost-btn"
-          id="reloadBtn"
-          type="button"
-        >
+<div id="fieldsRoot"></div>
+<div class="cms-actions">
+<button class="ghost-btn" id="reloadBtn" type="button">
           重新讀取
         </button>
-
-        <button
-          class="ghost-btn"
-          id="saveDraftBtn"
-          type="button"
-        >
+<button class="ghost-btn" id="saveDraftBtn" type="button">
           儲存草稿
         </button>
-
-        <button
-          class="primary-btn"
-          id="publishBtn"
-          type="button"
-        >
-          發布 P1
-        </button>
-      </div>
-
-      <div class="status" id="cmsStatus"></div>
-    </section>
-  </main>
-
-  <!-- Supabase Browser SDK -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"
-  ></script>
-
-  <script src="../js/supabase-config.js"></script>
-  <script src="../js/supabase-client.js"></script>
-  <script src="./js/auth.js"></script>
-  <script src="./js/admin.js"></script>
+<button class="primary-btn" id="publishBtn" type="button">發布本頁</button>
+</div>
+<div class="status" id="cmsStatus"></div>
+</section>
+</main>
+<!-- Supabase Browser SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/supabase-config.js"></script>
+<script src="../js/supabase-client.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/admin.js"></script>
 </body>
 </html>
