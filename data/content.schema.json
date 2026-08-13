@@ -1,1 +1,47 @@
-
+{
+  "schemaVersion": 1,
+  "namespace": "everich",
+  "pages": {
+    "p1": {
+      "label": "Page 01",
+      "fields": {
+        "question_01_part_01": {
+          "label": "第一組｜第一句",
+          "type": "text",
+          "value": "你的生命中，有沒有一個人 ――",
+          "maxLength": 60
+        },
+        "question_01_part_02": {
+          "label": "第一組｜第二句",
+          "type": "text",
+          "value": "讓你，成就了今天的自己？",
+          "maxLength": 60
+        },
+        "question_02_part_01": {
+          "label": "第二組｜第一句",
+          "type": "text",
+          "value": "某一段回憶，每當想起 ――",
+          "maxLength": 60
+        },
+        "question_02_part_02": {
+          "label": "第二組｜第二句",
+          "type": "text",
+          "value": "都會，默默地露出微笑？",
+          "maxLength": 60
+        },
+        "question_03_part_01": {
+          "label": "第三組｜第一句",
+          "type": "text",
+          "value": "有沒有一份陪伴，即使過了很久 ――",
+          "maxLength": 60
+        },
+        "question_03_part_02": {
+          "label": "第三組｜第二句",
+          "type": "text",
+          "value": "依然，溫暖著你？",
+          "maxLength": 60
+        }
+      }
+    }
+  }
+}
