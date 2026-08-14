@@ -767,3 +767,249 @@
       !important;
   }
 }
+
+
+/* =============================================================
+   MOBILE RWD PATCH V5｜P6 最終修正
+   -------------------------------------------------------------
+   1. 生成卡片區塊不再 sticky，不再有外層圓角框。
+   2. 最後一排情感選項不會被生成區覆蓋。
+   3. P6 仍可正常上下捲動。
+   ============================================================= */
+
+@media (max-width: 768px) {
+
+  /*
+    表單底部多留安全空間，
+    讓 Safari 底部工具列存在時也能把最後內容捲上來。
+  */
+  #messageCardSection .p5-shell {
+    padding-bottom:
+      calc(
+        130px +
+        env(safe-area-inset-bottom, 0px)
+      )
+      !important;
+  }
+
+  /*
+    第三步選項後方多留一點距離，
+    讓最後一排「情感」完整可點。
+  */
+  #messageCardSection .step-tags.is-open {
+    padding-bottom: 22px !important;
+  }
+
+  #messageCardSection .step-tags .p5-tag-options:last-child {
+    padding-bottom: 14px !important;
+  }
+
+  /*
+    移除上一版 mobile patch 為了 sticky submit 加上的大外框。
+    生成區回到正常 document flow，
+    不再浮在最後一排選項上方。
+  */
+  #messageCardSection .p5-form-step.step-submit.is-open {
+    position: static !important;
+    inset: auto !important;
+
+    width: 100% !important;
+
+    margin:
+      4px
+      0
+      0
+      !important;
+
+    padding:
+      8px
+      0
+      0
+      !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+
+    box-shadow: none !important;
+
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /*
+    只保留真正的生成按鈕本體。
+    若你之後連按鈕邊框也想移除，可再把 border 改成 0。
+  */
+  #messageCardSection .p5-generate-btn {
+    position: relative;
+    z-index: 1;
+  }
+
+  #messageCardSection .p5-validation-message {
+    margin-top: 7px;
+    padding-bottom: 4px;
+  }
+}
+
+
+/* =============================================================
+   MOBILE RWD PATCH V6｜P6 手機 / 平板額外導覽
+   -------------------------------------------------------------
+   桌機：完全隱藏
+   <= 768px：顯示「返回首頁 / 前往洸語牆」
+   ============================================================= */
+
+.p5-mobile-exit-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  /*
+    表單底部再多留一些空間，
+    確保 Safari 工具列不會壓住兩顆導覽按鈕。
+  */
+  #messageCardSection .p5-shell {
+    padding-bottom:
+      calc(
+        150px +
+        env(
+          safe-area-inset-bottom,
+          0px
+        )
+      )
+      !important;
+  }
+
+  #messageCardSection .p5-mobile-exit-nav {
+    display: flex;
+
+    width: 100%;
+
+    gap: 10px;
+
+    justify-content: center;
+    align-items: center;
+
+    margin:
+      14px
+      0
+      4px;
+
+    padding:
+      0
+      4px;
+  }
+
+  #messageCardSection .p5-mobile-exit-btn {
+    flex: 1 1 0;
+
+    min-width: 0;
+    min-height: 42px;
+
+    padding:
+      9px
+      12px;
+
+    border:
+      1px solid
+      rgba(
+        var(--coral-main-rgb),
+        .32
+      );
+
+    border-radius: 999px;
+
+    background:
+      rgba(
+        26,
+        26,
+        26,
+        .32
+      );
+
+    color:
+      rgba(
+        230,
+        230,
+        232,
+        .76
+      );
+
+    font-family:
+      'Noto Serif TC',
+      serif;
+
+    font-size: .72rem;
+    font-weight: 300;
+
+    letter-spacing: .10em;
+
+    cursor: pointer;
+
+    -webkit-tap-highlight-color:
+      transparent;
+
+    transition:
+      border-color .22s ease,
+      color .22s ease,
+      background .22s ease,
+      box-shadow .22s ease;
+  }
+
+  #messageCardSection .p5-mobile-exit-btn:active {
+    transform:
+      translateY(1px);
+  }
+
+  #messageCardSection .p5-mobile-exit-btn-primary {
+    border-color:
+      rgba(
+        var(--coral-main-rgb),
+        .58
+      );
+
+    color:
+      rgba(
+        var(--coral-light-rgb),
+        .92
+      );
+
+    background:
+      rgba(
+        var(--coral-main-rgb),
+        .075
+      );
+
+    box-shadow:
+      0
+      0
+      16px
+      rgba(
+        var(--coral-main-rgb),
+        .055
+      );
+  }
+}
+
+/* 窄手機：兩顆仍橫排，但字稍微縮小。 */
+@media (max-width: 390px) {
+
+  #messageCardSection .p5-mobile-exit-nav {
+    gap: 8px;
+  }
+
+  #messageCardSection .p5-mobile-exit-btn {
+    padding:
+      8px
+      9px;
+
+    font-size:
+      .67rem;
+
+    letter-spacing:
+      .07em;
+  }
+}
