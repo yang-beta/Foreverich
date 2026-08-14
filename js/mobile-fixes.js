@@ -13,6 +13,7 @@
   let touchStartX = 0;
   let touchStartY = 0;
   let touchStartedInP4 = false;
+  let touchStartedInP6 = false;
 
   function isVisiblePage(page) {
     if (!page) return false;
@@ -174,6 +175,18 @@
             "#aiReconstructionSection .p4-carousel"
           )
         );
+
+      /*
+        P6 表單有自己的垂直捲動。
+        只要手勢從 P6 內開始，就標記為 P6 專用手勢。
+        後續 touchend 不交給全站 nextPage / previousPage。
+      */
+      touchStartedInP6 =
+        Boolean(
+          event.target?.closest?.(
+            "#messageCardSection"
+          )
+        );
     },
     {
       capture: true,
@@ -195,6 +208,27 @@
       const deltaY =
         touchStartY - touch.clientY;
 
+      /*
+        P6：垂直滑動永遠只負責表單內頁捲動。
+        不再使用「捲到底後下一次 swipe 就換頁」的舊邏輯，
+        因為 sticky submit / Safari viewport 會讓 scrollTop 判斷提早到 max，
+        導致第三步尚未完成就跳去洸語牆。
+
+        P6 前往洸語牆仍由既有表單完成 / 送出流程處理。
+      */
+      if (
+        touchStartedInP6 &&
+        Math.abs(deltaY) >
+          Math.abs(deltaX) + 6
+      ) {
+        event.stopImmediatePropagation();
+        touchStartedInP6 = false;
+        touchStartedInP4 = false;
+        return;
+      }
+
+      touchStartedInP6 = false;
+
       /* P4：主要是左右滑時，不讓全站誤判成換頁。 */
       if (
         touchStartedInP4 &&
@@ -208,47 +242,6 @@
 
       touchStartedInP4 = false;
 
-      const page =
-        document.getElementById(
-          "messageCardSection"
-        );
-
-      if (
-        !page ||
-        !isVisiblePage(page) ||
-        page.scrollHeight <=
-          page.clientHeight + 4
-      ) {
-        return;
-      }
-
-      const maxScroll =
-        page.scrollHeight -
-        page.clientHeight;
-
-      /*
-        deltaY > 0 = 手指向上滑，內容往下捲。
-        只要還沒到底，就攔截原本 nextPage()。
-      */
-      if (
-        deltaY > 35 &&
-        page.scrollTop <
-          maxScroll - 3
-      ) {
-        event.stopImmediatePropagation();
-        return;
-      }
-
-      /*
-        deltaY < 0 = 手指向下滑，內容往上捲。
-        只要還沒回到頂端，就攔截原本上一頁。
-      */
-      if (
-        deltaY < -35 &&
-        page.scrollTop > 3
-      ) {
-        event.stopImmediatePropagation();
-      }
     },
     {
       capture: true,
@@ -256,7 +249,7 @@
     }
   );
 
-  /* 滑鼠 / trackpad 平板模式同樣避免 P6 尚未捲完就換頁。 */
+  /* 滑鼠 / trackpad 平板模式：P6 內的 wheel 也只負責表單捲動。 */
   window.addEventListener(
     "wheel",
     event => {
