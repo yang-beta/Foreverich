@@ -324,55 +324,48 @@
 
 
 /* =============================================================
-   MOBILE RWD PATCH V2
+   MOBILE RWD PATCH V3｜Safari 安定版
    -------------------------------------------------------------
-   A. LP：Logo 下方三行文字不要壓到 Logo
-   B. 洸語牆：整組再縮窄、縮短；導覽文字下移、底部按鈕上移
-   C. iPhone Safari：dynamic viewport / safe-area
+   核心原則：
+   1. 不再使用 visualViewport.height 改寫整頁高度。
+   2. 不改 section-page / sections-wrapper 的 100vh 設計。
+   3. 保留 P6 上上版已驗證正常的內頁捲動與鍵盤輸入。
+   4. 只使用 safe-area + overscroll 防止 Safari 貼頂 / 橡皮筋露頁。
    ============================================================= */
 
 @media (max-width: 768px) {
 
-  /* -----------------------------------------------------------
-     全頁高度使用 JS 寫入的實際可視高度。
-     fallback 才使用 100dvh。
-     ----------------------------------------------------------- */
+  /*
+    Safari 自由滑動時抑制頁面橡皮筋。
+    注意：不設定固定高度、不設定 position:fixed，
+    因此不會干擾 P6 鍵盤與輸入欄。
+  */
   html,
   body {
-    width: 100%;
-    height: var(--mobile-page-height, 100dvh);
-    min-height: var(--mobile-page-height, 100dvh);
-    overflow: hidden;
     overscroll-behavior: none;
   }
 
   .sections-wrapper {
-    height: var(--mobile-page-height, 100dvh) !important;
-    min-height: var(--mobile-page-height, 100dvh) !important;
-    overflow: visible;
+    overscroll-behavior: none;
   }
 
   .section-page {
-    height: var(--mobile-page-height, 100dvh) !important;
-    min-height: var(--mobile-page-height, 100dvh) !important;
-    max-height: var(--mobile-page-height, 100dvh) !important;
-    overflow: hidden;
+    overscroll-behavior: none;
   }
 
-  #mandalaCanvas {
-    height: var(--mobile-page-height, 100dvh) !important;
-  }
-
-  /* -----------------------------------------------------------
-     Skip：
-     不再只用 top:20px。
-     即使 Safari 網址列展開 / 收合，也至少留出安全距離。
-     ----------------------------------------------------------- */
+  /*
+    Skip safe-area：
+    保留上一版已證實有效的「不要貼住 iPhone 頂端」。
+    但不再跟 visualViewport 高度連動。
+  */
   .skip-anim-btn {
     top:
       max(
         54px,
-        calc(env(safe-area-inset-top, 0px) + 14px)
+        calc(
+          env(safe-area-inset-top, 0px)
+          + 14px
+        )
       )
       !important;
 
@@ -384,30 +377,31 @@
       !important;
   }
 
-  /* -----------------------------------------------------------
-     LP：
-     原本 mobile style 是 translateY(-88px)，
-     導致「回憶」直接壓進 Logo。
-
-     V2 往下放約 66px：
-     -88px → -22px
-     ----------------------------------------------------------- */
+  /*
+    LP：
+    Logo 本身不移動。
+    只把「回憶 / 從這裡 / 開始」往下，
+    避免文字壓到中心 Logo。
+  */
   #openingHero .interactive-area {
-    transform: translateY(-22px) !important;
+    transform:
+      translateY(-22px)
+      !important;
   }
 
-  /* LP 三行本身稍微縮短間距，避免下移後又壓到箭頭。 */
   #openingHero .subtitle-wrapper-1,
   #openingHero .subtitle-wrapper-2 {
     margin-top: 7px;
   }
 
-  /* 箭頭仍保留手機原本位置，不跟 LP 文字一起移動。 */
   #openingHero .scroll-arrow-btn {
     bottom:
       max(
         5%,
-        calc(env(safe-area-inset-bottom, 0px) + 22px)
+        calc(
+          env(safe-area-inset-bottom, 0px)
+          + 22px
+        )
       )
       !important;
   }
@@ -415,35 +409,60 @@
 
 
 /* =============================================================
-   洸語牆｜手機 V2
+   P4｜手機 / 平板 Canvas 比例保護
    -------------------------------------------------------------
-   目標：
-   - 卡片比上一版再窄、再短
-   - 上方導覽文字往下
-   - 底部留言按鈕往上
-   - 中央兩張卡不要吃滿整個畫面
+   Canvas 仍由原本 canvas.js 依 getBoundingClientRect() 重算。
+   這裡只確保 visual stage 不被 flex item 壓扁。
    ============================================================= */
+
+@media (max-width: 1100px) {
+
+  #aiReconstructionSection .p4-card-visual-stage {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  #aiReconstructionSection .p4-card-canvas {
+    left: 0;
+    top: 0;
+    right: auto;
+    bottom: auto;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /*
+    同心圓是 DOM，不是 Canvas。
+    維持正圓，不讓 carousel card 寬度把它拉成橢圓。
+  */
+  #aiReconstructionSection .p4-audio-rings {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+
+/* =============================================================
+   洸語牆｜手機 V3
+   -------------------------------------------------------------
+   延續 V2 的縮窄 / 縮短，但移除所有 visualViewport 高度依賴。
+   ============================================================= */
+
 @media (max-width: 600px) {
 
   .memory-wall-shell {
     width: 82vw !important;
     max-width: 340px !important;
 
-    height: min(
-      78dvh,
-      calc(
-        var(--mobile-page-height, 100dvh)
-        * .78
-      )
-    ) !important;
-
+    /*
+      使用普通 vh；不再讀 --mobile-page-height。
+      因此 Safari 鍵盤 / 網址列變動不會突然重算整站。
+    */
+    height: 78vh !important;
     min-height: 0 !important;
-
-    /* 整組維持真正畫面中央，不貼瀏覽器上下邊。 */
     margin: auto;
   }
 
-  /* 導覽文字往下移 */
+  /* 上方導覽文字往下，保留清楚呼吸空間。 */
   .memory-wall-header {
     margin-top: 20px !important;
     margin-bottom: 14px !important;
@@ -472,7 +491,7 @@
     grid-template-rows:
       repeat(
         2,
-        clamp(150px, 20.5dvh, 178px)
+        clamp(150px, 20.5vh, 178px)
       )
       !important;
 
@@ -481,7 +500,6 @@
       !important;
 
     gap: 8px !important;
-
     align-content: center;
     justify-content: start;
   }
@@ -515,7 +533,6 @@
     font-size: .54rem !important;
   }
 
-  /* 箭頭跟著縮窄後的卡片靠近 */
   .memory-wall-nav {
     width: 32px !important;
     height: 58px !important;
@@ -529,7 +546,7 @@
     right: 0 !important;
   }
 
-  /* 底部按鈕往上拉 */
+  /* 下方留言按鈕往上。 */
   .memory-wall-continue {
     max-width: 78vw !important;
 
@@ -542,22 +559,17 @@
 
     font-size: .66rem !important;
 
-    transform: translateY(-14px);
+    transform:
+      translateY(-14px);
   }
 }
 
 
-/* 螢幕特別矮時，再稍微壓縮。 */
+/* 特別矮的手機只壓縮洸語牆本身，不改全站 viewport。 */
 @media (max-width: 600px) and (max-height: 700px) {
 
   .memory-wall-shell {
-    height: min(
-      76dvh,
-      calc(
-        var(--mobile-page-height, 100dvh)
-        * .76
-      )
-    ) !important;
+    height: 76vh !important;
   }
 
   .memory-wall-header {
@@ -568,7 +580,7 @@
     grid-template-rows:
       repeat(
         2,
-        clamp(138px, 19dvh, 160px)
+        clamp(138px, 19vh, 160px)
       )
       !important;
   }
