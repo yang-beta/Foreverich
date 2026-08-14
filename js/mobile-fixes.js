@@ -251,16 +251,202 @@
     }
   );
 
+
+  /* -----------------------------------------------------------
+     iPhone Safari Dynamic Viewport Fix
+     -----------------------------------------------------------
+     原站 main.js 使用：
+       translateY(-100vh)
+       translateY(-200vh)
+       ...
+
+     Safari 地址列展開 / 收合時，CSS 100vh 與真正可視高度可能不同，
+     因而出現「下一頁露出幾 px」以及 Skip 看起來忽高忽低。
+
+     這裡不改 main.js：
+     1. 取得目前真正 viewport 高度
+     2. 寫入 --mobile-page-height
+     3. 監看 sectionsWrapper 的 transform
+     4. 若 main.js 寫入 -Nvh，自動換成 -N * 真實高度 px
+     ----------------------------------------------------------- */
+
+  const mobileViewport = {
+    currentIndex: 0,
+    observer: null,
+    rafId: null
+  };
+
+  function getMobileViewportHeight() {
+    /*
+      visualViewport.height 在 iPhone Safari 地址列變動時
+      會比單純 100vh 更接近真正可視區域。
+    */
+    const vvHeight =
+      window.visualViewport?.height;
+
+    const innerHeight =
+      window.innerHeight;
+
+    return Math.round(
+      vvHeight ||
+      innerHeight ||
+      document.documentElement.clientHeight
+    );
+  }
+
+  function setMobilePageHeight() {
+    if (window.innerWidth > 768) return;
+
+    const height =
+      getMobileViewportHeight();
+
+    document.documentElement.style.setProperty(
+      "--mobile-page-height",
+      `${height}px`
+    );
+
+    const wrapper =
+      document.getElementById(
+        "sectionsWrapper"
+      );
+
+    if (!wrapper) return;
+
+    wrapper.style.transform =
+      `translateY(-${
+        mobileViewport.currentIndex *
+        height
+      }px)`;
+  }
+
+  function readIndexFromTransform(transform) {
+    if (!transform) return null;
+
+    /*
+      main.js 原始值例如：
+      translateY(-300vh)
+    */
+    const vhMatch =
+      transform.match(
+        /translateY\(\s*(-?[\d.]+)vh\s*\)/
+      );
+
+    if (vhMatch) {
+      const vh =
+        parseFloat(vhMatch[1]);
+
+      return Math.max(
+        0,
+        Math.round(
+          Math.abs(vh) / 100
+        )
+      );
+    }
+
+    return null;
+  }
+
+  function initDynamicViewportSnap() {
+    if (window.innerWidth > 768) return;
+
+    const wrapper =
+      document.getElementById(
+        "sectionsWrapper"
+      );
+
+    if (!wrapper) return;
+
+    setMobilePageHeight();
+
+    /*
+      main.js 每次 goToPage() 都會修改 inline transform。
+      MutationObserver 在瀏覽器繪製下一 frame 前把 vh 改成 px。
+    */
+    mobileViewport.observer =
+      new MutationObserver(() => {
+
+        const index =
+          readIndexFromTransform(
+            wrapper.style.transform
+          );
+
+        if (index === null) return;
+
+        mobileViewport.currentIndex =
+          index;
+
+        const height =
+          getMobileViewportHeight();
+
+        wrapper.style.transform =
+          `translateY(-${
+            index * height
+          }px)`;
+      });
+
+    mobileViewport.observer.observe(
+      wrapper,
+      {
+        attributes: true,
+        attributeFilter: ["style"]
+      }
+    );
+
+    const refresh = () => {
+      if (mobileViewport.rafId) {
+        cancelAnimationFrame(
+          mobileViewport.rafId
+        );
+      }
+
+      mobileViewport.rafId =
+        requestAnimationFrame(() => {
+          setMobilePageHeight();
+          mobileViewport.rafId = null;
+        });
+    };
+
+    window.addEventListener(
+      "resize",
+      refresh,
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "orientationchange",
+      refresh,
+      { passive: true }
+    );
+
+    window.visualViewport
+      ?.addEventListener(
+        "resize",
+        refresh,
+        { passive: true }
+      );
+
+    window.visualViewport
+      ?.addEventListener(
+        "scroll",
+        refresh,
+        { passive: true }
+      );
+  }
+
   if (
     document.readyState ===
     "loading"
   ) {
     document.addEventListener(
       "DOMContentLoaded",
-      initP4Carousel,
+      () => {
+        initP4Carousel();
+        initDynamicViewportSnap();
+      },
       { once: true }
     );
   } else {
     initP4Carousel();
+    initDynamicViewportSnap();
   }
 })();
