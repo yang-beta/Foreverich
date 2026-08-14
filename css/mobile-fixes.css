@@ -321,3 +321,255 @@
       !important;
   }
 }
+
+
+/* =============================================================
+   MOBILE RWD PATCH V2
+   -------------------------------------------------------------
+   A. LP：Logo 下方三行文字不要壓到 Logo
+   B. 洸語牆：整組再縮窄、縮短；導覽文字下移、底部按鈕上移
+   C. iPhone Safari：dynamic viewport / safe-area
+   ============================================================= */
+
+@media (max-width: 768px) {
+
+  /* -----------------------------------------------------------
+     全頁高度使用 JS 寫入的實際可視高度。
+     fallback 才使用 100dvh。
+     ----------------------------------------------------------- */
+  html,
+  body {
+    width: 100%;
+    height: var(--mobile-page-height, 100dvh);
+    min-height: var(--mobile-page-height, 100dvh);
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .sections-wrapper {
+    height: var(--mobile-page-height, 100dvh) !important;
+    min-height: var(--mobile-page-height, 100dvh) !important;
+    overflow: visible;
+  }
+
+  .section-page {
+    height: var(--mobile-page-height, 100dvh) !important;
+    min-height: var(--mobile-page-height, 100dvh) !important;
+    max-height: var(--mobile-page-height, 100dvh) !important;
+    overflow: hidden;
+  }
+
+  #mandalaCanvas {
+    height: var(--mobile-page-height, 100dvh) !important;
+  }
+
+  /* -----------------------------------------------------------
+     Skip：
+     不再只用 top:20px。
+     即使 Safari 網址列展開 / 收合，也至少留出安全距離。
+     ----------------------------------------------------------- */
+  .skip-anim-btn {
+    top:
+      max(
+        54px,
+        calc(env(safe-area-inset-top, 0px) + 14px)
+      )
+      !important;
+
+    right:
+      max(
+        16px,
+        env(safe-area-inset-right, 0px)
+      )
+      !important;
+  }
+
+  /* -----------------------------------------------------------
+     LP：
+     原本 mobile style 是 translateY(-88px)，
+     導致「回憶」直接壓進 Logo。
+
+     V2 往下放約 66px：
+     -88px → -22px
+     ----------------------------------------------------------- */
+  #openingHero .interactive-area {
+    transform: translateY(-22px) !important;
+  }
+
+  /* LP 三行本身稍微縮短間距，避免下移後又壓到箭頭。 */
+  #openingHero .subtitle-wrapper-1,
+  #openingHero .subtitle-wrapper-2 {
+    margin-top: 7px;
+  }
+
+  /* 箭頭仍保留手機原本位置，不跟 LP 文字一起移動。 */
+  #openingHero .scroll-arrow-btn {
+    bottom:
+      max(
+        5%,
+        calc(env(safe-area-inset-bottom, 0px) + 22px)
+      )
+      !important;
+  }
+}
+
+
+/* =============================================================
+   洸語牆｜手機 V2
+   -------------------------------------------------------------
+   目標：
+   - 卡片比上一版再窄、再短
+   - 上方導覽文字往下
+   - 底部留言按鈕往上
+   - 中央兩張卡不要吃滿整個畫面
+   ============================================================= */
+@media (max-width: 600px) {
+
+  .memory-wall-shell {
+    width: 82vw !important;
+    max-width: 340px !important;
+
+    height: min(
+      78dvh,
+      calc(
+        var(--mobile-page-height, 100dvh)
+        * .78
+      )
+    ) !important;
+
+    min-height: 0 !important;
+
+    /* 整組維持真正畫面中央，不貼瀏覽器上下邊。 */
+    margin: auto;
+  }
+
+  /* 導覽文字往下移 */
+  .memory-wall-header {
+    margin-top: 20px !important;
+    margin-bottom: 14px !important;
+    transform: translateY(8px);
+  }
+
+  .memory-wall-title {
+    font-size: 1.02rem !important;
+    letter-spacing: .16em !important;
+  }
+
+  .memory-wall-header p {
+    margin-top: 7px !important;
+    font-size: .64rem !important;
+    line-height: 1.55 !important;
+    letter-spacing: .09em !important;
+  }
+
+  .memory-wall-carousel {
+    width: 100%;
+    padding-inline: 22px !important;
+    align-items: center;
+  }
+
+  .memory-wall-carousel .memory-wall-grid {
+    grid-template-rows:
+      repeat(
+        2,
+        clamp(150px, 20.5dvh, 178px)
+      )
+      !important;
+
+    grid-auto-columns:
+      min(68vw, 292px)
+      !important;
+
+    gap: 8px !important;
+
+    align-content: center;
+    justify-content: start;
+  }
+
+  .memory-wall-card {
+    height: 100%;
+    min-height: 0 !important;
+
+    padding:
+      12px
+      14px
+      11px
+      !important;
+
+    border-radius: 14px;
+  }
+
+  .memory-wall-meta {
+    font-size: .56rem !important;
+  }
+
+  .memory-wall-quote {
+    margin: 7px 0 6px !important;
+    font-size: .68rem !important;
+    line-height: 1.52 !important;
+    -webkit-line-clamp: 4 !important;
+  }
+
+  .memory-wall-foot {
+    margin-top: auto;
+    font-size: .54rem !important;
+  }
+
+  /* 箭頭跟著縮窄後的卡片靠近 */
+  .memory-wall-nav {
+    width: 32px !important;
+    height: 58px !important;
+  }
+
+  .memory-wall-nav-prev {
+    left: 0 !important;
+  }
+
+  .memory-wall-nav-next {
+    right: 0 !important;
+  }
+
+  /* 底部按鈕往上拉 */
+  .memory-wall-continue {
+    max-width: 78vw !important;
+
+    margin-top: 4px !important;
+
+    padding:
+      7px
+      14px
+      !important;
+
+    font-size: .66rem !important;
+
+    transform: translateY(-14px);
+  }
+}
+
+
+/* 螢幕特別矮時，再稍微壓縮。 */
+@media (max-width: 600px) and (max-height: 700px) {
+
+  .memory-wall-shell {
+    height: min(
+      76dvh,
+      calc(
+        var(--mobile-page-height, 100dvh)
+        * .76
+      )
+    ) !important;
+  }
+
+  .memory-wall-header {
+    margin-top: 10px !important;
+  }
+
+  .memory-wall-carousel .memory-wall-grid {
+    grid-template-rows:
+      repeat(
+        2,
+        clamp(138px, 19dvh, 160px)
+      )
+      !important;
+  }
+}
