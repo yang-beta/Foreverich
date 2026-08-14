@@ -156,6 +156,39 @@
       goToPage(currentPageIndex + 1);
     }
 
+    /* =============================================================
+       手機 / 平板 P6 專用導覽橋接
+       -------------------------------------------------------------
+       mobile-fixes.js 不直接碰 currentPageIndex / goToPage，
+       而是送出 everich:mobile-nav 自訂事件。
+       主程式在這裡統一處理正式頁面生命週期。
+       ============================================================= */
+    window.addEventListener(
+      'everich:mobile-nav',
+      event => {
+        const targetId =
+          event.detail?.targetId;
+
+        if (!targetId) return;
+
+        const target =
+          document.getElementById(
+            targetId
+          );
+
+        const targetIndex =
+          pageElements.indexOf(
+            target
+          );
+
+        if (targetIndex < 0) return;
+
+        goToPage(
+          targetIndex
+        );
+      }
+    );
+
 
         // =============================================================
         // Page 5｜寄語入口
@@ -661,20 +694,74 @@
     resizeAllCanvases();
     runPageLifecycle(pageElements[currentPageIndex], 'enter');
 
+    /* =============================================================
+       全站 wheel / swipe 換頁
+       -------------------------------------------------------------
+       手機 / 平板的 P6（messageCardSection）是「內頁可捲動表單」。
+       因此只要目前停在 P6，就完全禁止用 wheel / swipe 換頁。
+
+       P6 前往洸語牆只由原本「生成卡片 → 完成流程」控制。
+       這可以避免使用者為了看最後一排情感選項往上滑時，
+       被誤判為 nextPage() 而跳到洸語牆。
+       ============================================================= */
+
+    function shouldKeepNavigationInsideCurrentPage() {
+      const currentPage = pageElements[currentPageIndex];
+      if (!currentPage) return false;
+
+      const isMobileOrTablet =
+        window.matchMedia('(max-width: 768px)').matches;
+
+      return (
+        isMobileOrTablet &&
+        currentPage.id === 'messageCardSection'
+      );
+    }
+
     window.addEventListener('wheel', (e) => {
       if (isNavigationLocked()) return;
+
+      // P6 手機 / 平板：wheel / trackpad 只負責表單內捲動。
+      if (shouldKeepNavigationInsideCurrentPage()) return;
+
       if (e.deltaY > 20) nextPage();
       else if (e.deltaY < -20) goToPage(currentPageIndex - 1);
     }, { passive: true });
 
     let touchStartY = 0;
-    window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
-    window.addEventListener('touchend', (e) => {
-      if (isNavigationLocked()) return;
-      const deltaY = touchStartY - e.changedTouches[0].clientY;
-      if (deltaY > 50) nextPage();
-      else if (deltaY < -50) goToPage(currentPageIndex - 1);
-    }, { passive: true });
+
+    window.addEventListener(
+      'touchstart',
+      (e) => {
+        touchStartY =
+          e.touches[0].clientY;
+      },
+      { passive: true }
+    );
+
+    window.addEventListener(
+      'touchend',
+      (e) => {
+        if (isNavigationLocked()) return;
+
+        // P6 手機 / 平板：
+        // 不論目前 scrollTop 在哪裡，都不執行全站 swipe 換頁。
+        if (shouldKeepNavigationInsideCurrentPage()) return;
+
+        const deltaY =
+          touchStartY -
+          e.changedTouches[0].clientY;
+
+        if (deltaY > 50) {
+          nextPage();
+        } else if (deltaY < -50) {
+          goToPage(
+            currentPageIndex - 1
+          );
+        }
+      },
+      { passive: true }
+    );
 
 /* =============================================================
    Page 5｜留言板與寄語小卡
