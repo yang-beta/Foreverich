@@ -647,7 +647,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           personW * 1.70;
 
         const shadowRadiusY =
-          personH * 0.12;
+          personH * 0.20;
 
         const shadowGradient =
           bgCtx.createRadialGradient(
