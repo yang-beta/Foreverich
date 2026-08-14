@@ -92,39 +92,56 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // =============================================================
     const bgCanvas = document.getElementById('mandalaCanvas');
     const bgCtx = bgCanvas.getContext('2d', { alpha: false });
-    // P1 人物 PNG
-    // 優先讀取 img/man-s.png；若目前放在網站根目錄，則自動 fallback。
+    // P1 背景是全螢幕 Canvas，比 LP 的 40vh 波浪負擔高。
+    // 僅降低此 Canvas 的內部渲染倍率，不影響 CSS 顯示尺寸。
+    const BG_DPR = Math.min(window.devicePixelRatio || 1, 1.1);
+
+    // =============================================================
+    // P1 人物 PNG｜獨立設定
+    // -------------------------------------------------------------
+    // 這一區只控制人物，不參與 P1 圓圈 / 珊瑚流光 / 粒子 RAF。
+    // 即使圖片載入失敗，也只是不畫人物，不會中斷背景動畫。
+    // =============================================================
+    const PERSON_SIZE = 0.074;
+    const PERSON_OPACITY = 0.10;
+    const PERSON_Y_OFFSET = 20 * BG_DPR;
+    const SHADOW_OPACITY = 0.22;
+
     const p1PersonImage = new Image();
-    const p1PersonImageSources = ['img/man-s.png', './man-s.png'];
-    let p1PersonImageSourceIndex = 0;
     let p1PersonImageReady = false;
+    let p1PersonImageFailed = false;
+
+    const p1PersonSources = [
+      './img/man-s.png',
+      'img/man-s.png',
+      './man-s.png'
+    ];
+
+    let p1PersonSourceIndex = 0;
+
+    function loadNextP1PersonSource() {
+      if (p1PersonSourceIndex >= p1PersonSources.length) {
+        p1PersonImageFailed = true;
+        return;
+      }
+
+      p1PersonImage.src =
+        p1PersonSources[p1PersonSourceIndex];
+    }
 
     p1PersonImage.onload = () => {
       p1PersonImageReady = true;
+      p1PersonImageFailed = false;
     };
 
     p1PersonImage.onerror = () => {
       p1PersonImageReady = false;
-      p1PersonImageSourceIndex += 1;
-      if (p1PersonImageSourceIndex < p1PersonImageSources.length) {
-        p1PersonImage.src = p1PersonImageSources[p1PersonImageSourceIndex];
-
-    // =============================================================
-    // P1 人物顯示設定｜未來只需要調整這一區
-    // =============================================================
-    const PERSON_SIZE = 0.074;              // 人物大小
-    const PERSON_OPACITY = 0.10;            // 人物透明度 10%
-    const PERSON_Y_OFFSET = 20 * BG_DPR;    // 正值往下，負值往上
-    const SHADOW_OPACITY = 0.22;            // 暖色地面投影強度
-
-      }
+      p1PersonSourceIndex += 1;
+      loadNextP1PersonSource();
     };
 
-    p1PersonImage.src = p1PersonImageSources[p1PersonImageSourceIndex];
+    loadNextP1PersonSource();
 
-    // P1 背景是全螢幕 Canvas，比 LP 的 40vh 波浪負擔高。
-    // 僅降低此 Canvas 的內部渲染倍率，不影響 CSS 顯示尺寸。
-    const BG_DPR = Math.min(window.devicePixelRatio || 1, 1.1);
     let isBgCanvasRendering = true;
 
     function resizeBgCanvas() {
@@ -546,108 +563,141 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
 
       /*
-        P1 人物｜改用 man-s.png
+        P1 人物｜man-s.png
         -------------------------------------------------------------
-        定位問題的真正原因不是文字把人物往下壓。
-        舊版雖然 personContactY 已經是紅線高度，但 Canvas 人形以紅線
-        當「局部座標原點」後，腿仍繼續往下畫，因此腳底自然低於紅線。
-
-        新版直接讓 PNG 的「圖片底部」= personContactY。
-        所以人物腳底會真正落在紅線上，文字不參與人物座標計算。
+        注意：
+        - 文字 DOM 不會影響人物座標。
+        - personContactY 由 P1 圓圈幾何計算。
+        - 圖片最底部 + Y_OFFSET = 實際腳底位置。
+        - 圖片未載入時，直接略過人物；背景 RAF 繼續正常執行。
       */
       const personContactY =
         p1RingGeometry[p1CircleCount - 1]
           .shiftedBottomTopPointY;
 
-      // 人物永遠保持畫面水平正中央。
       const personX = centerX;
 
-      // 人物不需要大；只控制高度，寬度依 PNG 原始比例計算。
       const personH =
         Math.max(
-          44 * BG_DPR,
+          34 * BG_DPR,
           Math.min(W, H) * PERSON_SIZE
         );
 
-      const personReveal = Math.max(0, Math.min(1, animationParams.personProgress));
-      const personEase = personReveal * personReveal * (3 - 2 * personReveal);
+      const personReveal =
+        Math.max(
+          0,
+          Math.min(
+            1,
+            animationParams.personProgress
+          )
+        );
 
-      if (personEase > 0.001 && p1PersonImageReady) {
-        const naturalW = p1PersonImage.naturalWidth || 30;
-        const naturalH = p1PersonImage.naturalHeight || 80;
-        const personW = personH * (naturalW / naturalH);
+      const personEase =
+        personReveal *
+        personReveal *
+        (3 - 2 * personReveal);
 
-        // 精準定位：
-        // X：人物中心 = 畫面中心
-        // Y：PNG 最底部 = 紅線
-        const personDrawX = personX - personW / 2;
+      /*
+        把人物完全包在安全條件裡。
+        任何圖片載入問題都不會碰到圓圈 / 流光程式。
+      */
+      if (
+        personEase > 0.001 &&
+        p1PersonImageReady &&
+        p1PersonImage.naturalWidth > 0 &&
+        p1PersonImage.naturalHeight > 0
+      ) {
+        const naturalW =
+          p1PersonImage.naturalWidth;
 
-        // PERSON_Y_OFFSET > 0：往下；< 0：往上
-        const personDrawY =
-          personContactY - personH + PERSON_Y_OFFSET;
+        const naturalH =
+          p1PersonImage.naturalHeight;
 
-        // 人物實際腳底位置，陰影也以此為基準。
+        const personW =
+          personH *
+          (naturalW / naturalH);
+
         const personFootY =
-          personContactY + PERSON_Y_OFFSET;
+          personContactY +
+          PERSON_Y_OFFSET;
+
+        const personDrawX =
+          personX -
+          personW / 2;
+
+        const personDrawY =
+          personFootY -
+          personH;
 
         bgCtx.save();
 
         // ---------------------------------------------------------
-        // 地面暖色暗影
+        // 暖色地面長影
         // ---------------------------------------------------------
-        // 從人物腳底向左下 / 右下攤開。
-        // 使用 Deep Coral，避免黑色陰影在深色背景裡完全消失。
-        bgCtx.save();
+        // 先畫影子，再畫 PNG。
+        // 使用 Deep Coral，讓深色背景仍看得到，但不搶文字。
+        const shadowCenterX =
+          personX;
 
-        const shadowCenterX = personX;
         const shadowCenterY =
-          personFootY + personH * 0.050;
+          personFootY +
+          personH * 0.032;
 
-        const shadowRadiusX = personW * 1.65;
-        const shadowRadiusY = personH * 0.090;
+        const shadowRadiusX =
+          personW * 1.70;
 
-        const groundShadow = bgCtx.createRadialGradient(
-          shadowCenterX,
-          shadowCenterY,
+        const shadowRadiusY =
+          personH * 0.058;
+
+        const shadowGradient =
+          bgCtx.createRadialGradient(
+            shadowCenterX,
+            shadowCenterY,
+            0,
+            shadowCenterX,
+            shadowCenterY,
+            Math.max(
+              shadowRadiusX,
+              1
+            )
+          );
+
+        shadowGradient.addColorStop(
           0,
-          shadowCenterX,
-          shadowCenterY,
-          shadowRadiusX
-        );
-
-        groundShadow.addColorStop(
-          0,
           coralRgba(
             'deep',
-            SHADOW_OPACITY * 0.95 * personEase
+            SHADOW_OPACITY *
+            personEase
           )
         );
 
-        groundShadow.addColorStop(
-          0.38,
+        shadowGradient.addColorStop(
+          0.42,
           coralRgba(
             'deep',
-            SHADOW_OPACITY * 0.62 * personEase
+            SHADOW_OPACITY *
+            0.55 *
+            personEase
           )
         );
 
-        groundShadow.addColorStop(
-          0.72,
-          coralRgba(
-            'deep',
-            SHADOW_OPACITY * 0.24 * personEase
-          )
-        );
-
-        groundShadow.addColorStop(
+        shadowGradient.addColorStop(
           1,
-          coralRgba('deep', 0)
+          coralRgba(
+            'deep',
+            0
+          )
         );
 
-        bgCtx.fillStyle = groundShadow;
-        bgCtx.filter = `blur(${2.2 * BG_DPR}px)`;
+        bgCtx.save();
 
-        // 中央橢圓
+        bgCtx.fillStyle =
+          shadowGradient;
+
+        bgCtx.filter =
+          `blur(${2.0 * BG_DPR}px)`;
+
+        // 主影
         bgCtx.beginPath();
         bgCtx.ellipse(
           shadowCenterX,
@@ -661,13 +711,15 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         bgCtx.fill();
 
         // 左下延伸
-        bgCtx.globalAlpha = 0.72;
+        bgCtx.globalAlpha = 0.58;
         bgCtx.beginPath();
         bgCtx.ellipse(
-          shadowCenterX - personW * 0.74,
-          shadowCenterY + personH * 0.030,
+          shadowCenterX -
+            personW * 0.70,
+          shadowCenterY +
+            personH * 0.018,
           shadowRadiusX * 0.74,
-          shadowRadiusY * 0.78,
+          shadowRadiusY * 0.70,
           -0.10,
           0,
           Math.PI * 2
@@ -677,10 +729,12 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         // 右下延伸
         bgCtx.beginPath();
         bgCtx.ellipse(
-          shadowCenterX + personW * 0.74,
-          shadowCenterY + personH * 0.030,
+          shadowCenterX +
+            personW * 0.70,
+          shadowCenterY +
+            personH * 0.018,
           shadowRadiusX * 0.74,
-          shadowRadiusY * 0.78,
+          shadowRadiusY * 0.70,
           0.10,
           0,
           Math.PI * 2
@@ -689,12 +743,22 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
         bgCtx.restore();
 
-        // 人物透明度由 PERSON_OPACITY 集中控制。
-        // personEase 僅保留原本「慢慢出現」的動畫。
+        // ---------------------------------------------------------
+        // 人物 PNG
+        // ---------------------------------------------------------
         bgCtx.globalAlpha =
-          PERSON_OPACITY * personEase;
-        bgCtx.shadowColor = coralRgba('main', 0.14 * personEase);
-        bgCtx.shadowBlur = 5 * BG_DPR;
+          PERSON_OPACITY *
+          personEase;
+
+        bgCtx.shadowColor =
+          coralRgba(
+            'main',
+            0.10 *
+            personEase
+          );
+
+        bgCtx.shadowBlur =
+          4 * BG_DPR;
 
         bgCtx.drawImage(
           p1PersonImage,
@@ -706,7 +770,6 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
         bgCtx.restore();
       }
-      bgCtx.restore();
 
       bgCtx.restore();
     }
