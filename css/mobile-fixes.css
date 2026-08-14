@@ -1,0 +1,323 @@
+/* =============================================================
+   MOBILE / TABLET RWD PATCH
+   -------------------------------------------------------------
+   只覆寫 RWD，不修改原本桌機動畫與 Canvas。
+   1. P4：平板 / 手機改橫向滑動 + 左右半透明箭頭
+   2. P6：手機表單允許內頁垂直捲動 + Sticky 送出
+   3. 洸語牆：手機卡片縮窄、縮短，減少大面積空白
+   ============================================================= */
+
+/* ---------- P4 carousel base ---------- */
+.p4-carousel {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.p4-carousel-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 28;
+  width: 40px;
+  height: 68px;
+  transform: translateY(-50%);
+  border: 1px solid rgba(var(--coral-main-rgb), .28);
+  border-radius: 999px;
+  background: rgba(18,18,18,.50);
+  color: rgba(var(--coral-light-rgb), .90);
+  font: 300 1.9rem/1 serif;
+  display: none;
+  place-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 0 18px rgba(0,0,0,.18);
+  transition:
+    opacity .25s ease,
+    background .25s ease,
+    border-color .25s ease;
+}
+
+.p4-carousel-nav:hover {
+  background: rgba(var(--coral-main-rgb), .13);
+  border-color: rgba(var(--coral-main-rgb), .55);
+}
+
+.p4-carousel-nav:disabled {
+  opacity: .16;
+  pointer-events: none;
+}
+
+.p4-carousel-prev { left: 2px; }
+.p4-carousel-next { right: 2px; }
+
+/* 平板：兩張卡並排，左右滑動其餘卡片 */
+@media (min-width: 601px) and (max-width: 1100px) {
+  #aiReconstructionSection .p4-content {
+    width: 96vw;
+    gap: 14px;
+    padding: 4.5vh 10px 11vh;
+  }
+
+  #aiReconstructionSection .p4-carousel {
+    padding-inline: 38px;
+  }
+
+  #aiReconstructionSection .p4-carousel-nav {
+    display: grid;
+  }
+
+  #aiReconstructionSection .p4-cards {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 12px !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 2px !important;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  #aiReconstructionSection .p4-cards::-webkit-scrollbar {
+    display: none;
+  }
+
+  #aiReconstructionSection .p4-card-item {
+    flex: 0 0 calc((100% - 12px) / 2);
+    min-width: 0;
+    min-height: 300px;
+    height: auto;
+    scroll-snap-align: start;
+  }
+
+  #aiReconstructionSection .p4-card-visual-stage {
+    height: 128px;
+  }
+}
+
+/* 手機：一次以一張卡為主，下一張保留少量視覺提示 */
+@media (max-width: 600px) {
+  #aiReconstructionSection .p4-content {
+    width: 100vw;
+    gap: 10px;
+    padding: 4.2vh 4px 11vh;
+  }
+
+  #aiReconstructionSection .p4-header-group {
+    width: 88vw;
+  }
+
+  #aiReconstructionSection .p4-header-line {
+    font-size: .88rem;
+    line-height: 1.65;
+  }
+
+  #aiReconstructionSection .p4-carousel {
+    width: 100%;
+    padding-inline: 30px;
+  }
+
+  #aiReconstructionSection .p4-carousel-nav {
+    display: grid;
+    width: 34px;
+    height: 62px;
+    background: rgba(18,18,18,.44);
+  }
+
+  #aiReconstructionSection .p4-cards {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 10px !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 2px !important;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  #aiReconstructionSection .p4-cards::-webkit-scrollbar {
+    display: none;
+  }
+
+  #aiReconstructionSection .p4-card-item {
+    flex: 0 0 82%;
+    min-height: 280px;
+    height: auto;
+    padding: 14px;
+    scroll-snap-align: start;
+  }
+
+  #aiReconstructionSection .p4-card-visual-stage {
+    height: 104px;
+    margin-bottom: 11px;
+  }
+
+  #aiReconstructionSection .p4-card-title {
+    font-size: .94rem;
+    margin-bottom: 7px;
+  }
+
+  #aiReconstructionSection .p4-card-description {
+    font-size: .80rem;
+    line-height: 1.58;
+  }
+
+  #aiReconstructionSection .p4-footer-text {
+    width: 86vw;
+    font-size: .78rem;
+    line-height: 1.55;
+  }
+}
+
+/* ---------- P6 手機表單：改成真正可捲動頁面 ---------- */
+@media (max-width: 768px) {
+  #messageCardSection {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    scroll-behavior: smooth;
+  }
+
+  #messageCardSection .p5-shell {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    justify-content: flex-start !important;
+    padding:
+      70px 0
+      calc(118px + env(safe-area-inset-bottom))
+      !important;
+  }
+
+  #messageCardSection .p5-form-container {
+    width: min(88vw, 560px) !important;
+    flex: 0 0 auto !important;
+    gap: 11px;
+  }
+
+  #messageCardSection .p5-form-step.is-open {
+    padding: 14px 15px;
+  }
+
+  #messageCardSection .p5-step-title {
+    font-size: .96rem;
+    line-height: 1.5;
+  }
+
+  #messageCardSection .p5-target-options,
+  #messageCardSection .p5-tag-options {
+    gap: 7px;
+  }
+
+  #messageCardSection .p5-pill {
+    font-size: .76rem;
+    padding: 8px 11px;
+  }
+
+  #messageCardSection .p5-textarea-wrap textarea {
+    height: 76px;
+    min-height: 76px;
+    max-height: 76px;
+  }
+
+  /* 生成按鈕展開後保持在可操作區域，不再掉到頁面最底下看不到 */
+  #messageCardSection .p5-form-step.step-submit.is-open {
+    position: sticky;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 40;
+    width: 100%;
+    margin-top: 2px;
+    padding: 8px !important;
+    border: 1px solid rgba(var(--coral-main-rgb), .22);
+    border-radius: 999px;
+    background: rgba(26,26,26,.86);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+      0 -8px 26px rgba(0,0,0,.20),
+      0 0 18px rgba(var(--coral-main-rgb), .06);
+  }
+
+  #messageCardSection .p5-generate-btn {
+    min-height: 44px;
+  }
+
+  #messageCardSection .p5-validation-message {
+    margin-top: 5px;
+    min-height: 14px;
+    font-size: .70rem;
+  }
+}
+
+/* ---------- 洸語牆：手機卡片比例更緊湊 ---------- */
+@media (max-width: 600px) {
+  .memory-wall-shell {
+    width: 90vw !important;
+    max-width: 520px;
+    height: 92vh !important;
+  }
+
+  .memory-wall-carousel {
+    padding-inline: 26px !important;
+    align-items: center;
+  }
+
+  .memory-wall-carousel .memory-wall-grid {
+    grid-template-rows:
+      repeat(2, clamp(185px, 27vh, 225px))
+      !important;
+    grid-auto-columns:
+      min(76vw, 410px)
+      !important;
+    align-content: center;
+    justify-content: start;
+    gap: 9px !important;
+  }
+
+  .memory-wall-card {
+    height: 100%;
+    min-height: 0 !important;
+    padding: 14px 16px 13px !important;
+    justify-content: flex-start;
+  }
+
+  .memory-wall-meta {
+    font-size: .60rem !important;
+  }
+
+  .memory-wall-quote {
+    margin: 9px 0 7px !important;
+    font-size: .73rem !important;
+    line-height: 1.62 !important;
+    -webkit-line-clamp: 4 !important;
+  }
+
+  .memory-wall-foot {
+    margin-top: auto;
+    font-size: .58rem !important;
+  }
+
+  .memory-wall-continue {
+    max-width: 84vw;
+    margin-top: 10px !important;
+    padding: 8px 15px;
+    font-size: .72rem;
+  }
+}
+
+/* 特別矮的手機：再縮短洸語牆卡片 */
+@media (max-width: 600px) and (max-height: 680px) {
+  .memory-wall-carousel .memory-wall-grid {
+    grid-template-rows:
+      repeat(2, clamp(165px, 25vh, 190px))
+      !important;
+  }
+}
