@@ -206,7 +206,7 @@
       */
       --lp-guang-width: clamp(25px, 4vw, 61px);
       --lp-xian-width: clamp(25px, 4vw, 61px);
-      --lp-word-gap: clamp(0px, .08vw, 2px);
+      --lp-word-gap: clamp(50px, .08vw, 2px);
       --lp-guang-inset: 100px;
       --lp-xian-inset: 100px;
 
