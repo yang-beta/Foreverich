@@ -204,9 +204,9 @@
         注意：
         不使用 transform 位移，避免與 GSAP 的 scale 動畫互相覆蓋。
       */
-      --lp-guang-width: clamp(25px, 4vw, 61px);
-      --lp-xian-width: clamp(25px, 4vw, 61px);
-      --lp-word-gap: clamp(30px, .08vw, 2px);
+      --lp-guang-width: clamp(20px, 4vw, 61px);
+      --lp-xian-width: clamp(20px, 4vw, 61px);
+      --lp-word-gap: clamp(35px, .08vw, 2px);
       --lp-guang-inset: 28px;
       --lp-xian-inset: 28px;
 
