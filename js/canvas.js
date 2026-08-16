@@ -2322,3 +2322,277 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
 
     // =============================================================
+
+
+    // =============================================================
+    // 7. 品牌故事頁｜獨立地平線 / 波紋 Canvas
+    // -------------------------------------------------------------
+    // 參考視覺：
+    // - 上方深色空間
+    // - 左上微弱暖色 / 冷色霧光
+    // - 低位地平線
+    // - 下方密集水平線條與局部凹陷 / 隆起
+    //
+    // 與 P1 mandalaCanvas 完全獨立。
+    // =============================================================
+    const brandStoryCanvas =
+      document.getElementById('brandStoryCanvas');
+
+    const brandStoryCtx =
+      brandStoryCanvas?.getContext('2d');
+
+    let brandStoryRafId = null;
+    let isBrandStoryCanvasRunning = false;
+    let brandStoryLastFrame = 0;
+
+    function resizeBrandStoryCanvas() {
+      if (!brandStoryCanvas || !brandStoryCtx) return;
+
+      const rect =
+        brandStoryCanvas.getBoundingClientRect();
+
+      const cssWidth =
+        Math.max(1, rect.width || window.innerWidth);
+
+      const cssHeight =
+        Math.max(1, rect.height || window.innerHeight);
+
+      brandStoryCanvas.width =
+        Math.round(cssWidth * DPR);
+
+      brandStoryCanvas.height =
+        Math.round(cssHeight * DPR);
+    }
+
+    function brandStoryGaussian(
+      x,
+      center,
+      width
+    ) {
+      const d =
+        (x - center) / width;
+
+      return Math.exp(
+        -(d * d) * 2.2
+      );
+    }
+
+    function drawBrandStoryLandscape(
+      time = 0
+    ) {
+      if (!brandStoryCanvas || !brandStoryCtx) return;
+
+      const ctx = brandStoryCtx;
+      const w = brandStoryCanvas.width;
+      const h = brandStoryCanvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 背景
+      ctx.fillStyle = '#242424';
+      ctx.fillRect(0, 0, w, h);
+
+      // 左上極淡霧光：只提供參考圖中的空間層次。
+      const glowX = w * .255;
+      const glowY = h * .245;
+      const glowR = Math.max(w, h) * .31;
+
+      const glow =
+        ctx.createRadialGradient(
+          glowX,
+          glowY,
+          0,
+          glowX,
+          glowY,
+          glowR
+        );
+
+      glow.addColorStop(
+        0,
+        'rgba(255,176,136,.055)'
+      );
+      glow.addColorStop(
+        .35,
+        'rgba(111,140,128,.030)'
+      );
+      glow.addColorStop(
+        1,
+        'rgba(36,36,36,0)'
+      );
+
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+
+      const horizonY = h * .635;
+
+      // 地平線
+      ctx.beginPath();
+      ctx.moveTo(0, horizonY);
+      ctx.lineTo(w, horizonY);
+      ctx.strokeStyle =
+        'rgba(230,230,232,.34)';
+      ctx.lineWidth = 1.05 * DPR;
+      ctx.stroke();
+
+      // 水平地景線
+      const lineCount = 58;
+      const sampleCount = 110;
+      const slowPhase = time * .00011;
+
+      for (
+        let row = 0;
+        row < lineCount;
+        row += 1
+      ) {
+        const t =
+          row / (lineCount - 1);
+
+        // 越靠近畫面底部，線距逐漸拉開。
+        const baseY =
+          horizonY +
+          Math.pow(t, 1.43) *
+          (h - horizonY + 14 * DPR);
+
+        ctx.beginPath();
+
+        for (
+          let i = 0;
+          i <= sampleCount;
+          i += 1
+        ) {
+          const nx =
+            i / sampleCount;
+
+          const x =
+            nx * w;
+
+          // 中央偏左大凹陷
+          const basin =
+            brandStoryGaussian(
+              nx,
+              .445,
+              .125
+            );
+
+          // 人物右側較小隆起
+          const ridge =
+            brandStoryGaussian(
+              nx,
+              .675,
+              .095
+            );
+
+          // 只有越靠近前景，地形變形越明顯。
+          const depth =
+            Math.pow(t, 1.65);
+
+          const deformation =
+            basin *
+              (28 + 78 * t) *
+              DPR *
+              depth
+            -
+            ridge *
+              (10 + 34 * t) *
+              DPR *
+              depth;
+
+          // 很小的自然波動，不做明顯動畫干擾閱讀。
+          const micro =
+            Math.sin(
+              nx * 8.2 +
+              row * .13 +
+              slowPhase
+            ) *
+            1.3 *
+            DPR *
+            t;
+
+          const y =
+            baseY +
+            deformation +
+            micro;
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+
+        const coralLine =
+          row === 12 ||
+          row === 34 ||
+          row === 50;
+
+        ctx.strokeStyle =
+          coralLine
+            ? 'rgba(255,176,136,.23)'
+            : `rgba(230,230,232,${
+                0.18 + t * .28
+              })`;
+
+        ctx.lineWidth =
+          (0.72 + t * .24) *
+          DPR;
+
+        ctx.stroke();
+      }
+    }
+
+    function renderBrandStoryCanvas(
+      timestamp = 0
+    ) {
+      if (!isBrandStoryCanvasRunning) {
+        brandStoryRafId = null;
+        return;
+      }
+
+      // 約 30fps 即可，降低 GPU 負擔。
+      if (
+        timestamp -
+        brandStoryLastFrame >=
+        32
+      ) {
+        drawBrandStoryLandscape(
+          timestamp
+        );
+
+        brandStoryLastFrame =
+          timestamp;
+      }
+
+      brandStoryRafId =
+        requestAnimationFrame(
+          renderBrandStoryCanvas
+        );
+    }
+
+    function startBrandStoryCanvas() {
+      if (!brandStoryCanvas) return;
+
+      resizeBrandStoryCanvas();
+
+      isBrandStoryCanvasRunning =
+        true;
+
+      if (brandStoryRafId === null) {
+        brandStoryRafId =
+          requestAnimationFrame(
+            renderBrandStoryCanvas
+          );
+      }
+    }
+
+    function stopBrandStoryCanvas() {
+      isBrandStoryCanvasRunning =
+        false;
+
+      if (brandStoryRafId !== null) {
+        cancelAnimationFrame(
+          brandStoryRafId
+        );
+
+        brandStoryRafId = null;
+      }
+    }

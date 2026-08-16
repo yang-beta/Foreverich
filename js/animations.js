@@ -283,3 +283,190 @@
     }
 
     // =============================================================
+
+
+    // =============================================================
+    // 品牌故事頁文字動畫
+    // -------------------------------------------------------------
+    // 每段文字皆從 segment mask 的底線位置往上浮現。
+    //
+    // 時間：
+    // L1A → 等 1.5s → L1B → 整行停留 2s
+    // L2A → 等 2.0s → L2B → 整行停留 2s
+    // L3A → 等 1.5s → L3B → 等 2.0s → L3C
+    // =============================================================
+    let brandStoryTimeline = null;
+
+    function resetBrandStoryAnimation() {
+      brandStoryTimeline?.kill();
+      brandStoryTimeline = null;
+
+      const segments =
+        gsap.utils.toArray(
+          '#brandStorySection .brand-story-segment'
+        );
+
+      gsap.killTweensOf(
+        segments
+      );
+
+      gsap.set(
+        segments,
+        {
+          y: '118%',
+          autoAlpha: 0
+        }
+      );
+
+      gsap.set(
+        '#brandStorySection .brand-story-bird',
+        {
+          autoAlpha: 0
+        }
+      );
+
+      gsap.set(
+        '#brandStorySection .brand-story-person-wrap',
+        {
+          autoAlpha: 0
+        }
+      );
+    }
+
+    function playBrandStoryAnimation() {
+      resetBrandStoryAnimation();
+
+      brandStoryTimeline =
+        gsap.timeline({
+          defaults: {
+            ease: 'power2.out'
+          }
+        });
+
+      // 場景中的人物與飛鳥先很淡地進場。
+      brandStoryTimeline
+        .to(
+          '#brandStorySection .brand-story-person-wrap',
+          {
+            autoAlpha: 1,
+            duration: 1.4
+          },
+          .35
+        )
+        .to(
+          '#brandStorySection .brand-story-bird',
+          {
+            autoAlpha: .56,
+            duration: 1.2
+          },
+          .65
+        )
+
+        // 第一行
+        .to(
+          '#brandStoryL1A',
+          {
+            y: '0%',
+            autoAlpha: 1,
+            duration: .82
+          },
+          .65
+        )
+        .to(
+          {},
+          {
+            duration: 1.5
+          }
+        )
+        .to(
+          '#brandStoryL1B',
+          {
+            y: '0%',
+            autoAlpha: 1,
+            duration: .82
+          }
+        )
+        .to(
+          {},
+          {
+            duration: 2.0
+          }
+        )
+
+        // 第二行
+        .to(
+          '#brandStoryL2A',
+          {
+            y: '0%',
+            autoAlpha: 1,
+            duration: .82
+          }
+        )
+        .to(
+          {},
+          {
+            duration: 2.0
+          }
+        )
+        .to(
+          '#brandStoryL2B',
+          {
+            y: '0%',
+            autoAlpha: 1,
+            duration: .82
+          }
+        )
+        .to(
+          {},
+          {
+            duration: 2.0
+          }
+        )
+
+        // 第三行
+        .to(
+          '#brandStoryL3A',
+          {
+            y: '0%',
+            autoAlpha: 1,
+            duration: .82
+          }
+        )
+        .to(
+          {},
+          {
+            duration: 1.5
+          }
+        )
+        .to(
+          '#brandStoryL3B',
+          {
+            y: '0%',
+            autoAlpha: 1,
+            duration: .82
+          }
+        )
+        .to(
+          {},
+          {
+            duration: 2.0
+          }
+        )
+        .to(
+          '#brandStoryL3C',
+          {
+            y: '0%',
+            autoAlpha: 1,
+            duration: .82
+          }
+        );
+    }
+
+    function leaveBrandStoryAnimation() {
+      brandStoryTimeline?.kill();
+      brandStoryTimeline = null;
+
+      gsap.killTweensOf(
+        '#brandStorySection .brand-story-segment, #brandStorySection .brand-story-person-wrap, #brandStorySection .brand-story-bird'
+      );
+    }

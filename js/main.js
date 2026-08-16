@@ -133,9 +133,35 @@
       ['brandStorySection', {
         enter() {
           lCanvas.style.opacity = '0';
-          stopLoadingCanvas(); stopBackgroundCanvas(); stopSandCanvas(); stopBrandTransitionCanvas(); stopP4Canvases();
+
+          stopLoadingCanvas();
+          stopBackgroundCanvas();
+          stopSandCanvas();
+          stopBrandTransitionCanvas();
+          stopP4Canvases();
+
+          // 品牌故事有自己的背景，避免 P1 最後一幀殘留在底下。
+          const globalBgCanvas =
+            document.getElementById('mandalaCanvas');
+
+          if (globalBgCanvas) {
+            globalBgCanvas.style.opacity = '0';
+          }
+
+          startBrandStoryCanvas();
+          playBrandStoryAnimation();
         },
-        leave() {}
+        leave() {
+          stopBrandStoryCanvas();
+          leaveBrandStoryAnimation();
+
+          const globalBgCanvas =
+            document.getElementById('mandalaCanvas');
+
+          if (globalBgCanvas) {
+            globalBgCanvas.style.opacity = '1';
+          }
+        }
       }]
     ]);
 
@@ -712,6 +738,7 @@
       resizeSandCanvas();
       resizeBrandTransitionCanvas();
       resizeP4Canvases();
+      resizeBrandStoryCanvas();
       window.resizeP5Canvases?.();
       window.resizeMemoryWallLayout?.();
     }
