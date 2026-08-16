@@ -610,6 +610,32 @@
         return m ? {target:m[1]||'一份思念',quote:m[2]||'',meta:m[3]||''}
                  : {target:'一份思念',quote:s,meta:''};
       }
+      const ghostScripts=[
+        ['ႵႹႫႪႢ','Ավրէ նըժա քելուն՝ սէրախ դարիմ շըվա։','ღჷჱ · ᚴᚱᚢ'],
+        ['ᚦᚱᚨᛗ','ჟყა ვრუ ჳდეშა, ხმაჲ ნერ ორვა ლიჰუ։','Ախր · ႺႤႭ'],
+        ['Ծիր ႶႠ','ᛞᚨᚱ ᛗᛖᚾᚨ ᚲᚢᚱ, ႯႭႶ ჱնար վէշ։','ჳႠႪ · ᛟᚾ'],
+        ['ႺႭႪ','Քաժ էրվան նոշի, Ⴕა მირი ლუშა սեն։','ᚠᚱ · Ծն'],
+        ['ᛇᛚᚢ','ჴოშա ნარეჲ, ավր էշուն դարի մոն։','ႶႤ · ᚾᛟ'],
+        ['Վար ჳ','ᚴᛁᚱ ᛟᚱᚨ ᛞᚢ, ჟენა շուռ ველი։','Ծա · ႫႠ']
+      ];
+      function createGhostWallCard(seedIndex=0){
+        const set=ghostScripts[seedIndex%ghostScripts.length];
+        const card=document.createElement('article'); card.className='memory-wall-card memory-wall-ghost-card'; card.setAttribute('aria-hidden','true');
+        const meta=document.createElement('div'); meta.className='memory-wall-meta';
+        const target=document.createElement('span'); target.textContent=set[0]; const date=document.createElement('time'); date.textContent='···'; meta.append(target,date);
+        const quote=document.createElement('div'); quote.className='memory-wall-quote'; quote.textContent=set[1];
+        const foot=document.createElement('div'); foot.className='memory-wall-foot'; foot.textContent=set[2];
+        card.append(meta,quote,foot); return card;
+      }
+      function ensureGhostWallColumns(){
+        const carousel=grid.closest('.memory-wall-carousel'); if(!carousel) return;
+        carousel.querySelectorAll('.memory-wall-ghost-column').forEach(el=>el.remove());
+        const left=document.createElement('div'); left.className='memory-wall-ghost-column memory-wall-ghost-left';
+        const right=document.createElement('div'); right.className='memory-wall-ghost-column memory-wall-ghost-right';
+        for(let i=0;i<3;i+=1){left.appendChild(createGhostWallCard(i)); right.appendChild(createGhostWallCard(i+3));}
+        carousel.prepend(left); carousel.append(right);
+      }
+
       function createCard(item){
         const d=parseStoredText(item?.text);
         const card=document.createElement('article');
@@ -681,6 +707,7 @@
           }
           data.slice(0,12).forEach(item=>grid.appendChild(createCard(item)));
           grid.scrollLeft=0;
+          ensureGhostWallColumns();
           requestAnimationFrame(updateWallNav);
         }catch(error){
           console.error('洸語牆讀取失敗:',error);
@@ -689,6 +716,7 @@
         }
       }
       window.enterMemoryWallPage=function(){
+        ensureGhostWallColumns();
         load();
         requestAnimationFrame(updateWallNav);
         // 樹木金光停用：只保留底部波浪線。

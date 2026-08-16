@@ -1174,6 +1174,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     let brandTransitionPulseTween = null;
     let brandTransitionParticles = [];
     let brandTransitionHoverRing = -1;
+    let brandTransitionPlayToken = 0;
     let isBrandTransitionInteractive = false;
     let brandTransitionCenter = { x: 0, y: 0 };
     let brandTransitionMaxRadius = 0;
@@ -1443,11 +1444,22 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     }
 
     function playBrandTransitionAnimation() {
+      const playToken = ++brandTransitionPlayToken;
       resetBrandTransitionPage();
       setPageAnimationLock(true);
-      animateBrandTransitionCanvas();
 
-      brandTransitionTL = gsap.timeline();
+      const start = () => {
+        if (playToken !== brandTransitionPlayToken) return;
+        if (currentPageIndex !== pageElements.indexOf(document.getElementById('brandTransitionSection'))) return;
+
+        document.querySelectorAll('#brandTransitionSection .p3-text-line.story-line').forEach((line) => {
+          line.style.removeProperty('width');
+          const finalWidth = Math.ceil(line.scrollWidth || line.getBoundingClientRect().width);
+          if (finalWidth > 0) line.style.width = `${finalWidth}px`;
+        });
+
+        animateBrandTransitionCanvas();
+        brandTransitionTL = gsap.timeline();
 
       brandTransitionTL
         .to(
@@ -1507,6 +1519,11 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           duration: 0.4
         });
       }, null, 10.8);
+          };
+
+      if (document.fonts?.status === 'loaded') start();
+      else if (document.fonts?.ready) document.fonts.ready.then(start);
+      else start();
     }
 
     function skipBrandTransitionAnimation() {
@@ -1529,6 +1546,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     }
 
     function leaveBrandTransitionPage() {
+      brandTransitionPlayToken += 1;
       setPageAnimationLock(false);
       isBrandTransitionInteractive = false;
       brandTransitionTL?.kill();
@@ -2456,7 +2474,8 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, w, h);
 
-      const horizonY = h * .635;
+      // 水平線區約佔底部 2/7，地平線位於畫面 5/7 高度。
+      const horizonY = h * (5 / 7);
 
       // 地平線
       ctx.beginPath();
@@ -2499,52 +2518,8 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           const x =
             nx * w;
 
-          // 中央偏左大凹陷
-          const basin =
-            brandStoryGaussian(
-              nx,
-              .445,
-              .125
-            );
-
-          // 人物右側較小隆起
-          const ridge =
-            brandStoryGaussian(
-              nx,
-              .675,
-              .095
-            );
-
-          // 只有越靠近前景，地形變形越明顯。
-          const depth =
-            Math.pow(t, 1.65);
-
-          const deformation =
-            basin *
-              (28 + 78 * t) *
-              DPR *
-              depth
-            -
-            ridge *
-              (10 + 34 * t) *
-              DPR *
-              depth;
-
-          // 很小的自然波動，不做明顯動畫干擾閱讀。
-          const micro =
-            Math.sin(
-              nx * 8.2 +
-              row * .13 +
-              slowPhase
-            ) *
-            1.3 *
-            DPR *
-            t;
-
-          const y =
-            baseY +
-            deformation +
-            micro;
+          // 品牌故事地面完全水平，不再產生凹陷、隆起或波浪。
+          const y = baseY;
 
           if (i === 0) {
             ctx.moveTo(x, y);
@@ -2565,9 +2540,9 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
                 0.18 + t * .28
               })`;
 
-        ctx.lineWidth =
-          (0.72 + t * .24) *
-          DPR;
+        // 平面維持水平，只讓線條粗細交錯。
+        const thicknessPattern = [0.58, 0.82, 0.66, 1.08, 0.72, 0.92][row % 6];
+        ctx.lineWidth = (thicknessPattern + t * .16) * DPR;
 
         ctx.stroke();
       }
