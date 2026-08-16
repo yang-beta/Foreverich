@@ -1207,3 +1207,239 @@
     top: 53% !important;
   }
 }
+
+
+/* =============================================================
+   WALL + BRAND STORY + P1 UPDATE｜2026-08-16
+   ============================================================= */
+
+/* ---------- 洸語牆：移除樹，只保留底部波浪線 ---------- */
+#memoryWallSection .memory-tree-base,
+#memoryWallSection .tree-leaves,
+#memoryWallSection .tree-roots,
+#memoryWallSection .tree-trunk,
+#memoryWallSection .tree-major-branches,
+#memoryWallSection .tree-secondary-branches,
+#memoryWallSection .memory-tree-glow {
+  display: none !important;
+}
+
+#memoryWallSection .memory-wall-tree {
+  left: 0 !important;
+  top: auto !important;
+  bottom: -2vh !important;
+  width: 100vw !important;
+  height: 30vh !important;
+  opacity: .72 !important;
+  overflow: visible !important;
+  z-index: 0 !important;
+}
+
+#memoryWallSection .memory-wall-tree svg {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible !important;
+}
+
+/* 讓原本位於 SVG 底部的 hills 充滿目前保留的波浪區 */
+#memoryWallSection .memory-tree-hills {
+  transform: translateY(-555px) scaleY(1.05);
+  transform-origin: center bottom;
+}
+
+/* ---------- 洸語牆：依畫面盡量填滿 12 張 ---------- */
+#memoryWallSection .memory-wall-shell {
+  width: min(1500px, 96vw) !important;
+  height: 94vh !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+}
+
+#memoryWallSection .memory-wall-header {
+  flex: 0 0 auto;
+  margin: 0 0 clamp(10px, 1.8vh, 18px) !important;
+}
+
+#memoryWallSection .memory-wall-carousel {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+#memoryWallSection .memory-wall-grid {
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+  grid-auto-flow: row !important;
+  grid-auto-columns: auto !important;
+  overflow: hidden !important;
+  gap: clamp(8px, 1vw, 14px) !important;
+  padding: 0 !important;
+}
+
+#memoryWallSection .memory-wall-card {
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+#memoryWallSection .memory-wall-nav {
+  display: none !important;
+}
+
+#memoryWallSection .memory-wall-actions {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: clamp(10px, 1.6vh, 16px);
+}
+
+#memoryWallSection .memory-wall-actions .memory-wall-continue {
+  margin-top: 0 !important;
+}
+
+/* ---------- 品牌故事：目前空白，只保留最下方兩按鈕 ---------- */
+.brand-story-section {
+  position: relative;
+  background: var(--surface-bg);
+  overflow: hidden;
+}
+
+.brand-story-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-story-bottom-nav {
+  position: absolute;
+  left: 50%;
+  bottom: max(26px, calc(env(safe-area-inset-bottom, 0px) + 18px));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 5;
+}
+
+.brand-story-nav-btn {
+  min-width: 138px;
+  padding: 10px 18px;
+  border: 1px solid rgba(var(--coral-main-rgb), .52);
+  border-radius: 999px;
+  background: rgba(var(--coral-main-rgb), .055);
+  color: rgba(var(--coral-light-rgb), .92);
+  font: 400 .76rem 'Noto Serif TC', serif;
+  letter-spacing: .12em;
+  cursor: pointer;
+}
+
+/* ---------- P1：三行文字大幅往上，和人物拉開 ---------- */
+#heroSection .hero-container {
+  transform: translateY(-20vh);
+}
+
+/* ---------- 平板 ---------- */
+@media (max-width: 1100px) {
+  #memoryWallSection .memory-wall-shell {
+    width: 95vw !important;
+    height: 93vh !important;
+  }
+
+  #memoryWallSection .memory-wall-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  #memoryWallSection .memory-wall-card {
+    padding: 11px 12px 10px !important;
+  }
+
+  #heroSection .hero-container {
+    transform: translateY(-17vh);
+  }
+}
+
+/* ---------- 手機 ---------- */
+@media (max-width: 600px) {
+  #memoryWallSection .memory-wall-shell {
+    width: 94vw !important;
+    max-width: none !important;
+    height: 92vh !important;
+    margin: 0 auto !important;
+  }
+
+  #memoryWallSection .memory-wall-header {
+    margin-top: 0 !important;
+    margin-bottom: 9px !important;
+    transform: none !important;
+  }
+
+  #memoryWallSection .memory-wall-carousel {
+    padding-inline: 0 !important;
+  }
+
+  #memoryWallSection .memory-wall-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(6, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  #memoryWallSection .memory-wall-card {
+    padding: 8px 9px 7px !important;
+    border-radius: 11px !important;
+  }
+
+  #memoryWallSection .memory-wall-quote {
+    margin: 4px 0 !important;
+    font-size: .62rem !important;
+    line-height: 1.38 !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  #memoryWallSection .memory-wall-meta,
+  #memoryWallSection .memory-wall-foot {
+    font-size: .49rem !important;
+  }
+
+  #memoryWallSection .memory-wall-actions {
+    width: 100%;
+    gap: 7px;
+    margin-top: 7px;
+  }
+
+  #memoryWallSection .memory-wall-actions .memory-wall-continue {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 7px 8px !important;
+    font-size: .60rem !important;
+    letter-spacing: .05em !important;
+    white-space: nowrap;
+  }
+
+  #memoryWallSection .memory-wall-tree {
+    height: 23vh !important;
+    bottom: -1vh !important;
+  }
+
+  #heroSection .hero-container {
+    transform: translateY(-14vh);
+  }
+
+  .brand-story-bottom-nav {
+    width: 90vw;
+    gap: 8px;
+  }
+
+  .brand-story-nav-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 9px 8px;
+    font-size: .68rem;
+  }
+}
