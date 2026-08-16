@@ -1400,3 +1400,20 @@
     top: 51%;
   }
 }
+
+
+@media (max-width:768px) {
+  #brandTransitionSection .p3-text-line.story-line {
+    display:flex; flex-wrap:wrap; justify-content:center;
+    gap:0 .12em; width:100%; text-align:center; text-wrap:balance;
+  }
+  #brandStorySection .brand-story-line,
+  #brandStorySection .brand-story-line-long { font-size:1.02rem; letter-spacing:.08em; }
+}
+@media (max-width:600px) {
+  #memoryWallSection .memory-wall-ghost-column {
+    width:calc((100% - 6px) / 2); grid-template-rows:repeat(3,minmax(0,1fr)); gap:6px;
+  }
+  #memoryWallSection .memory-wall-ghost-left { right:calc(100% + 6px); }
+  #memoryWallSection .memory-wall-ghost-right { left:calc(100% + 6px); }
+}
