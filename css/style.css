@@ -3527,3 +3527,38 @@
 #brandStoryCanvas {
   z-index: 0 !important;
 }
+
+
+/* =============================================================
+   2026-08-16｜全站指定按鈕幾何統一 V12
+   -------------------------------------------------------------
+   僅統一：
+   - 框與文字內距：比照 Skip = 8px 16px
+   - 圓角：比照 Skip = 20px
+
+   不修改：
+   - color
+   - border-color
+   - background
+   - font / font-size
+   - hover / focus / selected 效果
+   ============================================================= */
+
+/* 留言表單中的所有膠囊選項 */
+.p5-pill,
+
+/* 洸語牆下方操作按鈕 */
+#memoryWallSection .memory-wall-continue,
+
+/* 品牌故事最下方導航按鈕 */
+#brandStorySection .brand-story-nav-btn {
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+}
+
+/*
+  Skip 原本就是：
+  padding: 8px 16px;
+  border-radius: 20px;
+  因此不需要覆寫它。
+*/
