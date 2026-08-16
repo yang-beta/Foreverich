@@ -1488,3 +1488,55 @@
     font-size: .88rem;
   }
 }
+
+
+/* =============================================================
+   2026-08-16｜LP / Brand Story V9 Mobile
+   ============================================================= */
+@media (max-width: 768px) {
+  #openingHero .lp-side-word-guang,
+  #openingHero .lp-side-word-xian {
+    /* V8: 10.8px, 3.2vw, 15.6px × 1.3 */
+    width: clamp(14.04px, 4.16vw, 20.28px) !important;
+  }
+
+  #openingHero .lp-side-word-guang {
+    margin-right: -65px !important;
+  }
+
+  #openingHero .lp-side-word-xian {
+    margin-left: -65px !important;
+  }
+
+  #brandStorySection .brand-story-final-bracket {
+    width: 18px;
+    height: 104px;
+  }
+
+  #brandStorySection .brand-story-final-bracket::before,
+  #brandStorySection .brand-story-final-bracket::after {
+    width: 17px;
+  }
+
+  #brandStorySection .brand-story-final-bracket-left {
+    left: calc(50% - min(43vw, 170px));
+  }
+
+  #brandStorySection .brand-story-final-bracket-right {
+    right: calc(50% - min(43vw, 170px));
+  }
+}
+
+@media (max-width: 600px) {
+  #brandStorySection .brand-story-final-bracket {
+    height: 94px;
+  }
+
+  #brandStorySection .brand-story-final-bracket-left {
+    left: calc(50% - 44vw);
+  }
+
+  #brandStorySection .brand-story-final-bracket-right {
+    right: calc(50% - 44vw);
+  }
+}
