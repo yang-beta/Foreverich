@@ -1061,7 +1061,7 @@
 #openingHero .lp-exhibition-title-wrap {
   position: absolute;
 
-  top: calc(33.333% + 138px);
+  top: calc(33.333% + 122px);
   left: 0;
   right: 0;
 
@@ -1079,13 +1079,13 @@
 }
 
 #openingHero .lp-exhibition-title {
-  color: var(--text-main);
+  color: #FFB088;
 
   font-family:
     'Noto Serif TC',
     serif;
 
-  font-size: 1.05rem;
+  font-size: 1.18rem;
   font-weight: 300;
 
   letter-spacing: .32em;
@@ -1147,7 +1147,7 @@
     top:
       calc(
         33.333%
-        + 70px
+        + 58px
       );
 
     height: 34px;
@@ -1155,7 +1155,7 @@
 
   #openingHero .lp-exhibition-title {
     font-size:
-      .88rem;
+      .98rem;
 
     letter-spacing:
       .24em;
@@ -1199,7 +1199,7 @@
     top:
       calc(
         31.5%
-        + 66px
+        + 56px
       );
   }
 
