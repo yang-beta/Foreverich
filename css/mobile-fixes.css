@@ -1417,3 +1417,74 @@
   #memoryWallSection .memory-wall-ghost-left { right:calc(100% + 6px); }
   #memoryWallSection .memory-wall-ghost-right { left:calc(100% + 6px); }
 }
+
+
+/* =============================================================
+   品牌故事 V4｜平板 / 手機文字排列保護
+   ============================================================= */
+@media (max-width: 1100px) {
+  #brandStorySection .brand-story-line,
+  #brandStorySection .brand-story-line-long {
+    gap: .62em !important;
+  }
+
+  #brandStorySection .brand-story-final-copy {
+    width: 88vw;
+    font-size: 1.05rem;
+    letter-spacing: .12em;
+  }
+}
+
+@media (max-width: 768px) {
+  /* 手機允許整段換行，但每個 segment 的欄間距保持一致，
+     不會因為先後動畫而重新推擠。 */
+  #brandStorySection .brand-story-line,
+  #brandStorySection .brand-story-line-long {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    column-gap: .55em !important;
+    row-gap: .18em !important;
+    width: 92vw;
+    margin-inline: auto;
+    white-space: normal;
+  }
+
+  #brandStorySection .brand-story-segment-mask {
+    max-width: 92vw;
+    white-space: normal;
+    text-align: center;
+  }
+
+  #brandStorySection .brand-story-segment,
+  #brandStorySection .brand-story-segment-mask-full .brand-story-segment {
+    white-space: normal;
+  }
+
+  #brandStorySection .brand-story-segment-mask-full {
+    width: 92vw;
+  }
+
+  #brandStorySection .brand-story-final-copy {
+    top: 45%;
+    width: 88vw;
+    gap: 12px;
+    font-size: 1rem;
+    line-height: 1.8;
+    letter-spacing: .08em;
+  }
+}
+
+@media (max-width: 600px) {
+  #brandStorySection .brand-story-line,
+  #brandStorySection .brand-story-line-long {
+    column-gap: .48em !important;
+    row-gap: .14em !important;
+  }
+
+  #brandStorySection .brand-story-final-copy {
+    width: 90vw;
+    font-size: .88rem;
+  }
+}

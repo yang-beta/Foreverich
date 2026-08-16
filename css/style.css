@@ -2915,3 +2915,101 @@
 #memoryWallSection .memory-wall-ghost-column .memory-wall-meta,
 #memoryWallSection .memory-wall-ghost-column .memory-wall-quote,
 #memoryWallSection .memory-wall-ghost-column .memory-wall-foot { color:rgba(230,230,232,.50); }
+
+
+/* =============================================================
+   2026-08-16｜品牌故事 V4：等距、結語、陰影、地平線
+   ============================================================= */
+
+/* 第一、第三行所有分段使用完全一致的間距。隱藏段落仍保留版面寬度，
+   所以前後文字出現時不會改變整行的幾何位置。 */
+#brandStorySection .brand-story-line,
+#brandStorySection .brand-story-line-long {
+  gap: .72em !important;
+}
+
+#brandStorySection .brand-story-segment-mask {
+  flex: 0 0 auto;
+}
+
+/* 第二行為整句，獨立置中。 */
+#brandStorySection .brand-story-segment-mask-full {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  text-align: center;
+}
+
+/* 最後兩行結語：位於畫面正中央，動畫同樣從下往上浮現。 */
+#brandStorySection .brand-story-final-copy {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  width: min(86vw, 980px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+
+  color: rgba(244, 244, 244, .94);
+  font-family: "Noto Serif TC", serif;
+  font-size: 1.2rem;
+  font-weight: 300;
+  line-height: 1.95;
+  letter-spacing: .2rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+#brandStorySection .brand-story-final-mask {
+  display: block;
+  overflow: hidden;
+  padding: 0 2px;
+}
+
+#brandStorySection .brand-story-final-line {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* 人物長影：120°，主影較清楚，遠端另加一層更模糊、更透明的擴散。 */
+#brandStorySection .brand-story-person-shadow {
+  left: 50% !important;
+  bottom: 0 !important;
+  width: 350% !important;   /* man-s 高寬比 80:30，約等於人物高度的 1.31 倍 */
+  height: 9px !important;
+  transform: translateX(-2%) rotate(120deg) !important;
+  transform-origin: 0 50% !important;
+  border-radius: 999px !important;
+  background: linear-gradient(
+    90deg,
+    rgba(24, 17, 14, .72) 0%,
+    rgba(35, 23, 18, .54) 28%,
+    rgba(35, 23, 18, .28) 62%,
+    rgba(35, 23, 18, 0) 100%
+  ) !important;
+  filter: blur(1.35px) !important;
+  opacity: .92 !important;
+}
+
+#brandStorySection .brand-story-person-shadow::after {
+  content: "";
+  position: absolute;
+  left: 38%;
+  top: 50%;
+  width: 64%;
+  height: 180%;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(35, 23, 18, .26) 0%,
+    rgba(35, 23, 18, .11) 54%,
+    rgba(35, 23, 18, 0) 100%
+  );
+  filter: blur(4.2px);
+  opacity: .62;
+}
