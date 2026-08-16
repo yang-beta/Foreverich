@@ -1289,3 +1289,114 @@
   #memoryWallSection .memory-wall-carousel::before { right: calc(100% + 7px); }
   #memoryWallSection .memory-wall-carousel::after { left: calc(100% + 7px); }
 }
+
+
+/* =============================================================
+   品牌故事｜Tablet
+   ============================================================= */
+@media (max-width: 1100px) {
+  .brand-story-copy {
+    top: 25%;
+    width: 91vw;
+    gap: 18px;
+  }
+
+  .brand-story-line {
+    font-size: clamp(15px, 2vw, 22px);
+    gap: 16px;
+    letter-spacing: .08em;
+  }
+
+  .brand-story-line-long {
+    font-size: clamp(14px, 1.82vw, 20px);
+    gap: 12px;
+  }
+
+  .brand-story-person-wrap {
+    left: 61%;
+    bottom: 23%;
+    width: clamp(24px, 3vw, 36px);
+  }
+
+  .brand-story-bird {
+    left: 42%;
+    top: 45%;
+  }
+}
+
+/* =============================================================
+   品牌故事｜Mobile / Tablet Safe Area
+   ============================================================= */
+@media (max-width: 768px) {
+  .brand-story-copy {
+    top:
+      max(
+        23%,
+        calc(env(safe-area-inset-top, 0px) + 112px)
+      );
+
+    width: 88vw;
+    gap: 15px;
+  }
+
+  .brand-story-line,
+  .brand-story-line-long {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    font-size: .84rem;
+    line-height: 1.75;
+    white-space: normal;
+  }
+
+  .brand-story-segment-mask {
+    padding-bottom: 3px;
+  }
+
+  .brand-story-person-wrap {
+    left: 64%;
+    bottom: 21%;
+    width: 26px;
+  }
+
+  .brand-story-bird {
+    left: 39%;
+    top: 49%;
+    width: 48px;
+  }
+
+  .brand-story-bottom-nav {
+    width: 88vw;
+    gap: 8px;
+  }
+
+  .brand-story-nav-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 9px 8px;
+    font-size: .68rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand-story-copy {
+    top: 20%;
+    gap: 13px;
+  }
+
+  .brand-story-line,
+  .brand-story-line-long {
+    font-size: .76rem;
+    letter-spacing: .05em;
+  }
+
+  .brand-story-person-wrap {
+    left: 67%;
+    bottom: 19.5%;
+    width: 23px;
+  }
+
+  .brand-story-bird {
+    top: 51%;
+  }
+}

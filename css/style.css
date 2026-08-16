@@ -2579,35 +2579,6 @@
 #memoryWallSection .memory-wall-actions .memory-wall-continue {
   margin-top: 0 !important;
 }
-.brand-story-section {
-  position: relative;
-  background: var(--surface-bg);
-  overflow: hidden;
-}
-.brand-story-placeholder {
-  width: 100%;
-  height: 100%;
-}
-.brand-story-bottom-nav {
-  position: absolute;
-  left: 50%;
-  bottom: max(26px, calc(env(safe-area-inset-bottom, 0px) + 18px));
-  transform: translateX(-50%);
-  display: flex;
-  gap: 12px;
-  z-index: 5;
-}
-.brand-story-nav-btn {
-  min-width: 138px;
-  padding: 10px 18px;
-  border: 1px solid rgba(var(--coral-main-rgb), .52);
-  border-radius: 999px;
-  background: rgba(var(--coral-main-rgb), .055);
-  color: rgba(var(--coral-light-rgb), .92);
-  font: 400 .76rem "Noto Serif TC", serif;
-  letter-spacing: .12em;
-  cursor: pointer;
-}
 #heroSection .hero-container {
   transform: translateY(-20vh);
 }
@@ -2654,4 +2625,227 @@
 #memoryWallSection .memory-wall-carousel::after { left: calc(100% + 14px); }
 #memoryWallSection .memory-wall-grid { position: relative; z-index: 1; }
 
-.brand-story-section { min-height: 100vh; }
+
+
+
+/* =============================================================
+   10. 品牌故事頁｜Brand Story
+   -------------------------------------------------------------
+   桌機 / 基礎樣式放在 style.css。
+   背景完全獨立，不沿用 P1 Canvas。
+   ============================================================= */
+
+#brandStorySection {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #242424 !important;
+  z-index: 20;
+}
+
+/* 品牌故事專用地景 Canvas */
+#brandStoryCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 遠方飛鳥 */
+.brand-story-bird {
+  position: absolute;
+  left: 41.5%;
+  top: 43%;
+  width: clamp(52px, 5.2vw, 92px);
+  height: auto;
+  z-index: 2;
+  opacity: .56;
+  fill: none;
+  stroke: rgba(230, 230, 232, .72);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* -------------------------------------------------------------
+   三行品牌文字
+   ------------------------------------------------------------- */
+.brand-story-copy {
+  position: absolute;
+  top: 27.5%;
+  left: 50%;
+  width: min(88vw, 1680px);
+  transform: translateX(-50%);
+  z-index: 4;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(18px, 2.2vh, 30px);
+
+  color: rgba(244, 244, 244, .92);
+  font-family: "Noto Serif TC", serif;
+  font-weight: 300;
+  text-align: center;
+  pointer-events: none;
+}
+
+.brand-story-line {
+  width: 100%;
+  min-height: 1.8em;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  gap: clamp(18px, 2vw, 42px);
+
+  font-size: clamp(18px, 1.45vw, 29px);
+  line-height: 1.65;
+  letter-spacing: .12em;
+  white-space: nowrap;
+}
+
+.brand-story-line-long {
+  font-size: clamp(17px, 1.32vw, 26px);
+  gap: clamp(14px, 1.55vw, 30px);
+}
+
+/*
+  每段文字都有自己的 bottom mask。
+  文字會從這條底線的位置往上出現。
+*/
+.brand-story-segment-mask {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding: 0 2px 5px;
+
+  border-bottom:
+    1px solid
+    rgba(var(--coral-main-rgb), .30);
+}
+
+.brand-story-segment {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* -------------------------------------------------------------
+   人物：沿用 P1 的 man-s.png
+   在品牌故事頁改成參考圖中的深色剪影。
+   ------------------------------------------------------------- */
+.brand-story-person-wrap {
+  position: absolute;
+  left: 58.5%;
+  bottom: 22.5%;
+  width: clamp(26px, 2.35vw, 44px);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.brand-story-person {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  z-index: 2;
+
+  opacity: .92;
+  filter:
+    brightness(0)
+    drop-shadow(0 0 2px rgba(0, 0, 0, .60));
+}
+
+.brand-story-person-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+
+  width: 250%;
+  height: 15px;
+
+  transform:
+    translateX(-32%)
+    rotate(4deg);
+
+  transform-origin: left center;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      ellipse at left center,
+      rgba(22, 16, 13, .68) 0%,
+      rgba(34, 23, 18, .42) 38%,
+      rgba(34, 23, 18, 0) 78%
+    );
+
+  filter: blur(2px);
+  z-index: 1;
+}
+
+/* -------------------------------------------------------------
+   最下方導航
+   ------------------------------------------------------------- */
+.brand-story-bottom-nav {
+  position: absolute;
+  left: 50%;
+  bottom: max(26px, calc(env(safe-area-inset-bottom, 0px) + 18px));
+
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 12px;
+
+  z-index: 8;
+}
+
+.brand-story-nav-btn {
+  min-width: 138px;
+  padding: 10px 18px;
+
+  border:
+    1px solid
+    rgba(var(--coral-main-rgb), .52);
+
+  border-radius: 999px;
+
+  background:
+    rgba(26, 26, 26, .48);
+
+  color:
+    rgba(var(--coral-light-rgb), .92);
+
+  font:
+    400
+    .76rem
+    "Noto Serif TC",
+    serif;
+
+  letter-spacing: .12em;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  transition:
+    background .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
+}
+
+.brand-story-nav-btn:hover {
+  background:
+    rgba(var(--coral-main-rgb), .08);
+
+  border-color:
+    rgba(var(--coral-main-rgb), .76);
+
+  box-shadow:
+    0 0 18px
+    rgba(var(--coral-main-rgb), .08);
+}
