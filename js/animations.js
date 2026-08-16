@@ -290,99 +290,225 @@
     // 品牌故事頁文字動畫｜V4
     // =============================================================
     // =============================================================
-    // 品牌故事最終 Slogan｜水波紋互動 V10
+    // 品牌故事最終 Slogan｜相機柔焦互動 V11
     // =============================================================
-    let brandStoryRippleBound = false;
-    let brandStoryLastRippleAt = 0;
-    let brandStoryLastRippleX = null;
-    let brandStoryLastRippleY = null;
+    let brandStoryFocusBound = false;
+    let brandStoryTouchFocusTimer = null;
 
-    function createBrandStoryRipple(clientX, clientY, force = false) {
-      const finalCopy = document.querySelector(
-        '#brandStorySection .brand-story-final-copy'
+    function updateBrandStoryFocusBounds() {
+      const page =
+        document.getElementById(
+          'brandStorySection'
+        );
+
+      const finalCopy =
+        page?.querySelector(
+          '.brand-story-final-copy'
+        );
+
+      if (!page || !finalCopy) return;
+
+      const pageRect =
+        page.getBoundingClientRect();
+
+      const rect =
+        finalCopy.getBoundingClientRect();
+
+      const left =
+        Math.max(
+          0,
+          rect.left -
+          pageRect.left
+        );
+
+      const top =
+        Math.max(
+          0,
+          rect.top -
+          pageRect.top
+        );
+
+      page.style.setProperty(
+        '--focus-left',
+        `${left}px`
       );
 
-      if (!finalCopy || !finalCopy.classList.contains('brand-story-final-active')) {
+      page.style.setProperty(
+        '--focus-top',
+        `${top}px`
+      );
+
+      page.style.setProperty(
+        '--focus-width',
+        `${rect.width}px`
+      );
+
+      page.style.setProperty(
+        '--focus-height',
+        `${rect.height}px`
+      );
+    }
+
+    function setBrandStoryFocusReady(
+      ready
+    ) {
+      const page =
+        document.getElementById(
+          'brandStorySection'
+        );
+
+      if (!page) return;
+
+      page.classList.toggle(
+        'brand-story-focus-ready',
+        ready
+      );
+
+      if (!ready) {
+        page.classList.remove(
+          'brand-story-focus-active'
+        );
+      }
+
+      if (ready) {
+        requestAnimationFrame(
+          updateBrandStoryFocusBounds
+        );
+      }
+    }
+
+    function setBrandStoryFocusActive(
+      active
+    ) {
+      const page =
+        document.getElementById(
+          'brandStorySection'
+        );
+
+      if (
+        !page ||
+        !page.classList.contains(
+          'brand-story-focus-ready'
+        )
+      ) {
         return;
       }
 
-      const now = performance.now();
-
-      // Desktop mousemove 節流；Touch / Pen force=true 時不限制。
-      if (!force) {
-        if (now - brandStoryLastRippleAt < 180) return;
-
-        if (brandStoryLastRippleX !== null && brandStoryLastRippleY !== null) {
-          const dx = clientX - brandStoryLastRippleX;
-          const dy = clientY - brandStoryLastRippleY;
-          if (Math.hypot(dx, dy) < 18) return;
-        }
-      }
-
-      brandStoryLastRippleAt = now;
-      brandStoryLastRippleX = clientX;
-      brandStoryLastRippleY = clientY;
-
-      const rect = finalCopy.getBoundingClientRect();
-      const ripple = document.createElement('span');
-      ripple.className = 'brand-story-ripple';
-      ripple.style.left = `${clientX - rect.left}px`;
-      ripple.style.top = `${clientY - rect.top}px`;
-
-      const size = Math.max(36, Math.min(56, rect.width * .065));
-      ripple.style.setProperty('--ripple-size', `${size}px`);
-
-      finalCopy.appendChild(ripple);
-      ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
-    }
-
-    function bindBrandStoryRipple() {
-      if (brandStoryRippleBound) return;
-
-      const finalCopy = document.querySelector(
-        '#brandStorySection .brand-story-final-copy'
+      page.classList.toggle(
+        'brand-story-focus-active',
+        active
       );
-      if (!finalCopy) return;
+    }
 
-      brandStoryRippleBound = true;
+    function bindBrandStoryFocus() {
+      if (brandStoryFocusBound) return;
 
-      // Desktop / trackpad：滑鼠移動就產生 ripple。
-      finalCopy.addEventListener('pointermove', (event) => {
-        if (event.pointerType === 'touch') return;
-        createBrandStoryRipple(event.clientX, event.clientY, false);
-      });
+      const page =
+        document.getElementById(
+          'brandStorySection'
+        );
 
-      // Mobile / tablet / pen：點擊或觸碰時才產生 ripple。
-      finalCopy.addEventListener('pointerdown', (event) => {
-        if (event.pointerType === 'touch' || event.pointerType === 'pen') {
-          createBrandStoryRipple(event.clientX, event.clientY, true);
+      const finalCopy =
+        page?.querySelector(
+          '.brand-story-final-copy'
+        );
+
+      if (!page || !finalCopy) return;
+
+      brandStoryFocusBound = true;
+
+      /*
+        Desktop：
+        游標只要進入 ［ ］框內就啟用，
+        離開框內立即慢慢恢復。
+      */
+      finalCopy.addEventListener(
+        'pointerenter',
+        event => {
+          if (
+            event.pointerType ===
+            'touch'
+          ) {
+            return;
+          }
+
+          updateBrandStoryFocusBounds();
+          setBrandStoryFocusActive(true);
         }
-      });
-    }
-
-    function setBrandStoryRippleActive(active) {
-      const finalCopy = document.querySelector(
-        '#brandStorySection .brand-story-final-copy'
       );
-      if (!finalCopy) return;
 
-      finalCopy.classList.toggle('brand-story-final-active', active);
+      finalCopy.addEventListener(
+        'pointerleave',
+        event => {
+          if (
+            event.pointerType ===
+            'touch'
+          ) {
+            return;
+          }
 
-      if (!active) {
-        finalCopy.querySelectorAll('.brand-story-ripple').forEach((ripple) => ripple.remove());
-        brandStoryLastRippleX = null;
-        brandStoryLastRippleY = null;
-      }
+          setBrandStoryFocusActive(false);
+        }
+      );
+
+      /*
+        Mobile / Tablet：
+        點一下 slogan 區域啟用柔焦。
+        約 2.8 秒後自動恢復，
+        避免 touch 裝置沒有 hover leave。
+      */
+      finalCopy.addEventListener(
+        'pointerdown',
+        event => {
+          if (
+            event.pointerType !==
+              'touch' &&
+            event.pointerType !==
+              'pen'
+          ) {
+            return;
+          }
+
+          updateBrandStoryFocusBounds();
+          setBrandStoryFocusActive(true);
+
+          clearTimeout(
+            brandStoryTouchFocusTimer
+          );
+
+          brandStoryTouchFocusTimer =
+            setTimeout(
+              () =>
+                setBrandStoryFocusActive(
+                  false
+                ),
+              2800
+            );
+        }
+      );
+
+      window.addEventListener(
+        'resize',
+        () => {
+          if (
+            page.classList.contains(
+              'brand-story-focus-ready'
+            )
+          ) {
+            updateBrandStoryFocusBounds();
+          }
+        }
+      );
     }
 
-    bindBrandStoryRipple();
+    bindBrandStoryFocus();
 
     let brandStoryTimeline = null;
 
     function resetBrandStoryAnimation() {
       brandStoryTimeline?.kill();
       brandStoryTimeline = null;
-      setBrandStoryRippleActive(false);
+      setBrandStoryFocusReady(false);
 
       const segments = gsap.utils.toArray('#brandStorySection .brand-story-segment');
       const finalLines = gsap.utils.toArray('#brandStorySection .brand-story-final-line');
@@ -456,7 +582,12 @@
             ease: 'power2.out'
           }
         )
-        .call(() => setBrandStoryRippleActive(true))
+        .call(
+          () =>
+            setBrandStoryFocusReady(
+              true
+            )
+        )
         .to('#brandStorySkipBtn', { opacity: 0, pointerEvents: 'none', duration: .4 }, '+=.4');
     }
 
@@ -476,7 +607,7 @@
           scaleY: 1
         }
       );
-      setBrandStoryRippleActive(true);
+      setBrandStoryFocusReady(true);
       gsap.set('#brandStorySection .brand-story-person-wrap', { autoAlpha: 1 });
       gsap.to('#brandStorySkipBtn', { opacity: 0, pointerEvents: 'none', duration: .3 });
     }
@@ -484,7 +615,8 @@
     function leaveBrandStoryAnimation() {
       brandStoryTimeline?.kill();
       brandStoryTimeline = null;
-      setBrandStoryRippleActive(false);
+      clearTimeout(brandStoryTouchFocusTimer);
+      setBrandStoryFocusReady(false);
       gsap.killTweensOf(
         '#brandStorySection .brand-story-segment, #brandStorySection .brand-story-final-line, #brandStorySection .brand-story-final-bracket, #brandStorySection .brand-story-copy, #brandStorySection .brand-story-person-wrap, #brandStorySkipBtn'
       );
