@@ -2396,6 +2396,12 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     let isBrandStoryCanvasRunning = false;
     let brandStoryLastFrame = 0;
 
+    /*
+      品牌故事靜態品牌色橫線：
+      每次進入頁面重新隨機，停留期間不改變，所以不會閃爍。
+    */
+    let brandStoryStaticCoralRows = [];
+
     function resizeBrandStoryCanvas() {
       if (!brandStoryCanvas || !brandStoryCtx) return;
 
@@ -2426,6 +2432,44 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       return Math.exp(
         -(d * d) * 2.2
       );
+    }
+
+    function generateBrandStoryStaticCoralRows(
+      lineCount = 58
+    ) {
+      const targetCount =
+        4 +
+        Math.floor(
+          Math.random() * 4
+        ); // 4～7 條
+
+      const rows = new Set();
+
+      /*
+        避開最上方幾條與最底部，
+        讓品牌色散落在整個水平地景中。
+      */
+      while (
+        rows.size <
+        targetCount
+      ) {
+        const row =
+          4 +
+          Math.floor(
+            Math.random() *
+            Math.max(
+              1,
+              lineCount - 10
+            )
+          );
+
+        rows.add(row);
+      }
+
+      brandStoryStaticCoralRows =
+        [...rows].sort(
+          (a, b) => a - b
+        );
     }
 
     function drawBrandStoryLandscape(
@@ -2461,8 +2505,6 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       // 人物腳底約位於畫面 77.5% 高度。
       // 透明度：最上方 25%，到人物踩的位置增加到 65%。
       const personFootY = h * .775;
-      const footT = Math.max(.01, Math.min(1, (personFootY - horizonY) / floorHeight));
-
       const lineCount = 58;
 
       // P1 式品牌色掃光：逐線向下移動，尾端提前交叉淡入下一輪，避免跳格。
@@ -2476,9 +2518,37 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         const t = row / (lineCount - 1);
         const baseY = horizonY + Math.pow(t, 1.36) * (floorHeight + 10 * DPR);
 
-        // 由 25% 漸增到人物腳底 65%，腳底以下維持 65%。
-        const alphaProgress = Math.min(1, t / footT);
-        const baseAlpha = .25 + .40 * alphaProgress;
+        /*
+          地平線透明度依「實際 Y 位置」計算：
+          - 第一條：25%
+          - 第二條開始逐條遞增
+          - 人物腳底：65%
+          - 腳底以下：維持 65%
+
+          不再使用 row index 的線性比例，因此即使線距本身是非線性的，
+          畫面上的透明度仍會按照真正的垂直位置自然增加。
+        */
+        const alphaProgress =
+          Math.max(
+            0,
+            Math.min(
+              1,
+              (
+                baseY -
+                horizonY
+              ) /
+              Math.max(
+                1,
+                personFootY -
+                horizonY
+              )
+            )
+          );
+
+        const baseAlpha =
+          .25 +
+          .40 *
+          alphaProgress;
 
         // 粗細交錯，但所有線都完全水平。
         const thicknessPattern = [0.56, 0.84, 0.64, 1.10, 0.70, 0.94][row % 6];
@@ -2493,6 +2563,37 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         ctx.lineWidth = baseWidth;
         ctx.stroke();
         ctx.restore();
+
+        /*
+          靜態品牌色橫線：
+          隨機挑選的幾條固定使用珊瑚杏色，
+          不參與掃光位移，因此畫面停留時不會改變位置。
+        */
+        if (
+          brandStoryStaticCoralRows.includes(
+            row
+          )
+        ) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(0, baseY);
+          ctx.lineTo(w, baseY);
+          ctx.strokeStyle =
+            coralRgba(
+              'main',
+              Math.min(
+                .34,
+                baseAlpha * .72
+              )
+            );
+          ctx.lineWidth =
+            Math.max(
+              baseWidth,
+              .82 * DPR
+            );
+          ctx.stroke();
+          ctx.restore();
+        }
 
         // 再疊 P1 同概念的珊瑚杏流動光。
         const currentDistance = Math.abs(row - sweepLine);
@@ -2548,6 +2649,9 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       if (!brandStoryCanvas) return;
 
       resizeBrandStoryCanvas();
+
+      // 每次進入品牌故事重新隨機，但進入後保持固定。
+      generateBrandStoryStaticCoralRows(58);
 
       isBrandStoryCanvasRunning =
         true;

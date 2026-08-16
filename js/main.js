@@ -610,30 +610,128 @@
         return m ? {target:m[1]||'一份思念',quote:m[2]||'',meta:m[3]||''}
                  : {target:'一份思念',quote:s,meta:''};
       }
-      const ghostScripts=[
-        ['ႵႹႫႪႢ','Ավրէ նըժա քելուն՝ սէրախ դարիմ շըվա։','ღჷჱ · ᚴᚱᚢ'],
-        ['ᚦᚱᚨᛗ','ჟყა ვრუ ჳდეშა, ხმაჲ ნერ ორვა ლიჰუ։','Ախր · ႺႤႭ'],
-        ['Ծիր ႶႠ','ᛞᚨᚱ ᛗᛖᚾᚨ ᚲᚢᚱ, ႯႭႶ ჱնար վէշ։','ჳႠႪ · ᛟᚾ'],
-        ['ႺႭႪ','Քաժ էրվան նոշի, Ⴕა მირი ლუშა սեն։','ᚠᚱ · Ծն'],
-        ['ᛇᛚᚢ','ჴოშա ნარეჲ, ավր էշուն դարի մոն։','ႶႤ · ᚾᛟ'],
-        ['Վար ჳ','ᚴᛁᚱ ᛟᚱᚨ ᛞᚢ, ჟენა շուռ ველი։','Ծա · ႫႠ']
-      ];
-      function createGhostWallCard(seedIndex=0){
-        const set=ghostScripts[seedIndex%ghostScripts.length];
-        const card=document.createElement('article'); card.className='memory-wall-card memory-wall-ghost-card'; card.setAttribute('aria-hidden','true');
-        const meta=document.createElement('div'); meta.className='memory-wall-meta';
-        const target=document.createElement('span'); target.textContent=set[0]; const date=document.createElement('time'); date.textContent='···'; meta.append(target,date);
-        const quote=document.createElement('div'); quote.className='memory-wall-quote'; quote.textContent=set[1];
-        const foot=document.createElement('div'); foot.className='memory-wall-foot'; foot.textContent=set[2];
-        card.append(meta,quote,foot); return card;
+      /*
+        洸語牆左右延伸卡片
+        -------------------------------------------------------------
+        不再使用假文字。
+        中央區域顯示最新 12 筆；
+        左右延伸區另外查詢資料庫最舊 6 筆：
+        - 左側 3 筆
+        - 右側 3 筆
+
+        卡片 DOM 格式與真實留言一致，但：
+        - aria-hidden=true
+        - 不設定 tabIndex / role
+        - 不掛 click / keydown
+        因此純視覺展示，不能點擊開卡。
+      */
+      function resolveWallTheme(targetText=''){
+        const raw=String(targetText||'');
+        if(/長輩|祖父|祖母|阿公|阿嬤|爺爺|奶奶|外公|外婆/.test(raw)) return 'elder';
+        if(/伴侶|愛人|男友|女友|先生|太太|丈夫|妻子/.test(raw)) return 'partner';
+        if(/摯友|朋友|好友|同學/.test(raw)) return 'friend';
+        if(/毛孩|狗|貓|寵物/.test(raw)) return 'pet';
+        if(/過去的自己|自己|曾經的我/.test(raw)) return 'past-self';
+        return 'custom';
       }
-      function ensureGhostWallColumns(){
-        const carousel=grid.closest('.memory-wall-carousel'); if(!carousel) return;
-        carousel.querySelectorAll('.memory-wall-ghost-column').forEach(el=>el.remove());
-        const left=document.createElement('div'); left.className='memory-wall-ghost-column memory-wall-ghost-left';
-        const right=document.createElement('div'); right.className='memory-wall-ghost-column memory-wall-ghost-right';
-        for(let i=0;i<3;i+=1){left.appendChild(createGhostWallCard(i)); right.appendChild(createGhostWallCard(i+3));}
-        carousel.prepend(left); carousel.append(right);
+
+      function createGhostWallCard(item){
+        const d=parseStoredText(item?.text);
+
+        const card=document.createElement('article');
+        card.className='memory-wall-card memory-wall-ghost-card';
+        card.dataset.cardTheme=resolveWallTheme(d.target);
+        card.setAttribute('aria-hidden','true');
+
+        const meta=document.createElement('div');
+        meta.className='memory-wall-meta';
+
+        const target=document.createElement('span');
+        target.textContent=d.target;
+
+        const date=document.createElement('time');
+        date.textContent=item?.created_at
+          ?new Date(item.created_at)
+            .toLocaleDateString('zh-TW')
+            .replace(/\//g,'.')
+          :'';
+
+        meta.append(target,date);
+
+        const quote=document.createElement('div');
+        quote.className='memory-wall-quote';
+        quote.textContent=
+          d.quote||
+          window.SiteContent?.get?.(
+            'wall.default_quote',
+            '一束沒有被說出口的思念。'
+          );
+
+        const foot=document.createElement('div');
+        foot.className='memory-wall-foot';
+        foot.textContent=
+          d.meta||
+          window.SiteContent?.get?.(
+            'wall.default_meta',
+            '洸限 · 時光寄語'
+          );
+
+        card.append(meta,quote,foot);
+        return card;
+      }
+
+      function ensureGhostWallColumns(
+        oldestItems=[]
+      ){
+        const carousel=
+          grid.closest(
+            '.memory-wall-carousel'
+          );
+
+        if(!carousel) return;
+
+        carousel
+          .querySelectorAll(
+            '.memory-wall-ghost-column'
+          )
+          .forEach(
+            el=>el.remove()
+          );
+
+        if(!oldestItems?.length) return;
+
+        const left=
+          document.createElement('div');
+
+        left.className=
+          'memory-wall-ghost-column memory-wall-ghost-left';
+
+        const right=
+          document.createElement('div');
+
+        right.className=
+          'memory-wall-ghost-column memory-wall-ghost-right';
+
+        oldestItems
+          .slice(0,3)
+          .forEach(
+            item=>
+              left.appendChild(
+                createGhostWallCard(item)
+              )
+          );
+
+        oldestItems
+          .slice(3,6)
+          .forEach(
+            item=>
+              right.appendChild(
+                createGhostWallCard(item)
+              )
+          );
+
+        carousel.prepend(left);
+        carousel.append(right);
       }
 
       function createCard(item){
@@ -641,15 +739,7 @@
         const card=document.createElement('article');
         card.className='memory-wall-card';
 
-        const wallTheme = (() => {
-          const raw = String(d.target || '');
-          if (/長輩|祖父|祖母|阿公|阿嬤|爺爺|奶奶|外公|外婆/.test(raw)) return 'elder';
-          if (/伴侶|愛人|男友|女友|先生|太太|丈夫|妻子/.test(raw)) return 'partner';
-          if (/摯友|朋友|好友|同學/.test(raw)) return 'friend';
-          if (/毛孩|狗|貓|寵物/.test(raw)) return 'pet';
-          if (/過去的自己|自己|曾經的我/.test(raw)) return 'past-self';
-          return 'custom';
-        })();
+        const wallTheme = resolveWallTheme(d.target);
 
         card.dataset.cardTheme = wallTheme;
         card.tabIndex=0;
@@ -698,17 +788,93 @@
         try{
           const client=window.getRemembranceSupabaseClient?.();
           if(!client) throw new Error('SUPABASE_CLIENT_UNAVAILABLE');
-          const {data,error}=await client.from('remembrance-db').select('*').order('created_at',{ascending:false}).limit(12);
-          if(error) throw error;
-          if(token!==fetchToken) return;
-          grid.replaceChildren();
-          if(!data?.length){
-            const el=document.createElement('div'); el.className='memory-wall-empty'; el.textContent=window.SiteContent?.get?.('wall.empty','牆上還沒有思念，等待第一道微光。'); grid.appendChild(el); return;
+
+          /*
+            同時取得：
+            1. 最新 12 筆 → 中央真實留言
+            2. 最舊 6 筆 → 左右視覺延伸卡片
+          */
+          const [
+            latestResult,
+            oldestResult
+          ]=await Promise.all([
+            client
+              .from('remembrance-db')
+              .select('*')
+              .order(
+                'created_at',
+                {ascending:false}
+              )
+              .limit(12),
+
+            client
+              .from('remembrance-db')
+              .select('*')
+              .order(
+                'created_at',
+                {ascending:true}
+              )
+              .limit(6)
+          ]);
+
+          if(latestResult.error){
+            throw latestResult.error;
           }
-          data.slice(0,12).forEach(item=>grid.appendChild(createCard(item)));
+
+          if(oldestResult.error){
+            /*
+              左右延伸卡片失敗不應讓整面牆一起失效。
+              中央最新 12 筆仍正常顯示。
+            */
+            console.warn(
+              '洸語牆最舊 6 筆讀取失敗:',
+              oldestResult.error
+            );
+          }
+
+          if(token!==fetchToken) return;
+
+          const data=
+            latestResult.data||[];
+
+          const oldestData=
+            oldestResult.error
+              ?[]
+              :(oldestResult.data||[]);
+
+          grid.replaceChildren();
+
+          if(!data.length){
+            const el=document.createElement('div');
+            el.className='memory-wall-empty';
+            el.textContent=
+              window.SiteContent?.get?.(
+                'wall.empty',
+                '牆上還沒有思念，等待第一道微光。'
+              );
+            grid.appendChild(el);
+            ensureGhostWallColumns(oldestData);
+            return;
+          }
+
+          data
+            .slice(0,12)
+            .forEach(
+              item=>
+                grid.appendChild(
+                  createCard(item)
+                )
+            );
+
           grid.scrollLeft=0;
-          ensureGhostWallColumns();
-          requestAnimationFrame(updateWallNav);
+
+          ensureGhostWallColumns(
+            oldestData
+          );
+
+          requestAnimationFrame(
+            updateWallNav
+          );
         }catch(error){
           console.error('洸語牆讀取失敗:',error);
           if(token!==fetchToken) return;
@@ -716,7 +882,6 @@
         }
       }
       window.enterMemoryWallPage=function(){
-        ensureGhostWallColumns();
         load();
         requestAnimationFrame(updateWallNav);
         // 樹木金光停用：只保留底部波浪線。
