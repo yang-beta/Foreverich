@@ -127,7 +127,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // SHADOW_OPACITY   暖色地面投影強度
     // =============================================================
     const PERSON_SIZE = 0.074;
-    const PERSON_OPACITY = 0.80;
+    const PERSON_OPACITY = 0.65;
     const PERSON_Y_OFFSET = 20 * BG_DPR;
     const SHADOW_OPACITY = 0.22;
 
