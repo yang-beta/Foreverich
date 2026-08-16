@@ -11,6 +11,6 @@
  * ============================================================= */
 
 window.EVERICH_SUPABASE_CONFIG = Object.freeze({
-  url: "https://cwlxcsdqoigkutbeemvf.supabase.co",
-  publishableKey: "sb_publishable_L52BGOl7tE2hBgLnqxnGoA_u6RQ3yrd"
+  url: "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE",
+  publishableKey: "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
 });
