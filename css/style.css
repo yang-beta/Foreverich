@@ -3068,11 +3068,11 @@
   left: 50% !important;
   bottom: 0 !important;
 
-  width: 365% !important;
+  width: 402% !important; /* V7：約 +10% */
   height: 34px !important;
 
   transform:
-    translateX(-1%)
+    translate(4%, 5px)
     rotate(120deg)
     !important;
 
@@ -3158,4 +3158,31 @@
 #memoryWallSection .memory-wall-tree svg {
   width: 100vw !important;
   max-width: none !important;
+}
+
+
+/* =============================================================
+   2026-08-16｜LP 洸／限 V7
+   -------------------------------------------------------------
+   - 字圖尺寸縮小 60%（保留原尺寸 40%）
+   - 與中央 Logo 的實際距離增加約 60%
+   - 以明確 gap 最終覆寫，避免舊 inset 計算干擾
+   ============================================================= */
+#openingHero {
+  --lp-guang-width: clamp(10px, 1.6vw, 24.4px) !important;
+  --lp-xian-width: clamp(10px, 1.6vw, 24.4px) !important;
+  --lp-guang-gap-final: 45px;
+  --lp-xian-gap-final: 45px;
+}
+
+#openingHero .lp-side-word-guang {
+  width: var(--lp-guang-width) !important;
+  margin-right: var(--lp-guang-gap-final) !important;
+  margin-left: 0 !important;
+}
+
+#openingHero .lp-side-word-xian {
+  width: var(--lp-xian-width) !important;
+  margin-left: var(--lp-xian-gap-final) !important;
+  margin-right: 0 !important;
 }
