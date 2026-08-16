@@ -1542,10 +1542,23 @@
 }
 
 
-/* 品牌故事最終 Slogan 水波紋｜Mobile / Tablet */
+
+
+/* =============================================================
+   品牌故事最終 Slogan 柔焦｜Mobile / Tablet
+   ============================================================= */
 @media (max-width: 768px) {
-  #brandStorySection .brand-story-ripple {
-    --ripple-size: 36px;
-    animation-duration: 2.15s;
+  /*
+    手機螢幕較小，柔焦略降低，
+    避免整頁一口氣變得太糊。
+  */
+  #brandStorySection::before {
+    backdrop-filter: blur(1.8px);
+    -webkit-backdrop-filter: blur(1.8px);
+  }
+
+  #brandStorySection::after {
+    backdrop-filter: blur(5.2px);
+    -webkit-backdrop-filter: blur(5.2px);
   }
 }

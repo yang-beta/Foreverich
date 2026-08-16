@@ -3340,58 +3340,190 @@
 }
 
 
+
+
 /* =============================================================
-   2026-08-16｜品牌故事最終 Slogan 水波紋 V10
+   2026-08-16｜品牌故事最終 Slogan 相機柔焦 V11
    -------------------------------------------------------------
-   Desktop：滑鼠在最終文字＋括號範圍移動時產生漣漪。
-   Touch：點擊／觸碰該範圍時產生漣漪。
+   目標：
+   - ［ ］框內完全清楚。
+   - 框外開始柔焦。
+   - 離框越遠，模糊越明顯。
+   - 不讓柔焦層遮住文字本身。
    ============================================================= */
-#brandStorySection .brand-story-final-copy {
-  isolation: isolate;
-  overflow: visible;
+
+#brandStorySection {
+  /*
+    JS 會依實際 bracket / slogan 尺寸更新以下變數。
+    預設值只是第一次載入前的保護值。
+  */
+  --focus-left: 35%;
+  --focus-top: 30%;
+  --focus-width: 30%;
+  --focus-height: 20%;
+  --focus-radius: 8px;
 }
 
-#brandStorySection .brand-story-final-copy.brand-story-final-active {
+/*
+  兩層 backdrop-filter：
+  第一層＝靠近框外的輕柔焦
+  第二層＝更外圍的更強柔焦
+
+  兩層都透過 mask 挖掉中央清晰區。
+*/
+#brandStorySection::before,
+#brandStorySection::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  z-index: 6;
+
+  pointer-events: none;
+
+  opacity: 0;
+
+  transition:
+    opacity .55s ease;
+
+  /*
+    中央挖空：
+    transparent 區就是 slogan / bracket 的實際位置。
+  */
+  -webkit-mask:
+    linear-gradient(#000 0 0)
+      content-box,
+    linear-gradient(#000 0 0);
+
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+/*
+  近景柔焦層：
+  中央 clear zone 比 bracket 大約 22px，
+  讓框邊不會突然切成模糊。
+*/
+#brandStorySection::before {
+  padding:
+    max(
+      0px,
+      calc(var(--focus-top) - 22px)
+    )
+    max(
+      0px,
+      calc(
+        100% -
+        var(--focus-left) -
+        var(--focus-width) -
+        22px
+      )
+    )
+    max(
+      0px,
+      calc(
+        100% -
+        var(--focus-top) -
+        var(--focus-height) -
+        22px
+      )
+    )
+    max(
+      0px,
+      calc(var(--focus-left) - 22px)
+    );
+
+  backdrop-filter:
+    blur(2.4px);
+
+  -webkit-backdrop-filter:
+    blur(2.4px);
+
+  background:
+    rgba(
+      18,
+      18,
+      18,
+      .025
+    );
+}
+
+/*
+  遠景柔焦層：
+  中央 clear zone 再放大，
+  因此只有距離 slogan 更遠的位置會疊到這一層，
+  形成「越外面越模糊」。
+*/
+#brandStorySection::after {
+  padding:
+    max(
+      0px,
+      calc(var(--focus-top) - 86px)
+    )
+    max(
+      0px,
+      calc(
+        100% -
+        var(--focus-left) -
+        var(--focus-width) -
+        86px
+      )
+    )
+    max(
+      0px,
+      calc(
+        100% -
+        var(--focus-top) -
+        var(--focus-height) -
+        86px
+      )
+    )
+    max(
+      0px,
+      calc(var(--focus-left) - 86px)
+    );
+
+  backdrop-filter:
+    blur(6.8px);
+
+  -webkit-backdrop-filter:
+    blur(6.8px);
+
+  background:
+    rgba(
+      18,
+      18,
+      18,
+      .045
+    );
+}
+
+/* 只有 final slogan 完整完成並進入互動狀態才可觸發。 */
+#brandStorySection.brand-story-focus-ready
+  .brand-story-final-copy {
   pointer-events: auto;
 }
 
-#brandStorySection .brand-story-ripple {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: var(--ripple-size, 44px);
-  height: var(--ripple-size, 44px);
-  border: 1px solid rgba(var(--coral-light-rgb), .50);
-  border-radius: 50%;
-  transform: translate(-50%, -50%) scale(.10);
-  transform-origin: center;
-  opacity: 0;
-  pointer-events: none;
-  z-index: -1;
-  box-shadow:
-    0 0 11px rgba(var(--coral-main-rgb), .08),
-    inset 0 0 9px rgba(var(--coral-light-rgb), .045);
-  animation: brandStoryWaterRipple 2.35s cubic-bezier(.16,.72,.28,1) forwards;
-  will-change: transform, opacity;
+/* 實際對焦時顯示柔焦層。 */
+#brandStorySection.brand-story-focus-active::before,
+#brandStorySection.brand-story-focus-active::after {
+  opacity: 1;
 }
 
-#brandStorySection .brand-story-ripple::after {
-  content: '';
-  position: absolute;
-  inset: 13%;
-  border: 1px solid rgba(var(--coral-main-rgb), .28);
-  border-radius: inherit;
+/*
+  slogan / bracket 本身永遠高於柔焦層，
+  因此框內保持清楚。
+*/
+#brandStorySection .brand-story-final-copy {
+  z-index: 8 !important;
 }
 
-@keyframes brandStoryWaterRipple {
-  0% {
-    transform: translate(-50%, -50%) scale(.10);
-    opacity: 0;
-  }
-  10% { opacity: .70; }
-  55% { opacity: .25; }
-  100% {
-    transform: translate(-50%, -50%) scale(7.2);
-    opacity: 0;
-  }
+/* 人物和地面仍保留在柔焦層下面，才有真正景深感。 */
+#brandStorySection .brand-story-person-wrap {
+  z-index: 4 !important;
+}
+
+#brandStoryCanvas {
+  z-index: 0 !important;
 }
