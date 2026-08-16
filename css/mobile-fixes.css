@@ -8,48 +8,16 @@
    ============================================================= */
 
 /* ---------- P4 carousel base ---------- */
-.p4-carousel {
-  position: relative;
-  width: 100%;
-  min-width: 0;
-}
 
-.p4-carousel-nav {
-  position: absolute;
-  top: 50%;
-  z-index: 28;
-  width: 40px;
-  height: 68px;
-  transform: translateY(-50%);
-  border: 1px solid rgba(var(--coral-main-rgb), .28);
-  border-radius: 999px;
-  background: rgba(18,18,18,.50);
-  color: rgba(var(--coral-light-rgb), .90);
-  font: 300 1.9rem/1 serif;
-  display: none;
-  place-items: center;
-  cursor: pointer;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  box-shadow: 0 0 18px rgba(0,0,0,.18);
-  transition:
-    opacity .25s ease,
-    background .25s ease,
-    border-color .25s ease;
-}
 
-.p4-carousel-nav:hover {
-  background: rgba(var(--coral-main-rgb), .13);
-  border-color: rgba(var(--coral-main-rgb), .55);
-}
 
-.p4-carousel-nav:disabled {
-  opacity: .16;
-  pointer-events: none;
-}
 
-.p4-carousel-prev { left: 2px; }
-.p4-carousel-next { right: 2px; }
+
+
+
+
+
+
 
 /* 平板：兩張卡並排，左右滑動其餘卡片 */
 @media (min-width: 601px) and (max-width: 1100px) {
@@ -861,9 +829,7 @@
    <= 768px：顯示「返回首頁 / 前往洸語牆」
    ============================================================= */
 
-.p5-mobile-exit-nav {
-  display: none;
-}
+
 
 @media (max-width: 768px) {
 
@@ -939,7 +905,7 @@
       );
 
     font-family:
-      'Noto Serif TC',
+      "Noto Serif TC",
       serif;
 
     font-size: .72rem;
@@ -1033,24 +999,7 @@
   所以用 margin-top = -375px，
   讓「可視 Logo 中心」落在約 33.333vh。
 */
-#openingHero .lp-logo-lockup {
-  position: absolute !important;
 
-  top: 33.333% !important;
-  left: 0 !important;
-  right: 0 !important;
-
-  width: 100% !important;
-
-  margin-top: -375px !important;
-  margin-bottom: 0 !important;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 3;
-}
 
 /*
   新增「拾光記憶展」
@@ -1058,63 +1007,16 @@
   不使用 transform 做版面定位：
   transform 保留給 GSAP 的由下往上動畫。
 */
-#openingHero .lp-exhibition-title-wrap {
-  position: absolute;
 
-  top: calc(33.333% + 122px);
-  left: 0;
-  right: 0;
 
-  height: 40px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-
-  z-index: 4;
-
-  pointer-events: none;
-}
-
-#openingHero .lp-exhibition-title {
-  color: #FFB088;
-
-  font-family:
-    'Noto Serif TC',
-    serif;
-
-  font-size: 1.18rem;
-  font-weight: 300;
-
-  letter-spacing: .32em;
-
-  line-height: 1.6;
-
-  white-space: nowrap;
-
-  opacity: 0;
-}
 
 /*
   「回憶 / 從這裡 / 開始」
   -------------------------------------------------------------
   改用 top 定位，不再使用舊版 translateY。
 */
-#openingHero .interactive-area {
-  position: absolute !important;
 
-  top: 57% !important;
-  left: 0 !important;
-  right: 0 !important;
-
-  width: 100%;
-
-  transform: none !important;
-
-  z-index: 4;
-}
 
 
 /* =============================================================
@@ -1214,135 +1116,43 @@
    ============================================================= */
 
 /* ---------- 洸語牆：移除樹，只保留底部波浪線 ---------- */
-#memoryWallSection .memory-tree-base,
-#memoryWallSection .tree-leaves,
-#memoryWallSection .tree-roots,
-#memoryWallSection .tree-trunk,
-#memoryWallSection .tree-major-branches,
-#memoryWallSection .tree-secondary-branches,
-#memoryWallSection .memory-tree-glow {
-  display: none !important;
-}
 
-#memoryWallSection .memory-wall-tree {
-  left: 0 !important;
-  top: auto !important;
-  bottom: -2vh !important;
-  width: 100vw !important;
-  height: 30vh !important;
-  opacity: .72 !important;
-  overflow: visible !important;
-  z-index: 0 !important;
-}
 
-#memoryWallSection .memory-wall-tree svg {
-  width: 100% !important;
-  height: 100% !important;
-  overflow: visible !important;
-}
+
+
+
 
 /* 讓原本位於 SVG 底部的 hills 充滿目前保留的波浪區 */
-#memoryWallSection .memory-tree-hills {
-  transform: translateY(-555px) scaleY(1.05);
-  transform-origin: center bottom;
-}
+
 
 /* ---------- 洸語牆：依畫面盡量填滿 12 張 ---------- */
-#memoryWallSection .memory-wall-shell {
-  width: min(1500px, 96vw) !important;
-  height: 94vh !important;
-  max-width: none !important;
-  margin: 0 auto !important;
-}
 
-#memoryWallSection .memory-wall-header {
-  flex: 0 0 auto;
-  margin: 0 0 clamp(10px, 1.8vh, 18px) !important;
-}
 
-#memoryWallSection .memory-wall-carousel {
-  width: 100%;
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  align-items: stretch;
-}
 
-#memoryWallSection .memory-wall-grid {
-  width: 100%;
-  height: 100%;
-  flex: 1 1 auto;
-  min-height: 0;
-  display: grid !important;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
-  grid-auto-flow: row !important;
-  grid-auto-columns: auto !important;
-  overflow: hidden !important;
-  gap: clamp(8px, 1vw, 14px) !important;
-  padding: 0 !important;
-}
 
-#memoryWallSection .memory-wall-card {
-  width: auto !important;
-  height: auto !important;
-  min-height: 0 !important;
-}
 
-#memoryWallSection .memory-wall-nav {
-  display: none !important;
-}
 
-#memoryWallSection .memory-wall-actions {
-  flex: 0 0 auto;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: clamp(10px, 1.6vh, 16px);
-}
 
-#memoryWallSection .memory-wall-actions .memory-wall-continue {
-  margin-top: 0 !important;
-}
+
+
+
+
+
+
+
+
 
 /* ---------- 品牌故事：目前空白，只保留最下方兩按鈕 ---------- */
-.brand-story-section {
-  position: relative;
-  background: var(--surface-bg);
-  overflow: hidden;
-}
 
-.brand-story-placeholder {
-  width: 100%;
-  height: 100%;
-}
 
-.brand-story-bottom-nav {
-  position: absolute;
-  left: 50%;
-  bottom: max(26px, calc(env(safe-area-inset-bottom, 0px) + 18px));
-  transform: translateX(-50%);
-  display: flex;
-  gap: 12px;
-  z-index: 5;
-}
 
-.brand-story-nav-btn {
-  min-width: 138px;
-  padding: 10px 18px;
-  border: 1px solid rgba(var(--coral-main-rgb), .52);
-  border-radius: 999px;
-  background: rgba(var(--coral-main-rgb), .055);
-  color: rgba(var(--coral-light-rgb), .92);
-  font: 400 .76rem 'Noto Serif TC', serif;
-  letter-spacing: .12em;
-  cursor: pointer;
-}
+
+
+
+
 
 /* ---------- P1：三行文字大幅往上，和人物拉開 ---------- */
-#heroSection .hero-container {
-  transform: translateY(-20vh);
-}
+
 
 /* ---------- 平板 ---------- */
 @media (max-width: 1100px) {
@@ -1360,9 +1170,7 @@
     padding: 11px 12px 10px !important;
   }
 
-  #heroSection .hero-container {
-    transform: translateY(-17vh);
-  }
+  /* P1 hero position moved to the consolidated P1 RWD block below. */
 }
 
 /* ---------- 手機 ---------- */
@@ -1427,9 +1235,7 @@
     bottom: -1vh !important;
   }
 
-  #heroSection .hero-container {
-    transform: translateY(-14vh);
-  }
+  /* P1 hero position moved to the consolidated P1 RWD block below. */
 
   .brand-story-bottom-nav {
     width: 90vw;
@@ -1441,5 +1247,85 @@
     min-width: 0;
     padding: 9px 8px;
     font-size: .68rem;
+  }
+}
+
+
+/* =============================================================
+   FINAL RWD ADJUSTMENTS｜只放平板 / 手機 / Safari 特殊修正
+   ============================================================= */
+
+@media (max-width: 1100px) {
+  /* P1：平板維持較高位置，但避免文字超出安全區。 */
+  #heroSection .hero-container {
+    transform: translateY(-24vh) !important;
+  }
+
+  /* 平板牆面保留少量左右假卡片。 */
+  #memoryWallSection .memory-wall-shell {
+    width: 88vw !important;
+    height: 90vh !important;
+    padding-top: max(30px, env(safe-area-inset-top, 0px)) !important;
+    padding-bottom: max(18px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #memoryWallSection .memory-wall-carousel::before,
+  #memoryWallSection .memory-wall-carousel::after {
+    width: 9vw;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Safari：
+     不用 visualViewport / fixed body，避免再次破壞 P6 鍵盤輸入。
+     只增加頁面內安全區，避免內容看起來整體被推到最上方。 */
+  #memoryWallSection .memory-wall-shell {
+    height: 90vh !important;
+    padding-top:
+      max(
+        48px,
+        calc(env(safe-area-inset-top, 0px) + 20px)
+      ) !important;
+    padding-bottom:
+      max(
+        22px,
+        calc(env(safe-area-inset-bottom, 0px) + 12px)
+      ) !important;
+  }
+
+  /* P4 Safari：保留頁面滿版，但把內容視覺區往下校正，
+     不改 body/section 的定位方式，避免鍵盤問題復發。 */
+  #page4Section .p4-content,
+  #page4Section .p4-inner,
+  #page4Section .page4-content {
+    position: relative;
+    top: max(10px, env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (max-width: 600px) {
+  #heroSection .hero-container {
+    transform: translateY(-18vh) !important;
+  }
+
+  /* 手機畫面太窄時，假卡只露出很薄的一角，不壓縮真正留言卡。 */
+  #memoryWallSection .memory-wall-shell {
+    width: 88vw !important;
+    height: 89vh !important;
+  }
+
+  #memoryWallSection .memory-wall-carousel::before,
+  #memoryWallSection .memory-wall-carousel::after {
+    width: 11vw;
+    border-radius: 12px;
+    opacity: .55;
+  }
+
+  #memoryWallSection .memory-wall-carousel::before {
+    right: calc(100% + 7px);
+  }
+
+  #memoryWallSection .memory-wall-carousel::after {
+    left: calc(100% + 7px);
   }
 }
