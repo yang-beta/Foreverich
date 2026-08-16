@@ -3186,3 +3186,60 @@
   margin-left: var(--lp-xian-gap-final) !important;
   margin-right: 0 !important;
 }
+
+
+/* =============================================================
+   2026-08-16｜LP 洸／限 V8｜修正 V7 距離計算錯誤
+   -------------------------------------------------------------
+   V7 錯誤：
+   原本桌機 margin 是 -250px，用來補償 Logo SVG / 750px 容器的
+   大量視覺留白；V7 卻直接改成 +45px，實際差距變成 295px，
+   所以「洸／限」被推得非常遠。
+
+   正確作法：
+   1. 字圖尺寸獨立縮為原本 40%。
+   2. 距離沿用原本負 margin 補償，只把「可見間距」增加約 15px。
+      若原本可見距離約 25px，25 + 15 = 40px，約等於 +60%。
+   ============================================================= */
+
+/* 桌機：
+   原 width max 61px → 40% = 24.4px
+   原 margin -250px → -235px，只往外增加約 15px
+*/
+@media (min-width: 769px) {
+  #openingHero .lp-side-word-guang,
+  #openingHero .lp-side-word-xian {
+    width: clamp(15.6px, 1.6vw, 24.4px) !important;
+  }
+
+  #openingHero .lp-side-word-guang {
+    margin-right: -235px !important;
+    margin-left: 0 !important;
+  }
+
+  #openingHero .lp-side-word-xian {
+    margin-left: -235px !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* 手機 / 平板：
+   原 max 39px → 40% = 15.6px
+   原 margin -80px → -65px，同樣往外增加約 15px
+*/
+@media (max-width: 768px) {
+  #openingHero .lp-side-word-guang,
+  #openingHero .lp-side-word-xian {
+    width: clamp(10.8px, 3.2vw, 15.6px) !important;
+  }
+
+  #openingHero .lp-side-word-guang {
+    margin-right: -65px !important;
+    margin-left: 0 !important;
+  }
+
+  #openingHero .lp-side-word-xian {
+    margin-left: -65px !important;
+    margin-right: 0 !important;
+  }
+}
