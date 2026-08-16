@@ -2443,108 +2443,76 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       ctx.fillStyle = '#242424';
       ctx.fillRect(0, 0, w, h);
 
-      // 左上極淡霧光：只提供參考圖中的空間層次。
+      // 左上極淡空間霧光
       const glowX = w * .255;
       const glowY = h * .245;
       const glowR = Math.max(w, h) * .31;
-
-      const glow =
-        ctx.createRadialGradient(
-          glowX,
-          glowY,
-          0,
-          glowX,
-          glowY,
-          glowR
-        );
-
-      glow.addColorStop(
-        0,
-        'rgba(255,176,136,.055)'
-      );
-      glow.addColorStop(
-        .35,
-        'rgba(111,140,128,.030)'
-      );
-      glow.addColorStop(
-        1,
-        'rgba(36,36,36,0)'
-      );
-
+      const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, glowR);
+      glow.addColorStop(0, 'rgba(255,176,136,.055)');
+      glow.addColorStop(.35, 'rgba(111,140,128,.030)');
+      glow.addColorStop(1, 'rgba(36,36,36,0)');
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, w, h);
 
-      // 水平線區約佔底部 2/7，地平線位於畫面 5/7 高度。
+      // 水平線區約佔底部 2/7。
       const horizonY = h * (5 / 7);
+      const floorHeight = h - horizonY;
 
-      // 地平線
-      ctx.beginPath();
-      ctx.moveTo(0, horizonY);
-      ctx.lineTo(w, horizonY);
-      ctx.strokeStyle =
-        'rgba(230,230,232,.34)';
-      ctx.lineWidth = 1.05 * DPR;
-      ctx.stroke();
+      // 人物腳底約位於畫面 77.5% 高度。
+      // 透明度：最上方 25%，到人物踩的位置增加到 65%。
+      const personFootY = h * .775;
+      const footT = Math.max(.01, Math.min(1, (personFootY - horizonY) / floorHeight));
 
-      // 水平地景線
       const lineCount = 58;
-      const sampleCount = 110;
-      const slowPhase = time * .00011;
 
-      for (
-        let row = 0;
-        row < lineCount;
-        row += 1
-      ) {
-        const t =
-          row / (lineCount - 1);
+      // P1 式品牌色掃光：逐線向下移動，尾端提前交叉淡入下一輪，避免跳格。
+      const sweepProgress = ((time * 0.000055) % 1 + 1) % 1;
+      const sweepLine = sweepProgress * (lineCount - 1);
+      const crossRange = .10;
+      const endFade = 1 - Math.max(0, Math.min(1, (sweepProgress - (1 - crossRange)) / crossRange));
+      const nextFade = Math.max(0, Math.min(1, (sweepProgress - (1 - crossRange)) / crossRange));
 
-        // 越靠近畫面底部，線距逐漸拉開。
-        const baseY =
-          horizonY +
-          Math.pow(t, 1.43) *
-          (h - horizonY + 14 * DPR);
+      for (let row = 0; row < lineCount; row += 1) {
+        const t = row / (lineCount - 1);
+        const baseY = horizonY + Math.pow(t, 1.36) * (floorHeight + 10 * DPR);
 
+        // 由 25% 漸增到人物腳底 65%，腳底以下維持 65%。
+        const alphaProgress = Math.min(1, t / footT);
+        const baseAlpha = .25 + .40 * alphaProgress;
+
+        // 粗細交錯，但所有線都完全水平。
+        const thicknessPattern = [0.56, 0.84, 0.64, 1.10, 0.70, 0.94][row % 6];
+        const baseWidth = (thicknessPattern + t * .14) * DPR;
+
+        // 先畫中性底線。
+        ctx.save();
         ctx.beginPath();
-
-        for (
-          let i = 0;
-          i <= sampleCount;
-          i += 1
-        ) {
-          const nx =
-            i / sampleCount;
-
-          const x =
-            nx * w;
-
-          // 品牌故事地面完全水平，不再產生凹陷、隆起或波浪。
-          const y = baseY;
-
-          if (i === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
-        }
-
-        const coralLine =
-          row === 12 ||
-          row === 34 ||
-          row === 50;
-
-        ctx.strokeStyle =
-          coralLine
-            ? 'rgba(255,176,136,.23)'
-            : `rgba(230,230,232,${
-                0.18 + t * .28
-              })`;
-
-        // 平面維持水平，只讓線條粗細交錯。
-        const thicknessPattern = [0.58, 0.82, 0.66, 1.08, 0.72, 0.92][row % 6];
-        ctx.lineWidth = (thicknessPattern + t * .16) * DPR;
-
+        ctx.moveTo(0, baseY);
+        ctx.lineTo(w, baseY);
+        ctx.strokeStyle = `rgba(230,230,232,${baseAlpha})`;
+        ctx.lineWidth = baseWidth;
         ctx.stroke();
+        ctx.restore();
+
+        // 再疊 P1 同概念的珊瑚杏流動光。
+        const currentDistance = Math.abs(row - sweepLine);
+        const currentGlow = Math.max(0, 1 - currentDistance / 2.35) * endFade;
+        const nextDistance = Math.abs(row - 0);
+        const nextGlow = Math.max(0, 1 - nextDistance / 2.35) * nextFade;
+        const lineGlow = Math.max(currentGlow, nextGlow);
+
+        if (lineGlow > 0) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(0, baseY);
+          ctx.lineTo(w, baseY);
+          ctx.strokeStyle = coralRgba('main', .10 + lineGlow * .30);
+          ctx.lineWidth = Math.max(baseWidth, (0.88 + lineGlow * .25) * DPR);
+          ctx.shadowColor = coralRgba('main', .07 + lineGlow * .18);
+          ctx.shadowBlur = (1.5 + lineGlow * 3.0) * DPR;
+          ctx.stroke();
+          ctx.restore();
+        }
       }
     }
 

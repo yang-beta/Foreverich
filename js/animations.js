@@ -287,43 +287,84 @@
 
 
     // =============================================================
-    // 品牌故事頁文字動畫｜2026-08-16
+    // 品牌故事頁文字動畫｜V4
     // =============================================================
     let brandStoryTimeline = null;
+
     function resetBrandStoryAnimation() {
-      brandStoryTimeline?.kill(); brandStoryTimeline = null;
-      const segments=gsap.utils.toArray('#brandStorySection .brand-story-segment');
-      gsap.killTweensOf(segments);
-      gsap.set(segments,{y:'118%',autoAlpha:0});
-      gsap.set('#brandStorySection .brand-story-person-wrap',{autoAlpha:0});
-      gsap.set('#brandStorySkipBtn',{opacity:1,pointerEvents:'auto'});
+      brandStoryTimeline?.kill();
+      brandStoryTimeline = null;
+
+      const segments = gsap.utils.toArray('#brandStorySection .brand-story-segment');
+      const finalLines = gsap.utils.toArray('#brandStorySection .brand-story-final-line');
+
+      gsap.killTweensOf([...segments, ...finalLines]);
+      gsap.set(segments, { y: '118%', autoAlpha: 0 });
+      gsap.set(finalLines, { y: '118%', autoAlpha: 0 });
+      gsap.set('#brandStorySection .brand-story-copy', { autoAlpha: 1 });
+      gsap.set('#brandStorySection .brand-story-final-copy', { autoAlpha: 1 });
+      gsap.set('#brandStorySection .brand-story-person-wrap', { autoAlpha: 0 });
+      gsap.set('#brandStorySkipBtn', { opacity: 1, pointerEvents: 'auto' });
       document.getElementById('brandStorySkipBtn')?.classList.add('show');
     }
+
     function playBrandStoryAnimation() {
       resetBrandStoryAnimation();
-      brandStoryTimeline=gsap.timeline({defaults:{ease:'power2.out'}});
+
+      brandStoryTimeline = gsap.timeline({ defaults: { ease: 'power2.out' } });
+
       brandStoryTimeline
-        .to('#brandStorySection .brand-story-person-wrap',{autoAlpha:1,duration:1.2},.3)
-        .to('#brandStoryL1A',{y:'0%',autoAlpha:1,duration:.82},.55)
-        .to({},{duration:1.5})
-        .to('#brandStoryL1B',{y:'0%',autoAlpha:1,duration:.82})
-        .to({},{duration:2.0})
-        .to('#brandStoryL2A',{y:'0%',autoAlpha:1,duration:.9})
-        .to({},{duration:2.5})
-        .to('#brandStoryL3A',{y:'0%',autoAlpha:1,duration:.82})
-        .to({},{duration:1.5})
-        .to('#brandStoryL3B',{y:'0%',autoAlpha:1,duration:.82})
-        .to({},{duration:2.0})
-        .to('#brandStoryL3C',{y:'0%',autoAlpha:1,duration:.82})
-        .to('#brandStorySkipBtn',{opacity:0,pointerEvents:'none',duration:.4},'+=.4');
+        .to('#brandStorySection .brand-story-person-wrap', { autoAlpha: 1, duration: 1.2 }, .3)
+
+        // 第一行
+        .to('#brandStoryL1A', { y: '0%', autoAlpha: 1, duration: .82 }, .55)
+        .to({}, { duration: 1.5 })
+        .to('#brandStoryL1B', { y: '0%', autoAlpha: 1, duration: .82 })
+        .to({}, { duration: 2.0 })
+
+        // 第二行：整句一次出現
+        .to('#brandStoryL2A', { y: '0%', autoAlpha: 1, duration: .9 })
+        .to({}, { duration: 2.5 })
+
+        // 第三行
+        .to('#brandStoryL3A', { y: '0%', autoAlpha: 1, duration: .82 })
+        .to({}, { duration: 1.5 })
+        .to('#brandStoryL3B', { y: '0%', autoAlpha: 1, duration: .82 })
+        .to({}, { duration: 2.0 })
+        .to('#brandStoryL3C', { y: '0%', autoAlpha: 1, duration: .82 })
+
+        // 全部原始品牌文字播放完成後停 2 秒，再清除。
+        .to({}, { duration: 2.0 })
+        .to('#brandStorySection .brand-story-copy', {
+          autoAlpha: 0,
+          duration: .58,
+          ease: 'power1.inOut'
+        })
+
+        // 中央收束句，同樣從下方往上出現。
+        .to('#brandStoryFinal1', { y: '0%', autoAlpha: 1, duration: .86 })
+        .to({}, { duration: 1.5 })
+        .to('#brandStoryFinal2', { y: '0%', autoAlpha: 1, duration: .86 })
+        .to('#brandStorySkipBtn', { opacity: 0, pointerEvents: 'none', duration: .4 }, '+=.4');
     }
+
     function skipBrandStoryAnimation() {
-      brandStoryTimeline?.pause();
-      gsap.set('#brandStorySection .brand-story-segment',{y:'0%',autoAlpha:1});
-      gsap.set('#brandStorySection .brand-story-person-wrap',{autoAlpha:1});
-      gsap.to('#brandStorySkipBtn',{opacity:0,pointerEvents:'none',duration:.3});
+      brandStoryTimeline?.kill();
+      brandStoryTimeline = null;
+
+      // Skip 直接到故事最終狀態：原三行清除，只保留中央兩句。
+      gsap.set('#brandStorySection .brand-story-copy', { autoAlpha: 0 });
+      gsap.set('#brandStorySection .brand-story-segment', { y: '0%', autoAlpha: 1 });
+      gsap.set('#brandStorySection .brand-story-final-copy', { autoAlpha: 1 });
+      gsap.set('#brandStorySection .brand-story-final-line', { y: '0%', autoAlpha: 1 });
+      gsap.set('#brandStorySection .brand-story-person-wrap', { autoAlpha: 1 });
+      gsap.to('#brandStorySkipBtn', { opacity: 0, pointerEvents: 'none', duration: .3 });
     }
+
     function leaveBrandStoryAnimation() {
-      brandStoryTimeline?.kill(); brandStoryTimeline=null;
-      gsap.killTweensOf('#brandStorySection .brand-story-segment, #brandStorySection .brand-story-person-wrap, #brandStorySkipBtn');
+      brandStoryTimeline?.kill();
+      brandStoryTimeline = null;
+      gsap.killTweensOf(
+        '#brandStorySection .brand-story-segment, #brandStorySection .brand-story-final-line, #brandStorySection .brand-story-copy, #brandStorySection .brand-story-person-wrap, #brandStorySkipBtn'
+      );
     }
