@@ -1630,7 +1630,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           y: 0.42 + Math.random() * 0.16,
           sizeX: 0.060 + Math.random() * 0.025,
           sizeY: 0.13 + Math.random() * 0.055,
-          amplitude: -(0.046 + Math.random() * 0.018),
+          amplitude: -(0.0322 + Math.random() * 0.0126),
           power: 1.35
         },
 
@@ -1640,15 +1640,16 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           y: 0.48 + Math.random() * 0.18,
           sizeX: 0.052 + Math.random() * 0.025,
           sizeY: 0.11 + Math.random() * 0.060,
-          amplitude: -(0.040 + Math.random() * 0.018),
+          amplitude: -(0.0280 + Math.random() * 0.0126),
           power: 1.45
         }
       ];
 
-      // 再加 0～2 個較小山丘，總數維持 2～4 個。
+      // 再加 1～2 個較小山丘，總數固定至少 3 個、最多 4 個。
       const extraCount =
+        1 +
         Math.floor(
-          Math.random() * 3
+          Math.random() * 2
         );
 
       for (
@@ -1665,8 +1666,8 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           // 永遠為負值：只往上凸，不再往下凹。
           amplitude:
             -(
-              0.018 +
-              Math.random() * 0.025
+              0.0126 +
+              Math.random() * 0.0175
             ),
 
           power:
@@ -2483,9 +2484,11 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
       ctx.clearRect(0, 0, w, h);
 
-      // 背景
-      ctx.fillStyle = '#242424';
-      ctx.fillRect(0, 0, w, h);
+      /*
+        背景不再由 Canvas 填滿。
+        品牌故事 Section 的 CSS 背景已改成和洸語牆相同，
+        Canvas 保持透明，只疊加地平線與淡霧光。
+      */
 
       // 左上極淡空間霧光
       const glowX = w * .255;
@@ -2494,7 +2497,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, glowR);
       glow.addColorStop(0, 'rgba(255,176,136,.055)');
       glow.addColorStop(.35, 'rgba(111,140,128,.030)');
-      glow.addColorStop(1, 'rgba(36,36,36,0)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, w, h);
 
@@ -2503,7 +2506,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       const floorHeight = h - horizonY;
 
       // 人物腳底約位於畫面 77.5% 高度。
-      // 透明度：最上方 25%，到人物踩的位置增加到 65%。
+      // 透明度：最上方 5%，到人物踩的位置增加到 50%。
       const personFootY = h * .775;
       const lineCount = 58;
 
@@ -2520,10 +2523,10 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
         /*
           地平線透明度依「實際 Y 位置」計算：
-          - 第一條：25%
+          - 第一條：5%
           - 第二條開始逐條遞增
-          - 人物腳底：65%
-          - 腳底以下：維持 65%
+          - 人物腳底：50%
+          - 腳底以下：維持 50%
 
           不再使用 row index 的線性比例，因此即使線距本身是非線性的，
           畫面上的透明度仍會按照真正的垂直位置自然增加。
@@ -2546,8 +2549,8 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           );
 
         const baseAlpha =
-          .25 +
-          .40 *
+          .05 +
+          .45 *
           alphaProgress;
 
         // 粗細交錯，但所有線都完全水平。

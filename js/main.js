@@ -469,82 +469,206 @@
       const nextBtn=document.getElementById('memoryWallNextBtn');
 
       function randomizeTreeHills(){
-        const paths = page.querySelectorAll('.memory-tree-hills path');
-        if(!paths.length) return;
+        const svg =
+          page.querySelector(
+            '.memory-wall-tree svg'
+          );
 
-        paths.forEach((path,index)=>{
-          const startX = -90 + Math.random() * 170;
+        const paths =
+          page.querySelectorAll(
+            '.memory-tree-hills path'
+          );
 
-          // 每條線右側終點明顯不同，避免整排被同一位置切齊。
-          const endX =
-            430 +
-            Math.random() * 410 +
-            (index % 4 === 0 ? 70 : 0);
+        if(
+          !svg ||
+          !paths.length
+        ) return;
 
-          const baseY =
-            792 +
-            index * 9.2 +
-            (Math.random() - .5) * 15;
+        /*
+          樹已經移除，目前這個 SVG 只負責底部波浪線。
+          使用 preserveAspectRatio="none"，
+          讓 viewBox 760 寬真正拉滿 100vw，
+          不再因原本 meet 比例而只集中在某一側。
+        */
+        svg.setAttribute(
+          'preserveAspectRatio',
+          'none'
+        );
 
-          const segmentCount =
-            3 + Math.floor(Math.random() * 3);
+        /*
+          每次進入洸語牆隨機挑 2～4 條品牌色線。
+          位置在該次停留期間固定，不閃爍。
+        */
+        const coralCount =
+          2 +
+          Math.floor(
+            Math.random() * 3
+          );
 
-          let x = startX;
-          let y = baseY;
-          let d = `M ${x.toFixed(1)} ${y.toFixed(1)}`;
+        const coralIndices =
+          new Set();
 
-          for(let seg=0; seg<segmentCount; seg++){
-            const remaining = segmentCount - seg;
-            const avgWidth = (endX - x) / remaining;
+        while(
+          coralIndices.size <
+          Math.min(
+            coralCount,
+            paths.length
+          )
+        ){
+          coralIndices.add(
+            Math.floor(
+              Math.random() *
+              paths.length
+            )
+          );
+        }
 
-            const nextX =
-              seg === segmentCount - 1
-                ? endX
-                : x + avgWidth * (.72 + Math.random() * .52);
+        paths.forEach(
+          (path,index)=>{
+            /*
+              每條線都從 viewBox 左側外延伸到右側外，
+              確保實際顯示一定橫跨整個螢幕。
+            */
+            const startX =
+              -35 -
+              Math.random() * 35;
 
-            const amp =
-              9 + Math.random() * 30;
+            const endX =
+              795 +
+              Math.random() * 45;
 
-            const direction =
-              Math.random() > .5 ? 1 : -1;
+            const baseY =
+              792 +
+              index * 9.2 +
+              (Math.random() - .5) * 15;
 
-            const nextY =
-              baseY +
-              direction *
-              amp *
-              (.28 + Math.random() * .72);
+            const segmentCount =
+              4 +
+              Math.floor(
+                Math.random() * 2
+              );
 
-            const c1x =
-              x + (nextX - x) * (.18 + Math.random() * .20);
+            let x = startX;
+            let y = baseY;
 
-            const c2x =
-              x + (nextX - x) * (.62 + Math.random() * .24);
+            let d =
+              `M ${x.toFixed(1)} ${y.toFixed(1)}`;
 
-            const c1y =
-              y +
-              direction *
-              amp *
-              (.45 + Math.random() * .65);
+            for(
+              let seg=0;
+              seg<segmentCount;
+              seg+=1
+            ){
+              const remaining =
+                segmentCount - seg;
 
-            const c2y =
-              nextY -
-              direction *
-              amp *
-              (.28 + Math.random() * .52);
+              const avgWidth =
+                (endX - x) /
+                remaining;
 
-            d +=
-              ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}` +
-              ` ${c2x.toFixed(1)} ${c2y.toFixed(1)}` +
-              ` ${nextX.toFixed(1)} ${nextY.toFixed(1)}`;
+              const nextX =
+                seg ===
+                segmentCount - 1
+                  ? endX
+                  : x +
+                    avgWidth *
+                    (
+                      .82 +
+                      Math.random() * .34
+                    );
 
-            x = nextX;
-            y = nextY;
+              const amp =
+                8 +
+                Math.random() * 24;
+
+              const direction =
+                Math.random() >
+                .5
+                  ? 1
+                  : -1;
+
+              const nextY =
+                baseY +
+                direction *
+                amp *
+                (
+                  .25 +
+                  Math.random() * .65
+                );
+
+              const c1x =
+                x +
+                (nextX - x) *
+                (
+                  .20 +
+                  Math.random() * .16
+                );
+
+              const c2x =
+                x +
+                (nextX - x) *
+                (
+                  .66 +
+                  Math.random() * .18
+                );
+
+              const c1y =
+                y +
+                direction *
+                amp *
+                (
+                  .35 +
+                  Math.random() * .52
+                );
+
+              const c2y =
+                nextY -
+                direction *
+                amp *
+                (
+                  .24 +
+                  Math.random() * .42
+                );
+
+              d +=
+                ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}` +
+                ` ${c2x.toFixed(1)} ${c2y.toFixed(1)}` +
+                ` ${nextX.toFixed(1)} ${nextY.toFixed(1)}`;
+
+              x = nextX;
+              y = nextY;
+            }
+
+            path.setAttribute(
+              'd',
+              d
+            );
+
+            if(
+              coralIndices.has(
+                index
+              )
+            ){
+              path.style.stroke =
+                'rgba(255,176,136,.30)';
+
+              path.style.opacity =
+                `${.62 + Math.random() * .23}`;
+
+              path.style.strokeWidth =
+                `${1.0 + Math.random() * .35}`;
+            }else{
+              path.style.stroke =
+                'rgba(201,190,177,.16)';
+
+              path.style.opacity =
+                `${.42 + Math.random() * .30}`;
+
+              path.style.strokeWidth =
+                `${.78 + Math.random() * .26}`;
+            }
           }
-
-          path.setAttribute('d', d);
-          path.style.opacity =
-            `${0.55 + Math.random() * 0.45}`;
-        });
+        );
       }
 
       function randomizeTreeBranches(){
