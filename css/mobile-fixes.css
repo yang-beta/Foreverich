@@ -1540,3 +1540,12 @@
     right: calc(50% - 44vw);
   }
 }
+
+
+/* 品牌故事最終 Slogan 水波紋｜Mobile / Tablet */
+@media (max-width: 768px) {
+  #brandStorySection .brand-story-ripple {
+    --ripple-size: 36px;
+    animation-duration: 2.15s;
+  }
+}
