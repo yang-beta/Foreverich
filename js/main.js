@@ -129,6 +129,13 @@
           window.enterP6Page?.();
         },
         leave() { window.leaveP6Page?.(); }
+      }],
+      ['brandStorySection', {
+        enter() {
+          lCanvas.style.opacity = '0';
+          stopLoadingCanvas(); stopBackgroundCanvas(); stopSandCanvas(); stopBrandTransitionCanvas(); stopP4Canvases();
+        },
+        leave() {}
       }]
     ]);
 
@@ -560,7 +567,7 @@
         grid.scrollBy({left:wallPageStep(),behavior:'smooth'});
       });
       grid.addEventListener('scroll',()=>requestAnimationFrame(updateWallNav),{passive:true});
-      randomizeTreeBranches();
+      // 樹木已移除，只保留底部波浪線；波浪仍可每次進入略有差異。
       randomizeTreeHills();
 
       // 統一交給全站 handleResize() 呼叫。
@@ -658,17 +665,44 @@
       window.enterMemoryWallPage=function(){
         load();
         requestAnimationFrame(updateWallNav);
-        page.classList.add('is-tree-glowing');
+        // 樹木金光停用：只保留底部波浪線。
         gsap.fromTo('.memory-wall-header',{autoAlpha:0,y:14},{autoAlpha:1,y:0,duration:.7,ease:'power2.out'});
         gsap.fromTo(continueBtn,{autoAlpha:0,y:10},{autoAlpha:1,y:0,duration:.55,delay:.35,ease:'power2.out'});
       };
       window.leaveMemoryWallPage=function(){
         fetchToken+=1;
-        page.classList.remove('is-tree-glowing');
+
         window.closeMemoryWallCard?.();
         gsap.killTweensOf(['.memory-wall-header',continueBtn]);
       };
       continueBtn.addEventListener('click',goP6);
+
+      const storyBtn=document.getElementById('memoryWallStoryBtn');
+      storyBtn?.addEventListener('click',()=>{
+        const target=document.getElementById('brandStorySection');
+        const index=pageElements.indexOf(target);
+        if(index>=0) goToPage(index);
+      });
+    })();
+
+    // =============================================================
+    // Page 8｜品牌故事（目前內容留白）
+    // =============================================================
+    (() => {
+      const page=document.getElementById('brandStorySection');
+      if(!page) return;
+
+      const wallBtn=document.getElementById('brandStoryWallBtn');
+      const homeBtn=document.getElementById('brandStoryHomeBtn');
+
+      function goToSection(id){
+        const target=document.getElementById(id);
+        const index=pageElements.indexOf(target);
+        if(index>=0) goToPage(index);
+      }
+
+      wallBtn?.addEventListener('click',()=>goToSection('memoryWallSection'));
+      homeBtn?.addEventListener('click',()=>goToSection('openingHero'));
     })();
 
 
