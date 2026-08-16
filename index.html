@@ -11,8 +11,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&amp;family=Noto+Sans+TC:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
 <link href="data:," rel="icon"/>
-<link href="./css/style.css?v=20260816-brandstory1" rel="stylesheet"/>
-<link href="./css/mobile-fixes.css?v=20260816-brandstory1" rel="stylesheet"/>
+<link href="./css/style.css?v=20260816-p3brandwall3" rel="stylesheet"/>
+<link href="./css/mobile-fixes.css?v=20260816-p3brandwall3" rel="stylesheet"/>
 <!-- 2. GSAP 核心動畫庫 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -910,43 +910,22 @@
 <div class="section-page brand-story-section" id="brandStorySection">
   <!-- 獨立品牌故事背景：不再沿用 P1 mandalaCanvas -->
   <canvas id="brandStoryCanvas" aria-hidden="true"></canvas>
+  <button class="skip-anim-btn" id="brandStorySkipBtn" type="button">Skip 略過動畫 ✕</button>
 
-  <!-- 參考圖中的遠方飛鳥：純裝飾線稿 -->
-  <svg class="brand-story-bird" viewBox="0 0 120 50" aria-hidden="true">
-    <path d="M7 35 C25 22, 38 20, 56 30 C73 19, 90 19, 112 28" />
-    <path d="M56 30 C60 34, 65 37, 71 39" />
-  </svg>
 
   <!-- 品牌故事文字 -->
   <div class="brand-story-copy" aria-label="洸限品牌故事">
     <div class="brand-story-line">
-      <span class="brand-story-segment-mask">
-        <span class="brand-story-segment" id="brandStoryL1A">「 洸 」是擴散的水光</span>
-      </span>
-      <span class="brand-story-segment-mask">
-        <span class="brand-story-segment" id="brandStoryL1B">「 限 」是幾何的邊界</span>
-      </span>
+      <span class="brand-story-segment-mask"><span class="brand-story-segment" id="brandStoryL1A">「 洸 」是擴散的水光；</span></span>
+      <span class="brand-story-segment-mask"><span class="brand-story-segment" id="brandStoryL1B">「 限 」是幾何的邊界</span></span>
     </div>
-
     <div class="brand-story-line">
-      <span class="brand-story-segment-mask">
-        <span class="brand-story-segment" id="brandStoryL2A">「 洸限 」是一場結合五感科技</span>
-      </span>
-      <span class="brand-story-segment-mask">
-        <span class="brand-story-segment" id="brandStoryL2B">與東方哲學的沉浸式紀念展覽</span>
-      </span>
+      <span class="brand-story-segment-mask brand-story-segment-mask-full"><span class="brand-story-segment" id="brandStoryL2A">「 洸限 」是一場結合五感科技與東方哲學的沉浸式紀念展覽</span></span>
     </div>
-
     <div class="brand-story-line brand-story-line-long">
-      <span class="brand-story-segment-mask">
-        <span class="brand-story-segment" id="brandStoryL3A">「 洸限 」希望你</span>
-      </span>
-      <span class="brand-story-segment-mask">
-        <span class="brand-story-segment" id="brandStoryL3B">不僅是完成未完成的情感</span>
-      </span>
-      <span class="brand-story-segment-mask">
-        <span class="brand-story-segment" id="brandStoryL3C">更讓人帶著這份愛繼續生活――</span>
-      </span>
+      <span class="brand-story-segment-mask"><span class="brand-story-segment" id="brandStoryL3A">「 洸限 」希望你，</span></span>
+      <span class="brand-story-segment-mask"><span class="brand-story-segment" id="brandStoryL3B">不僅是完成未完成的情感，</span></span>
+      <span class="brand-story-segment-mask"><span class="brand-story-segment" id="brandStoryL3C">更讓人帶著這份愛繼續生活――</span></span>
     </div>
   </div>
 
@@ -975,9 +954,9 @@
 <script src="./js/auth-entry-redirect.js"></script>
 <script src="./js/supabase-client.js"></script>
 <script src="./js/content.js"></script>
-<script src="./js/canvas.js?v=20260816-brandstoryfix2"></script>
-<script src="./js/animations.js?v=20260816-brandstory1"></script>
-<script src="./js/main.js?v=20260816-brandstory1"></script>
+<script src="./js/canvas.js?v=20260816-p3brandwall3"></script>
+<script src="./js/animations.js?v=20260816-p3brandwall3"></script>
+<script src="./js/main.js?v=20260816-p3brandwall3"></script>
 <script src="./js/mobile-fixes.js?v=20260816-recovery1"></script>
 </body>
 </html>
