@@ -301,6 +301,13 @@
       gsap.killTweensOf([...segments, ...finalLines]);
       gsap.set(segments, { y: '118%', autoAlpha: 0 });
       gsap.set(finalLines, { y: '118%', autoAlpha: 0 });
+      gsap.set(
+        '#brandStorySection .brand-story-final-bracket',
+        {
+          autoAlpha: 0,
+          scaleY: .45
+        }
+      );
       gsap.set('#brandStorySection .brand-story-copy', { autoAlpha: 1 });
       gsap.set('#brandStorySection .brand-story-final-copy', { autoAlpha: 1 });
       gsap.set('#brandStorySection .brand-story-person-wrap', { autoAlpha: 0 });
@@ -345,6 +352,21 @@
         .to('#brandStoryFinal1', { y: '0%', autoAlpha: 1, duration: .86 })
         .to({}, { duration: 1.5 })
         .to('#brandStoryFinal2', { y: '0%', autoAlpha: 1, duration: .86 })
+
+        /*
+          第二句完整出現後約 1 秒，
+          左右方括號才一起展開。
+        */
+        .to({}, { duration: 1.0 })
+        .to(
+          '#brandStorySection .brand-story-final-bracket',
+          {
+            autoAlpha: 1,
+            scaleY: 1,
+            duration: .62,
+            ease: 'power2.out'
+          }
+        )
         .to('#brandStorySkipBtn', { opacity: 0, pointerEvents: 'none', duration: .4 }, '+=.4');
     }
 
@@ -357,6 +379,13 @@
       gsap.set('#brandStorySection .brand-story-segment', { y: '0%', autoAlpha: 1 });
       gsap.set('#brandStorySection .brand-story-final-copy', { autoAlpha: 1 });
       gsap.set('#brandStorySection .brand-story-final-line', { y: '0%', autoAlpha: 1 });
+      gsap.set(
+        '#brandStorySection .brand-story-final-bracket',
+        {
+          autoAlpha: 1,
+          scaleY: 1
+        }
+      );
       gsap.set('#brandStorySection .brand-story-person-wrap', { autoAlpha: 1 });
       gsap.to('#brandStorySkipBtn', { opacity: 0, pointerEvents: 'none', duration: .3 });
     }
@@ -365,6 +394,6 @@
       brandStoryTimeline?.kill();
       brandStoryTimeline = null;
       gsap.killTweensOf(
-        '#brandStorySection .brand-story-segment, #brandStorySection .brand-story-final-line, #brandStorySection .brand-story-copy, #brandStorySection .brand-story-person-wrap, #brandStorySkipBtn'
+        '#brandStorySection .brand-story-segment, #brandStorySection .brand-story-final-line, #brandStorySection .brand-story-final-bracket, #brandStorySection .brand-story-copy, #brandStorySection .brand-story-person-wrap, #brandStorySkipBtn'
       );
     }
