@@ -3013,3 +3013,29 @@
   filter: blur(4.2px);
   opacity: .62;
 }
+
+
+/* =============================================================
+   2026-08-16｜品牌故事 V5：分段文字間距修正
+   -------------------------------------------------------------
+   第一行 / 第三行雖然是分段動畫，但視覺上要像同一句文字。
+   因此取消明顯 flex gap，只保留極小的自然句內距離。
+   ============================================================= */
+#brandStorySection .brand-story-line,
+#brandStorySection .brand-story-line-long {
+  gap: .08em !important;
+  column-gap: .08em !important;
+}
+
+/*
+  letter-spacing 會讓每個獨立 segment 的尾端也多留一份字距。
+  用負 margin 抵消 segment 邊界重複出現的尾端字距，
+  讓「；」「，」後接下一段時看起來像正常連續句子。
+*/
+#brandStorySection .brand-story-segment-mask:not(:last-child) {
+  margin-right: calc(-1 * .16rem);
+}
+
+#brandStorySection .brand-story-segment-mask:last-child {
+  margin-right: 0;
+}
