@@ -3039,3 +3039,123 @@
 #brandStorySection .brand-story-segment-mask:last-child {
   margin-right: 0;
 }
+
+
+/* =============================================================
+   2026-08-16｜品牌故事 / 洸語牆 V6
+   ============================================================= */
+
+/* 品牌故事背景底色與洸語牆完全一致。 */
+#brandStorySection {
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(var(--coral-main-rgb), .045),
+      transparent 46%
+    ),
+    var(--surface-bg)
+    !important;
+}
+
+/*
+  人物夕陽長影：
+  - 方向維持約 120°
+  - 腳底端窄
+  - 遠端逐漸展開成扇形
+  - 最遠端寬度至少為近端約 2 倍以上
+*/
+#brandStorySection .brand-story-person-shadow {
+  left: 50% !important;
+  bottom: 0 !important;
+
+  width: 365% !important;
+  height: 34px !important;
+
+  transform:
+    translateX(-1%)
+    rotate(120deg)
+    !important;
+
+  transform-origin:
+    0 50%
+    !important;
+
+  border-radius: 0 !important;
+
+  clip-path:
+    polygon(
+      0 43%,
+      100% 0,
+      100% 100%,
+      0 57%
+    )
+    !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(25, 17, 14, .70) 0%,
+      rgba(35, 23, 18, .50) 30%,
+      rgba(35, 23, 18, .24) 67%,
+      rgba(35, 23, 18, 0) 100%
+    )
+    !important;
+
+  filter:
+    blur(.9px)
+    !important;
+
+  opacity:
+    .90
+    !important;
+}
+
+/* 遠端再加一層更寬、更淡、更模糊的散射。 */
+#brandStorySection .brand-story-person-shadow::after {
+  content: "";
+
+  position: absolute;
+
+  left: 45%;
+  top: 50%;
+
+  width: 55%;
+  height: 150%;
+
+  transform:
+    translateY(-50%);
+
+  clip-path:
+    polygon(
+      0 34%,
+      100% 0,
+      100% 100%,
+      0 66%
+    );
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(35, 23, 18, .18) 0%,
+      rgba(35, 23, 18, .08) 52%,
+      rgba(35, 23, 18, 0) 100%
+    );
+
+  filter:
+    blur(4.6px);
+
+  opacity:
+    .58;
+}
+
+/* 洸語牆底部 SVG 必須完整橫跨整個畫面。 */
+#memoryWallSection .memory-wall-tree {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+}
+
+#memoryWallSection .memory-wall-tree svg {
+  width: 100vw !important;
+  max-width: none !important;
+}
