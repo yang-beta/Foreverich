@@ -57,37 +57,149 @@
     // 🎬 4. GSAP 開場與 Banner 時間軸控制
     // =============================================================
     const mainTl = gsap.timeline();
+
     const openingTextItems = [
       { element: '#line1', duration: 1.5 },
       { element: '#line2', duration: 1.2 },
       { element: '#line3', duration: 1.0 }
     ];
-    gsap.set(openingTextItems.map(item => item.element), { y: "200%", opacity: 0 });
 
-    mainTl.to(".loading-text-box .char", { opacity: 1, y: 0, duration: 0.6, stagger: 0.7, ease: "power2.out" })
-    .call(() => { document.getElementById('loadingSkipBtn').classList.add('show'); })
-    .to({}, { duration: 0.8 })
-    .to("#loadingText", { opacity: 0, duration: 1.0, ease: "power2.inOut" })
-    .to("#logoBox", { clipPath: "circle(70% at 50% 50%)", scale: 1, filter: "blur(0px)", opacity: 1, duration: 3.5, ease: "power1.inOut" }, "-=0.5")
-    .to(".lp-side-word", {
-      opacity: 1,
-      scale: 1,
-      filter: "blur(0px) drop-shadow(0 0 16px rgba(255,255,255,.16))",
-      duration: 1.5,
-      ease: "power2.out"
-    }, "-=1.55")
-    .to({}, { duration: 1.5 });
+    // LP 所有文字先保持隱藏，避免 HTML / CMS 載入瞬間閃現。
+    gsap.set(
+      [
+        '#lpExhibitionTitle',
+        ...openingTextItems.map(item => item.element)
+      ],
+      {
+        y: '200%',
+        opacity: 0
+      }
+    );
 
-    openingTextItems.forEach((item, index) => {
-      mainTl.to(item.element, {
-        y: "0%",
-        opacity: 1,
-        duration: item.duration,
-        ease: "power2.out"
-      }, index === 0 ? undefined : "+=0.2");
-    });
+    /* =============================================================
+       LP「載入中……」動畫｜2026-08-16 暫停使用
+       -------------------------------------------------------------
+       使用者希望保留原程式碼，未來可以快速恢復，
+       因此以下動畫只 MARK 掉，不刪除。
 
-    mainTl.call(() => animateArrow(document.getElementById('openingHero')));
+       若未來要恢復：
+       1. 移除這段 block comment
+       2. 把下方「直接進 Logo 動畫」的 mainTl.call 保留即可
+          （或自行把 Skip 顯示時間移回 loading 動畫後）
+       =============================================================
+
+    mainTl
+      .to(
+        '.loading-text-box .char',
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.7,
+          ease: 'power2.out'
+        }
+      )
+      .call(() => {
+        document
+          .getElementById('loadingSkipBtn')
+          .classList.add('show');
+      })
+      .to({}, { duration: 0.8 })
+      .to(
+        '#loadingText',
+        {
+          opacity: 0,
+          duration: 1.0,
+          ease: 'power2.inOut'
+        }
+      );
+
+    ============================================================= */
+
+    /*
+      Loading 文字動畫停用後，Skip 仍保留，
+      LP 進入後可直接略過整段開場。
+    */
+    mainTl
+      .call(() => {
+        document
+          .getElementById('loadingSkipBtn')
+          .classList.add('show');
+      })
+
+      // 1. 中央 Logo 先出現
+      .to(
+        '#logoBox',
+        {
+          clipPath: 'circle(70% at 50% 50%)',
+          scale: 1,
+          filter: 'blur(0px)',
+          opacity: 1,
+          duration: 3.5,
+          ease: 'power1.inOut'
+        }
+      )
+
+      // 2. 「洸 / 限」在 Logo 接近完成時一起浮現
+      .to(
+        '.lp-side-word',
+        {
+          opacity: 1,
+          scale: 1,
+          filter:
+            'blur(0px) drop-shadow(0 0 16px rgba(255,255,255,.16))',
+          duration: 1.5,
+          ease: 'power2.out'
+        },
+        '-=1.55'
+      )
+
+      /*
+        3. Logo + 洸限完成後：
+           「拾光記憶展」由下往上出現。
+           動畫方式與「回憶」相同。
+      */
+      .to(
+        '#lpExhibitionTitle',
+        {
+          y: '0%',
+          opacity: 1,
+          duration: 1.5,
+          ease: 'power2.out'
+        }
+      )
+
+      /*
+        4. 拾光記憶展「完整出現」後等待 1.5 秒，
+           才開始播放「回憶 / 從這裡 / 開始」。
+      */
+      .to({}, { duration: 1.5 });
+
+    openingTextItems.forEach(
+      (item, index) => {
+        mainTl.to(
+          item.element,
+          {
+            y: '0%',
+            opacity: 1,
+            duration: item.duration,
+            ease: 'power2.out'
+          },
+          index === 0
+            ? undefined
+            : '+=0.2'
+        );
+      }
+    );
+
+    mainTl.call(
+      () =>
+        animateArrow(
+          document.getElementById(
+            'openingHero'
+          )
+        )
+    );
 
     let bannerTimeline = null;
     let isBeamAnimated = false;
