@@ -127,7 +127,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // SHADOW_OPACITY   暖色地面投影強度
     // =============================================================
     const PERSON_SIZE = 0.074;
-    const PERSON_OPACITY = 0.65;
+    const PERSON_OPACITY = 0.40;
     const PERSON_Y_OFFSET = 20 * BG_DPR;
     const SHADOW_OPACITY = 0.22;
 
@@ -1589,43 +1589,76 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     }
 
     function buildP4TerrainFeatures() {
-      // 每次進入 P4 重新配置，但同一次停留期間固定不跳動。
-      // 固定 2 個大型凹凸，再加 0~2 個隨機小型特徵。
+      /*
+        P4 隨機局部地形｜2026-08-16
+        -------------------------------------------------------------
+        改為「只有突出地面的小山丘」，不再生成凹陷／坑洞。
+
+        注意座標方向：
+        drawP4TerrainFrame() 最後使用：
+          y = baseY + deformation
+
+        所以：
+        - amplitude < 0 ＝ 線條往上凸 ＝ 小山丘
+        - amplitude > 0 ＝ 線條往下凹 ＝ 坑洞
+
+        因此這裡所有 feature amplitude 都固定為負值。
+        每次進 P4 仍重新配置，停留同一頁期間則固定不跳動。
+      */
       const features = [
+        // 大型山丘 1
         {
-          x: 0.30 + Math.random() * 0.08,
-          y: 0.46 + Math.random() * 0.14,
-          sizeX: 0.065 + Math.random() * 0.018,
-          sizeY: 0.14 + Math.random() * 0.05,
-          amplitude: 0.052 + Math.random() * 0.015,
+          x: 0.27 + Math.random() * 0.10,
+          y: 0.42 + Math.random() * 0.16,
+          sizeX: 0.060 + Math.random() * 0.025,
+          sizeY: 0.13 + Math.random() * 0.055,
+          amplitude: -(0.046 + Math.random() * 0.018),
           power: 1.35
         },
+
+        // 大型山丘 2
         {
-          x: 0.68 + Math.random() * 0.10,
-          y: 0.52 + Math.random() * 0.16,
-          sizeX: 0.055 + Math.random() * 0.020,
-          sizeY: 0.12 + Math.random() * 0.05,
-          amplitude: -(0.046 + Math.random() * 0.016),
+          x: 0.64 + Math.random() * 0.13,
+          y: 0.48 + Math.random() * 0.18,
+          sizeX: 0.052 + Math.random() * 0.025,
+          sizeY: 0.11 + Math.random() * 0.060,
+          amplitude: -(0.040 + Math.random() * 0.018),
           power: 1.45
         }
       ];
 
-      const extraCount = Math.floor(Math.random() * 3); // 0~2，總數 2~4
+      // 再加 0～2 個較小山丘，總數維持 2～4 個。
+      const extraCount =
+        Math.floor(
+          Math.random() * 3
+        );
 
-      for (let i = 0; i < extraCount; i += 1) {
-        const sign = Math.random() > 0.5 ? 1 : -1;
-
+      for (
+        let i = 0;
+        i < extraCount;
+        i += 1
+      ) {
         features.push({
           x: 0.12 + Math.random() * 0.76,
           y: 0.22 + Math.random() * 0.62,
-          sizeX: 0.020 + Math.random() * 0.030,
-          sizeY: 0.055 + Math.random() * 0.065,
-          amplitude: sign * (0.020 + Math.random() * 0.025),
-          power: 1.55 + Math.random() * 0.35
+          sizeX: 0.020 + Math.random() * 0.032,
+          sizeY: 0.052 + Math.random() * 0.070,
+
+          // 永遠為負值：只往上凸，不再往下凹。
+          amplitude:
+            -(
+              0.018 +
+              Math.random() * 0.025
+            ),
+
+          power:
+            1.48 +
+            Math.random() * 0.42
         });
       }
 
-      p4TerrainFeatures = features;
+      p4TerrainFeatures =
+        features;
     }
 
     function p4TerrainShape(px, depth, time) {
@@ -1633,7 +1666,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         P4 基礎坡面：
         - 原本大型坡形保留。
         - 額外疊一層低頻、平滑的波浪，讓底層不再像平面。
-        - 局部凸起／凹陷獨立維持 1.80 倍，不再被基礎波浪倍率影響。
+        - 局部小山丘獨立維持 1.80 倍，不再被基礎波浪倍率影響。
       */
       const broad =
         Math.sin(px * Math.PI * 3.05 + time) * 0.013;
@@ -1695,7 +1728,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
         local += p4TerrainLocalFeature(px, depth, feature);
       }
 
-      // 局部凸起／凹陷維持使用者指定的 1.80 倍。
+      // 局部小山丘維持使用者指定的 1.80 倍。
       local *= 1.80;
 
       const micro =
@@ -2268,7 +2301,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     function playP4Animation() {
       resetP4State();
 
-      // 每次進入 P4 重新產生 2~4 個局部凹凸，停留期間固定。
+      // 每次進入 P4 重新產生 2~4 個局部小山丘，停留期間固定。
       buildP4TerrainFeatures();
       startP4Terrain();
 
