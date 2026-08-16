@@ -1599,3 +1599,123 @@
     border-radius: 20px !important;
   }
 }
+
+
+/* =============================================================
+   2026-08-16｜LP / Brand Story V13｜Tablet / Mobile
+   ============================================================= */
+
+@media (max-width: 768px) {
+
+  /*
+    LP「洸／限」：
+    桌機 max 50px 不直接套到手機。
+    手機依目前 V12 尺寸比例同步放大，
+    但限制最大約 32px。
+  */
+  #openingHero .lp-side-word-guang,
+  #openingHero .lp-side-word-xian {
+    width:
+      clamp(
+        22px,
+        6vw,
+        32px
+      )
+      !important;
+  }
+
+  /* V12 手機距離維持不變 */
+  #openingHero .lp-side-word-guang {
+    margin-right:
+      -65px
+      !important;
+  }
+
+  #openingHero .lp-side-word-xian {
+    margin-left:
+      -65px
+      !important;
+  }
+
+  /*
+    手機目前：
+    wrapper height 32px
+    + margin-top 7px
+    = 約 39px
+
+    39 × 1.10 ≈ 42.9px
+    因此三行文字整組往下約 43px。
+  */
+  #openingHero .interactive-area {
+    top:
+      calc(
+        54% + 43px
+      )
+      !important;
+
+    transform:
+      none
+      !important;
+  }
+
+  /*
+    品牌故事按鈕：
+    取消舊 RWD 的 flex:1，
+    不再把兩顆按鈕平均撐滿整行。
+  */
+  #brandStorySection .brand-story-nav-btn {
+    min-width:
+      0
+      !important;
+
+    width:
+      auto
+      !important;
+
+    flex:
+      0 0 auto
+      !important;
+
+    padding:
+      8px 16px
+      !important;
+
+    border-radius:
+      20px
+      !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #brandStorySection .brand-story-bottom-nav {
+    width:
+      auto
+      !important;
+
+    max-width:
+      calc(
+        100vw - 24px
+      );
+
+    justify-content:
+      center;
+  }
+
+  #brandStorySection .brand-story-nav-btn {
+    flex:
+      0 0 auto
+      !important;
+  }
+}
+
+/* 矮手機沿用同一個「目前行距 +10%」概念，
+   只以原本 53% 的定位基準往下 43px。 */
+@media (max-width: 768px) and (max-height: 700px) {
+  #openingHero .interactive-area {
+    top:
+      calc(
+        53% + 43px
+      )
+      !important;
+  }
+}
