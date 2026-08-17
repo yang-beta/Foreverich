@@ -33,6 +33,12 @@
   --font-caption: .76rem;
   --font-meta: .68rem;
   --font-micro: .38rem;
+
+  /* Text color｜保留原網站層級 */
+  --text-primary: #E6E6E8;
+  --text-caption: rgba(230,230,232,.58);
+  --text-muted: rgba(230,230,232,.48);
+  --text-loading-note: rgba(230,230,232,.55);
 }
 
 @media (max-width: 1100px) {
@@ -215,4 +221,67 @@
 
 #messageEntrySection .p5-entry-option-copy strong {
   font-weight: var(--weight-medium) !important;
+}
+
+
+/* =============================================================
+   P5 / P6 / 洸語牆 精準修正｜2026-08-17 FIX 04
+   -------------------------------------------------------------
+   1. P5 選項說明恢復原本淡灰色。
+   2. 洸語牆中央 Loading / Empty / Error 恢復原本 muted 色。
+   3. P6 產生卡片前兩行維持主文字 / 淡灰的明確層次。
+   4. 時光小卡 Modal 直接以 #p5CardModal 鎖定 Typography，
+      不受 Modal 被移到 body 或其他父層影響。
+   ============================================================= */
+
+/* P5：選項下方說明文字 */
+#messageEntrySection .p5-entry-option-copy small {
+  color: var(--text-caption) !important;
+}
+
+/* 洸語牆：中央提示文字 */
+#memoryWallSection .memory-wall-loading,
+#memoryWallSection .memory-wall-empty,
+#memoryWallSection .memory-wall-error {
+  color: var(--text-muted) !important;
+}
+
+/* P6：產生卡片前 Loading 兩行文字 */
+#p5CardModal .p5-ai-loading h2 {
+  color: var(--text-primary) !important;
+}
+#p5CardModal .p5-ai-loading p {
+  color: var(--text-loading-note) !important;
+}
+
+/* P6：時光小卡 — 以 Modal 為根節點精準鎖定字級 */
+#p5CardModal .p5-card-tags {
+  font-family: var(--font-sans) !important;
+  font-size: var(--font-meta) !important;
+  font-weight: var(--weight-regular) !important;
+}
+#p5CardModal .p5-card-copy {
+  font-family: var(--font-serif) !important;
+  font-size: var(--font-body) !important;
+  font-weight: var(--weight-regular) !important;
+}
+#p5CardModal .p5-card-bottomline {
+  font-family: var(--font-sans) !important;
+  font-size: var(--font-meta) !important;
+  font-weight: var(--weight-regular) !important;
+}
+#p5CardModal .p5-card-stamp {
+  font-family: var(--font-serif) !important;
+  font-size: var(--font-meta) !important;
+  font-weight: var(--weight-semibold) !important;
+}
+#p5CardModal .p5-card-stamp small {
+  font-family: var(--font-sans) !important;
+  font-size: var(--font-micro) !important;
+  font-weight: var(--weight-regular) !important;
+}
+#p5CardModal .p5-card-action {
+  font-family: var(--font-sans) !important;
+  font-size: var(--font-ui) !important;
+  font-weight: var(--weight-regular) !important;
 }
