@@ -82,8 +82,6 @@
     }
 
     .ui-line-content {
-      font-family: 'Noto Serif TC', serif;
-      font-weight: 400;
       letter-spacing: 0.18em;
       color: var(--text-main);
       transform: translateY(115%);
@@ -267,8 +265,8 @@
       opacity: 0;
       will-change: transform, opacity;
     }
-    .title-part1 { letter-spacing: 0.4em; font-weight: 300; }
-    .title-part2 { letter-spacing: 0.4em; font-weight: 300; opacity: 0.9; }
+    .title-part1 { letter-spacing: 0.4em; }
+    .title-part2 { letter-spacing: 0.4em; opacity: 0.9; }
 
     @keyframes coralGlowPulse {
       0% { filter: drop-shadow(0 0 8px rgba(var(--coral-main-rgb), 0.4)); }
@@ -299,7 +297,7 @@
       max-width: 800px;
     }
 
-    .banner-question-part { font-weight: 300; letter-spacing: 0.2rem; }
+    .banner-question-part { letter-spacing: 0.2rem; }
     .bq-part:last-child { margin-left: 0.8rem; }
 
     /* =============================================================
@@ -477,7 +475,6 @@
     .p4-header-line,
     .p4-footer-text {
       width: 100%;
-      font-family: 'Noto Serif TC', serif;
       text-align: center;
       color: var(--text-main);
       letter-spacing: .12em;
@@ -685,7 +682,6 @@
     }
 
     .p4-card-title {
-      font-family: 'Noto Serif TC', serif;
       letter-spacing: .12em;
       color: var(--coral-main);
       margin-bottom: 12px;
@@ -955,9 +951,9 @@
 .p5-entry-options.is-ready { pointer-events:auto; }
 .p5-entry-option { min-height:116px; padding:20px 24px; border:1px solid rgba(230,230,232,.18); border-radius:22px; background:rgba(31,31,31,.62); color:var(--text-main); cursor:pointer; display:flex; align-items:center; gap:18px; text-align:left; transition:border-color .3s ease,box-shadow .3s ease,transform .3s ease,background .3s ease; }
 .p5-entry-option:hover { transform:translateY(-3px); border-color:rgba(var(--coral-main-rgb), .65); box-shadow:0 0 26px rgba(var(--coral-main-rgb), .12); background:rgba(var(--coral-main-rgb), .055); }
-.p5-entry-option-index { width:42px; height:42px; border:1px solid rgba(var(--coral-main-rgb), .55); border-radius:50%; display:grid; place-items:center; color:var(--coral-main); font-weight:500; font-family:'Noto Sans TC',sans-serif; flex:0 0 auto; }
+.p5-entry-option-index { width:42px; height:42px; border:1px solid rgba(var(--coral-main-rgb), .55); border-radius:50%; display:grid; place-items:center; color:var(--coral-main); flex:0 0 auto; }
 .p5-entry-option-copy { display:flex; flex-direction:column; gap:7px; }
-.p5-entry-option-copy strong { font-weight:500; font-family:'Noto Serif TC',serif; letter-spacing:.12em; }
+.p5-entry-option-copy strong { letter-spacing:.12em; }
 .p5-entry-option-copy small { color:rgba(230,230,232,.58); line-height:1.65; letter-spacing:.08em; }
 
 
@@ -1260,10 +1256,10 @@
 }
 .memory-wall-card::before { content:""; position:absolute; left:0; top:18%; bottom:18%; width:2px; background:rgba(var(--coral-main-rgb), .65); }
 .memory-wall-meta { display:flex; justify-content:space-between; gap:8px; color:rgb(var(--coral-main-rgb)); letter-spacing:.06em; }
-.memory-wall-quote { margin:10px 0; color:rgba(230,230,232,.86); font-weight:400; font-family:'Noto Serif TC',serif; line-height:1.8; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+.memory-wall-quote { margin:10px 0; color:rgba(230,230,232,.86); line-height:1.8; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
 .memory-wall-foot { color:rgba(230,230,232,.42); letter-spacing:.06em; }
 .memory-wall-loading,.memory-wall-empty,.memory-wall-error { grid-column:1/-1; grid-row:1/-1; display:grid; place-items:center; color:rgba(230,230,232,.48); letter-spacing:.1em; }
-.memory-wall-continue { margin-top:18px; padding:9px 18px; border:1px solid rgba(var(--coral-main-rgb), .6); border-radius:999px; background:rgba(var(--coral-main-rgb), .06); color:var(--coral-glow); font-weight:400; font-family:'Noto Serif TC',serif; letter-spacing:.12em; cursor:pointer; transition:background .3s ease,box-shadow .3s ease,transform .3s ease; }
+.memory-wall-continue { margin-top:18px; padding:9px 18px; border:1px solid rgba(var(--coral-main-rgb), .6); border-radius:999px; background:rgba(var(--coral-main-rgb), .06); color:var(--coral-glow); letter-spacing:.12em; cursor:pointer; transition:background .3s ease,box-shadow .3s ease,transform .3s ease; }
 .memory-wall-continue:hover { transform:translateY(-2px); background:rgba(var(--coral-main-rgb), .12); box-shadow:0 0 20px rgba(var(--coral-main-rgb), .12); }
 @media (max-width:900px) {
   .p5-entry-options { grid-template-columns:1fr; }
@@ -1378,9 +1374,7 @@
   text-transform: uppercase;
 }
 .p5-step-title {
-  font-family: 'Noto Serif TC', serif;
   color: var(--p5-text);
-  font-weight: 400;
   letter-spacing: .12em;
   line-height: 1.65;
 }
@@ -1393,8 +1387,6 @@
 .p5-step-number {
   flex: 0 0 auto;
   color: rgba(var(--coral-main-rgb), .82);
-  font-family: 'Noto Sans TC', sans-serif;
-  font-weight: 500;
   letter-spacing: .18em;
 }
 .step-input .p5-step-kicker,
@@ -1422,7 +1414,6 @@
   border-radius: 999px;
   background: rgba(255,255,255,.025);
   color: rgba(230,230,232,.72);
-  font-weight: 400; font-family: 'Noto Sans TC', sans-serif;
   letter-spacing: .08em;
   padding: 9px 16px;
   cursor: pointer;
@@ -1461,7 +1452,6 @@
   border-radius: 12px;
   background: rgba(7,7,7,.28);
   color: var(--p5-text);
-  font-weight: 300; font-family: 'Noto Sans TC', sans-serif;
   letter-spacing: .07em;
   outline: none;
   transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
@@ -1522,7 +1512,6 @@
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(var(--coral-main-rgb), .16), rgba(var(--coral-main-rgb), .06));
   color: var(--coral-glow);
-  font-weight: 400; font-family: 'Noto Serif TC', serif;
   letter-spacing: .08em;
   padding: 9px 16px; /* 與上方場景／情感膠囊按鈕左右距離一致 */
   cursor: pointer;
@@ -1689,7 +1678,6 @@
 }
 .p5-ai-loading h2 {
   margin-top: 30px;
-  font-weight: 400; font-family: 'Noto Serif TC', serif;
   letter-spacing: .18em;
 }
 .p5-ai-loading p {
@@ -1954,7 +1942,6 @@
 .p5-card-copy {
   margin: auto 0;
   border: 0;
-  font-weight: 400; font-family: 'Noto Serif TC', serif;
   line-height: 2.15;
   letter-spacing: .1em;
   text-align: left;
@@ -1977,11 +1964,10 @@
   border: 1px solid rgba(var(--coral-main-rgb), .55);
   border-radius: 50%;
   color: rgba(var(--coral-light-rgb), .82);
-  font-weight: 600; font-family: 'Noto Serif TC', serif;
   letter-spacing: .16em;
   transform: rotate(-8deg);
 }
-.p5-card-stamp small { margin-top: 2px; font-weight: 400; font-family: 'Noto Sans TC', sans-serif; letter-spacing: .06em; }
+.p5-card-stamp small { margin-top: 2px; letter-spacing: .06em; }
 
 .p5-card-actions,
 .p5-outro-actions {
@@ -1998,7 +1984,6 @@
   border-radius: 999px;
   background: rgba(255,255,255,.035);
   color: var(--p5-text);
-  font-weight: 400; font-family: 'Noto Sans TC', sans-serif;
   letter-spacing: .08em;
   cursor: pointer;
   transition: border-color .25s ease, background .25s ease, box-shadow .25s ease, transform .25s ease;
@@ -2435,11 +2420,6 @@
 #openingHero .lp-exhibition-title {
   color: #FFB088;
 
-  font-family:
-    "Noto Serif TC",
-    serif;
-  font-weight: 300;
-
   letter-spacing: .32em;
 
   line-height: 1.6;
@@ -2774,9 +2754,6 @@
 
   color:
     rgba(var(--coral-light-rgb), .92);
-
-  font-weight: 400;
-  font-family: 'Noto Serif TC', serif;
 
   letter-spacing: .12em;
 
@@ -3620,9 +3597,9 @@
 #memoryWallSection .memory-wall-error {
   color: rgba(230,230,232,.48);
 }
-#messageCardSection .p5-ai-loading h2 {
+.p5-ai-loading h2 {
   color: var(--p5-text);
 }
-#messageCardSection .p5-ai-loading p {
+.p5-ai-loading p {
   color: rgba(230,230,232,.55);
 }
