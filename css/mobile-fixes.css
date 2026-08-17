@@ -79,7 +79,6 @@
   }
 
   #aiReconstructionSection .p4-header-line {
-    font-size: .88rem;
     line-height: 1.65;
   }
 
@@ -127,18 +126,15 @@
   }
 
   #aiReconstructionSection .p4-card-title {
-    font-size: .94rem;
     margin-bottom: 7px;
   }
 
   #aiReconstructionSection .p4-card-description {
-    font-size: .80rem;
     line-height: 1.58;
   }
 
   #aiReconstructionSection .p4-footer-text {
     width: 86vw;
-    font-size: .78rem;
     line-height: 1.55;
   }
 }
@@ -176,7 +172,6 @@
   }
 
   #messageCardSection .p5-step-title {
-    font-size: .96rem;
     line-height: 1.5;
   }
 
@@ -186,7 +181,6 @@
   }
 
   #messageCardSection .p5-pill {
-    font-size: .76rem;
     padding: 8px 11px;
   }
 
@@ -221,7 +215,6 @@
   #messageCardSection .p5-validation-message {
     margin-top: 5px;
     min-height: 14px;
-    font-size: .70rem;
   }
 }
 
@@ -258,26 +251,22 @@
   }
 
   .memory-wall-meta {
-    font-size: .60rem !important;
   }
 
   .memory-wall-quote {
     margin: 9px 0 7px !important;
-    font-size: .73rem !important;
     line-height: 1.62 !important;
     -webkit-line-clamp: 4 !important;
   }
 
   .memory-wall-foot {
     margin-top: auto;
-    font-size: .58rem !important;
   }
 
   .memory-wall-continue {
     max-width: 84vw;
     margin-top: 10px !important;
     padding: 8px 15px;
-    font-size: .72rem;
   }
 }
 
@@ -438,7 +427,6 @@
   }
 
   .memory-wall-title {
-    font-size: 1.02rem !important;
     letter-spacing: .16em !important;
   }
 
@@ -486,19 +474,16 @@
   }
 
   .memory-wall-meta {
-    font-size: .56rem !important;
   }
 
   .memory-wall-quote {
     margin: 7px 0 6px !important;
-    font-size: .68rem !important;
     line-height: 1.52 !important;
     -webkit-line-clamp: 4 !important;
   }
 
   .memory-wall-foot {
     margin-top: auto;
-    font-size: .54rem !important;
   }
 
   .memory-wall-nav {
@@ -524,8 +509,6 @@
       7px
       14px
       !important;
-
-    font-size: .66rem !important;
 
     transform:
       translateY(-14px);
@@ -678,12 +661,10 @@
   }
 
   .memory-wall-meta {
-    font-size: .54rem !important;
   }
 
   .memory-wall-quote {
     margin: 6px 0 5px !important;
-    font-size: .65rem !important;
     line-height: 1.48 !important;
 
     /*
@@ -694,7 +675,6 @@
   }
 
   .memory-wall-foot {
-    font-size: .52rem !important;
   }
 
   .memory-wall-nav {
@@ -714,7 +694,6 @@
     max-width: 68vw !important;
     margin-top: 2px !important;
     padding: 7px 12px !important;
-    font-size: .63rem !important;
     transform: translateY(-18px);
   }
 }
@@ -1056,8 +1035,6 @@
   }
 
   #openingHero .lp-exhibition-title {
-    font-size:
-      .98rem;
 
     letter-spacing:
       .24em;
@@ -1205,14 +1182,12 @@
 
   #memoryWallSection .memory-wall-quote {
     margin: 4px 0 !important;
-    font-size: .62rem !important;
     line-height: 1.38 !important;
     -webkit-line-clamp: 2 !important;
   }
 
   #memoryWallSection .memory-wall-meta,
   #memoryWallSection .memory-wall-foot {
-    font-size: .49rem !important;
   }
 
   #memoryWallSection .memory-wall-actions {
@@ -1225,7 +1200,6 @@
     flex: 1 1 0;
     min-width: 0;
     padding: 7px 8px !important;
-    font-size: .60rem !important;
     letter-spacing: .05em !important;
     white-space: nowrap;
   }
@@ -1246,7 +1220,6 @@
     flex: 1 1 0;
     min-width: 0;
     padding: 9px 8px;
-    font-size: .68rem;
   }
 }
 
@@ -1302,13 +1275,11 @@
   }
 
   .brand-story-line {
-    font-size: clamp(15px, 2vw, 22px);
     gap: 16px;
     letter-spacing: .08em;
   }
 
   .brand-story-line-long {
-    font-size: clamp(14px, 1.82vw, 20px);
     gap: 12px;
   }
 
@@ -1344,7 +1315,6 @@
     width: 100%;
     flex-wrap: wrap;
     gap: 5px 10px;
-    font-size: .84rem;
     line-height: 1.75;
     white-space: normal;
   }
@@ -1374,7 +1344,6 @@
     flex: 1 1 0;
     min-width: 0;
     padding: 9px 8px;
-    font-size: .68rem;
   }
 }
 
@@ -1386,7 +1355,6 @@
 
   .brand-story-line,
   .brand-story-line-long {
-    font-size: .76rem;
     letter-spacing: .05em;
   }
 
@@ -1408,7 +1376,7 @@
     gap:0 .12em; width:100%; text-align:center; text-wrap:balance;
   }
   #brandStorySection .brand-story-line,
-  #brandStorySection .brand-story-line-long { font-size:1.02rem; letter-spacing:.08em; }
+  #brandStorySection .brand-story-line-long { letter-spacing:.08em; }
 }
 @media (max-width:600px) {
   #memoryWallSection .memory-wall-ghost-column {
@@ -1430,7 +1398,6 @@
 
   #brandStorySection .brand-story-final-copy {
     width: 88vw;
-    font-size: 1.05rem;
     letter-spacing: .12em;
   }
 }
@@ -1470,7 +1437,6 @@
     top: 45%;
     width: 88vw;
     gap: 12px;
-    font-size: 1rem;
     line-height: 1.8;
     letter-spacing: .08em;
   }
@@ -1485,7 +1451,6 @@
 
   #brandStorySection .brand-story-final-copy {
     width: 90vw;
-    font-size: .88rem;
   }
 }
 
