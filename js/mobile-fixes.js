@@ -137,6 +137,9 @@
         cards.scrollWidth - 3;
     }
 
+    // 由 main.js 的單一 handleResize 入口統一呼叫，避免第二個 window resize listener。
+    window.refreshP4CarouselNav = updateNav;
+
     prev.addEventListener(
       "click",
       () => {
@@ -159,16 +162,6 @@
 
     cards.addEventListener(
       "scroll",
-      () => {
-        requestAnimationFrame(
-          updateNav
-        );
-      },
-      { passive: true }
-    );
-
-    window.addEventListener(
-      "resize",
       () => {
         requestAnimationFrame(
           updateNav

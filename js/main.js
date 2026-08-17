@@ -1058,6 +1058,7 @@
       resizeBrandStoryCanvas();
       window.resizeP5Canvases?.();
       window.resizeMemoryWallLayout?.();
+      window.refreshP4CarouselNav?.();
     }
 
     function handleResize() {

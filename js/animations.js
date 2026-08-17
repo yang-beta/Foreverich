@@ -77,49 +77,9 @@
       }
     );
 
-    /* =============================================================
-       LP「載入中……」動畫｜2026-08-16 暫停使用
-       -------------------------------------------------------------
-       使用者希望保留原程式碼，未來可以快速恢復，
-       因此以下動畫只 MARK 掉，不刪除。
-
-       若未來要恢復：
-       1. 移除這段 block comment
-       2. 把下方「直接進 Logo 動畫」的 mainTl.call 保留即可
-          （或自行把 Skip 顯示時間移回 loading 動畫後）
-       =============================================================
-
-    mainTl
-      .to(
-        '.loading-text-box .char',
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.7,
-          ease: 'power2.out'
-        }
-      )
-      .call(() => {
-        document
-          .getElementById('loadingSkipBtn')
-          .classList.add('show');
-      })
-      .to({}, { duration: 0.8 })
-      .to(
-        '#loadingText',
-        {
-          opacity: 0,
-          duration: 1.0,
-          ease: 'power2.inOut'
-        }
-      );
-
-    ============================================================= */
-
     /*
-      Loading 文字動畫停用後，Skip 仍保留，
-      LP 進入後可直接略過整段開場。
+      LP 進入後直接顯示 Skip，
+      使用者可略過整段開場。
     */
     mainTl
       .call(() => {
