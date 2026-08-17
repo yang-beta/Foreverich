@@ -1,0 +1,130 @@
+/* =============================================================
+   TYPOGRAPHY SYSTEM｜2026-08-17
+   -------------------------------------------------------------
+   文字大小只由本檔管理。既有 style.css / mobile-fixes.css 中的舊 font-size
+   先保留作為版面回溯依據，但由本檔最後載入並統一覆寫。
+
+   Desktop > 1100px
+   Tablet  769px–1100px
+   Mobile  <= 768px
+   ============================================================= */
+
+:root {
+  --font-display: 1.2rem;
+  --font-heading: 1.06rem;
+  --font-body: .86rem;
+  --font-ui: .86rem;
+  --font-caption: .76rem;
+  --font-meta: .68rem;
+  --font-micro: .38rem;
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --font-display: 1.1rem;
+    --font-heading: 1rem;
+    --font-body: .84rem;
+    --font-ui: .84rem;
+    --font-caption: .74rem;
+    --font-meta: .66rem;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --font-display: 1rem;
+    --font-heading: .94rem;
+    --font-body: .82rem;
+    --font-ui: .82rem;
+    --font-caption: .72rem;
+    --font-meta: .64rem;
+  }
+}
+
+/* ① 主敘事 */
+#openingHero .title-part1,
+#openingHero .title-part2,
+#heroSection .banner-question-part,
+#audiovisualSection .story-line,
+#audiovisualSection #fPart1,
+#audiovisualSection #fPart2,
+#audiovisualSection #dot1,
+#audiovisualSection #dot2,
+#audiovisualSection #dot3,
+#brandTransitionSection .p3-text-line,
+#aiReconstructionSection .p4-header-line,
+#aiReconstructionSection .p4-footer-text,
+#messageEntrySection .p5-entry-line,
+#messageCardSection .p5-outro-line,
+#brandStorySection .brand-story-line,
+#brandStorySection .brand-story-line-long,
+#brandStorySection .brand-story-final-copy,
+#brandStorySection .brand-story-final-line {
+  font-size: var(--font-display) !important;
+}
+
+/* ③ 標題 */
+#openingHero .lp-exhibition-title,
+#aiReconstructionSection .p4-card-title,
+#messageCardSection .p5-step-title,
+#messageCardSection .p5-ai-loading h2,
+#memoryWallSection .memory-wall-title {
+  font-size: var(--font-heading) !important;
+}
+
+/* ④ 內文 */
+#aiReconstructionSection .p4-card-description,
+#messageCardSection .p5-custom-target-wrap input,
+#messageCardSection .p5-textarea-wrap textarea,
+#messageCardSection .p5-card-copy,
+#memoryWallSection .memory-wall-quote {
+  font-size: var(--font-body) !important;
+}
+
+/* ⑤ 說明文字 */
+#messageEntrySection .p5-entry-option-copy small,
+#messageCardSection .p5-custom-target-wrap label,
+#messageCardSection .p5-custom-target-wrap input::placeholder,
+#messageCardSection .p5-textarea-wrap textarea::placeholder,
+#messageCardSection .p5-field-note,
+#messageCardSection .p5-validation-message,
+#messageCardSection .p5-ai-loading p,
+#messageCardSection .p5-send-status,
+#memoryWallSection .memory-wall-loading,
+#memoryWallSection .memory-wall-empty,
+#memoryWallSection .memory-wall-error {
+  font-size: var(--font-caption) !important;
+}
+
+/* ⑥ Meta／輔助資訊 */
+#messageEntrySection .p5-entry-option-index,
+#messageCardSection .p5-step-number,
+#messageCardSection .p5-char-count,
+#messageCardSection .p5-tag-group-label,
+#messageCardSection .p5-card-tags,
+#messageCardSection .p5-card-bottomline,
+#messageCardSection .p5-card-stamp,
+#memoryWallSection .memory-wall-meta,
+#memoryWallSection .memory-wall-foot {
+  font-size: var(--font-meta) !important;
+}
+
+/* ⑧ Micro／極小資訊 */
+#messageCardSection .p5-card-stamp small {
+  font-size: var(--font-micro) !important;
+}
+
+/* ⑨ 操作按鈕／UI
+   純圖示箭頭（‹ ›、SVG 箭頭）不納入文字 Typography，保留元件自己的 icon size。 */
+.skip-anim-btn,
+#messageEntrySection .p5-entry-option-copy strong,
+#messageCardSection .p5-pill,
+#messageCardSection .p5-generate-btn,
+#messageCardSection .p5-card-action,
+#messageCardSection .p5-outro-btn,
+#messageCardSection .p5-modal-close,
+#messageCardSection .p5-mobile-exit-nav button,
+#memoryWallSection .memory-wall-continue,
+#brandStorySection .brand-story-nav-btn {
+  font-size: var(--font-ui) !important;
+}

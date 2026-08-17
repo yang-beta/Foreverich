@@ -179,20 +179,6 @@
       transition: opacity 1.2s ease;
     }
 
-    .loading-text-box {
-      position: absolute;
-      z-index: 10;
-      font-size: 1.2rem;
-      letter-spacing: 0.5em;
-      color: var(--text-main);
-      font-weight: 300;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .char { opacity: 0; display: inline-block; transform: translateY(10px); }
-
     .lp-logo-lockup {
       /*
         LP 左右文字圖調整區
