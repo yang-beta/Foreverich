@@ -215,7 +215,7 @@
   #messageCardSection .p5-validation-message {
     margin-top: 5px;
     min-height: 14px;
-  }
+    }
 }
 
 /* ---------- 洸語牆：手機卡片比例更緊湊 ---------- */
@@ -251,7 +251,7 @@
   }
 
   .memory-wall-meta {
-  }
+    }
 
   .memory-wall-quote {
     margin: 9px 0 7px !important;
@@ -261,13 +261,13 @@
 
   .memory-wall-foot {
     margin-top: auto;
-  }
+    }
 
   .memory-wall-continue {
     max-width: 84vw;
     margin-top: 10px !important;
     padding: 8px 15px;
-  }
+    }
 }
 
 /* 特別矮的手機：再縮短洸語牆卡片 */
@@ -432,7 +432,6 @@
 
   .memory-wall-header p {
     margin-top: 7px !important;
-    font-size: .64rem !important;
     line-height: 1.55 !important;
     letter-spacing: .09em !important;
   }
@@ -474,7 +473,7 @@
   }
 
   .memory-wall-meta {
-  }
+    }
 
   .memory-wall-quote {
     margin: 7px 0 6px !important;
@@ -484,7 +483,7 @@
 
   .memory-wall-foot {
     margin-top: auto;
-  }
+    }
 
   .memory-wall-nav {
     width: 32px !important;
@@ -661,7 +660,7 @@
   }
 
   .memory-wall-meta {
-  }
+    }
 
   .memory-wall-quote {
     margin: 6px 0 5px !important;
@@ -675,7 +674,7 @@
   }
 
   .memory-wall-foot {
-  }
+    }
 
   .memory-wall-nav {
     width: 30px !important;
@@ -887,7 +886,6 @@
       "Noto Serif TC",
       serif;
 
-    font-size: .72rem;
     font-weight: 300;
 
     letter-spacing: .10em;
@@ -950,9 +948,6 @@
     padding:
       8px
       9px;
-
-    font-size:
-      .67rem;
 
     letter-spacing:
       .07em;
@@ -1035,7 +1030,6 @@
   }
 
   #openingHero .lp-exhibition-title {
-
     letter-spacing:
       .24em;
   }
@@ -1188,7 +1182,7 @@
 
   #memoryWallSection .memory-wall-meta,
   #memoryWallSection .memory-wall-foot {
-  }
+    }
 
   #memoryWallSection .memory-wall-actions {
     width: 100%;
@@ -1220,7 +1214,7 @@
     flex: 1 1 0;
     min-width: 0;
     padding: 9px 8px;
-  }
+    }
 }
 
 
@@ -1344,7 +1338,7 @@
     flex: 1 1 0;
     min-width: 0;
     padding: 9px 8px;
-  }
+    }
 }
 
 @media (max-width: 600px) {
@@ -1451,7 +1445,7 @@
 
   #brandStorySection .brand-story-final-copy {
     width: 90vw;
-  }
+    }
 }
 
 

@@ -1,8 +1,10 @@
 /* =============================================================
    TYPOGRAPHY SYSTEM｜2026-08-17
    -------------------------------------------------------------
-   文字大小只由本檔管理。既有 style.css / mobile-fixes.css 中的舊 font-size
-   先保留作為版面回溯依據，但由本檔最後載入並統一覆寫。
+   文字大小只由本檔管理。
+   style.css / mobile-fixes.css 的歷史文字 font-size Patch 已於 2026-08-18 清除。
+   後續新增或調整文字尺寸，請只修改本檔 Token / 語意分類，不要在其他 CSS
+   重新加入文字 font-size 覆寫。
 
    Desktop > 1100px
    Tablet  769px–1100px
@@ -124,6 +126,7 @@
 #messageCardSection .p5-outro-btn,
 #messageCardSection .p5-modal-close,
 #messageCardSection .p5-mobile-exit-nav button,
+#messageCardSection .p5-mobile-exit-btn,
 #memoryWallSection .memory-wall-continue,
 #brandStorySection .brand-story-nav-btn {
   font-size: var(--font-ui) !important;
