@@ -3548,10 +3548,8 @@
   color: var(--coral-main);
   font-family: "Noto Serif TC", serif;
   font-weight: 300;
-  letter-spacing: .32em;
-  line-height: 1.6;
-  white-space: nowrap;
-  opacity: 0;
+  letter-spacing: .4em;
+  line-height: 1;
 }
 
 #openingHero .interactive-area {
