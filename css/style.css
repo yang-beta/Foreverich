@@ -3388,22 +3388,18 @@
 
 /*
   近景柔焦層：
-  中央 clear zone 比 bracket 大約 22px，
-  讓框邊不會突然切成模糊。
+  中央 clear zone 直接貼齊左右 bracket 的實際範圍，
+  不再額外向左右放大。
 */
 #brandStorySection::before {
   padding:
-    max(
-      0px,
-      calc(var(--focus-top) - 22px)
-    )
+    max(0px, var(--focus-top))
     max(
       0px,
       calc(
         100% -
         var(--focus-left) -
-        var(--focus-width) -
-        22px
+        var(--focus-width)
       )
     )
     max(
@@ -3411,14 +3407,10 @@
       calc(
         100% -
         var(--focus-top) -
-        var(--focus-height) -
-        22px
+        var(--focus-height)
       )
     )
-    max(
-      0px,
-      calc(var(--focus-left) - 22px)
-    );
+    max(0px, var(--focus-left));
 
   backdrop-filter:
     blur(2.4px);
@@ -3437,23 +3429,18 @@
 
 /*
   遠景柔焦層：
-  中央 clear zone 再放大，
-  因此只有距離 slogan 更遠的位置會疊到這一層，
-  形成「越外面越模糊」。
+  與近景層共用相同 bracket clear zone。
+  框外兩層 blur 疊加，框內則維持完全清晰。
 */
 #brandStorySection::after {
   padding:
-    max(
-      0px,
-      calc(var(--focus-top) - 86px)
-    )
+    max(0px, var(--focus-top))
     max(
       0px,
       calc(
         100% -
         var(--focus-left) -
-        var(--focus-width) -
-        86px
+        var(--focus-width)
       )
     )
     max(
@@ -3461,14 +3448,10 @@
       calc(
         100% -
         var(--focus-top) -
-        var(--focus-height) -
-        86px
+        var(--focus-height)
       )
     )
-    max(
-      0px,
-      calc(var(--focus-left) - 86px)
-    );
+    max(0px, var(--focus-left));
 
   backdrop-filter:
     blur(6.8px);
