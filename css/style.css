@@ -3565,7 +3565,6 @@
 }
 
 #openingHero .text-line {
-  color: var(--text-main);
   line-height: 1;
 }
 
