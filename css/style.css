@@ -3540,8 +3540,8 @@
   color: var(--coral-main);
   font-family: "Noto Serif TC", serif;
   font-weight: 300;
-  letter-spacing: .32em;
-  line-height: 1.6;
+  letter-spacing: .4em;
+  line-height: 1;
   white-space: nowrap;
   opacity: 0;
 }
@@ -3600,10 +3600,6 @@
     --lp-title-start-gap: clamp(88px, 12vh, 110px);
     --lp-copy-line-height: 32px;
     --lp-copy-line-gap: 7px;
-  }
-
-  #openingHero .lp-exhibition-title {
-    letter-spacing: .24em;
   }
 }
 
