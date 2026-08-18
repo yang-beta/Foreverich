@@ -32,6 +32,9 @@
         },
         leave() {
           stopLoadingCanvas();
+        },
+        skip() {
+          skipLoadingToBanner();
         }
       }],
       ['heroSection', {
@@ -66,6 +69,9 @@
           bannerTimeline?.kill();
           bannerTimeline = null;
           isBeamAnimated = false;
+        },
+        skip() {
+          scrollToContent();
         }
       }],
       ['audiovisualSection', {
@@ -78,6 +84,9 @@
         },
         leave() {
           leaveP2Page();
+        },
+        skip() {
+          skipP2Animation();
         }
       }],
       ['brandTransitionSection', {
@@ -91,6 +100,9 @@
         },
         leave() {
           leaveBrandTransitionPage();
+        },
+        skip() {
+          skipBrandTransitionAnimation();
         }
       }],
       ['aiReconstructionSection', {
@@ -104,6 +116,9 @@
         },
         leave() {
           leaveP4Page();
+        },
+        skip() {
+          skipP4Animation();
         }
       }],
       ['messageEntrySection', {
@@ -112,7 +127,8 @@
           stopLoadingCanvas(); stopBackgroundCanvas(); stopSandCanvas(); stopBrandTransitionCanvas(); stopP4Canvases();
           window.enterP5EntryPage?.();
         },
-        leave() { window.leaveP5EntryPage?.(); }
+        leave() { window.leaveP5EntryPage?.(); },
+        skip() { window.skipP5EntryPage?.(); }
       }],
       ['memoryWallSection', {
         enter() {
@@ -128,7 +144,8 @@
           stopLoadingCanvas(); stopBackgroundCanvas(); stopSandCanvas(); stopBrandTransitionCanvas(); stopP4Canvases();
           window.enterP6Page?.();
         },
-        leave() { window.leaveP6Page?.(); }
+        leave() { window.leaveP6Page?.(); },
+        skip() { window.skipP6Page?.(); }
       }],
       ['brandStorySection', {
         enter() {
@@ -161,9 +178,69 @@
           if (globalBgCanvas) {
             globalBgCanvas.style.opacity = '1';
           }
+        },
+        skip() {
+          skipBrandStoryAnimation();
         }
       }]
     ]);
+
+    /* =============================================================
+       Page UI Lifecycle｜Next Arrow + Skip 統一入口
+       -------------------------------------------------------------
+       Arrow：
+       - 顯示時機仍由各頁動畫在完成點呼叫 animateArrow()。
+       - Click / reset / aria 狀態統一由此管理。
+
+       Skip：
+       - 所有 .skip-anim-btn 只呼叫 skipCurrentPage()。
+       - 各頁真正的完成邏輯保留在 pageLifecycle[id].skip()，
+         不強迫不同 Timeline / Canvas 共用同一套實作。
+       ============================================================= */
+    function getPageArrow(page) {
+      return page?.querySelector?.('.scroll-arrow-btn') || null;
+    }
+
+    function resetPageArrow(page) {
+      const arrow = getPageArrow(page);
+      if (!arrow) return;
+
+      gsap.killTweensOf(arrow);
+      arrow.dataset.animated = 'false';
+      arrow.setAttribute('aria-disabled', 'true');
+      gsap.set(arrow, {
+        opacity: 0,
+        y: 0,
+        pointerEvents: 'none'
+      });
+    }
+
+    function skipCurrentPage() {
+      const page = pageElements[currentPageIndex];
+      if (!page) return;
+
+      const lifecycle = pageLifecycle.get(page.id);
+      lifecycle?.skip?.(page);
+    }
+
+    document.querySelectorAll('.scroll-arrow-btn').forEach(button => {
+      button.setAttribute('aria-disabled', 'true');
+
+      button.addEventListener('click', event => {
+        // opacity:0 不代表不可點；只有 animateArrow() 啟用後才可下一頁。
+        if (button.dataset.animated !== 'true') {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        nextPage();
+      });
+    });
+
+    document.querySelectorAll('.skip-anim-btn').forEach(button => {
+      button.addEventListener('click', skipCurrentPage);
+    });
 
     function runPageLifecycle(page, phase) {
       const lifecycle = pageLifecycle.get(page.id);
@@ -177,6 +254,7 @@
       const previousPage = pageElements[currentPageIndex];
       const nextPageElement = pageElements[index];
 
+      resetPageArrow(previousPage);
       runPageLifecycle(previousPage, 'leave');
       currentPageIndex = index;
       sectionsWrapper.style.transform = `translateY(-${currentPageIndex * 100}vh)`;
@@ -441,7 +519,7 @@
         gsap.killTweensOf([...lines,options,skipBtn]);
         setPageAnimationLock(false);
       };
-      skipBtn.addEventListener('click',()=>{
+      window.skipP5EntryPage = function() {
         if (tl) tl.progress(1);
         else {
           gsap.set(lines,{y:0,autoAlpha:1});
@@ -449,7 +527,7 @@
           readyOptions();
           setPageAnimationLock(false);
         }
-      });
+      };
       writeBtn.addEventListener('click',()=>goToSection('messageCardSection'));
       wallBtn.addEventListener('click',()=>goToSection('memoryWallSection'));
     })();
@@ -1976,6 +2054,9 @@
     gsap.to(els.skipBtn, { autoAlpha: 0, pointerEvents: 'none', duration: .25 });
   }
 
+  // Page UI Lifecycle 對外介面；實際完成邏輯仍由 skipP5Entrance() 負責。
+  window.skipP6Page = skipP5Entrance;
+
   window.enterP6Page = function enterP6Page() {
     stopP5DissolveCanvas();
     closeModal(true);
@@ -2009,7 +2090,6 @@
   els.memory.addEventListener('input', updateCharCount);
   els.tagBtns.forEach(btn => btn.addEventListener('click', () => chooseTag(btn)));
   els.generateBtn.addEventListener('click', handleGenerate);
-  els.skipBtn.addEventListener('click', skipP5Entrance);
   els.closeBtn.addEventListener('click', () => closeModal(false));
   els.downloadBtn.addEventListener('click', downloadCard);
   els.releaseBtn.addEventListener('click', releaseCard);

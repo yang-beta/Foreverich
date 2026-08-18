@@ -34,26 +34,6 @@
       });
     }
 
-    document.querySelectorAll('.scroll-arrow-btn').forEach((button) => {
-      button.setAttribute('aria-disabled', 'true');
-      button.addEventListener('click', (event) => {
-        // opacity:0 不等於不可點。只有 animateArrow() 完成啟用後才允許切頁。
-        if (button.dataset.animated !== 'true') {
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-        nextPage();
-      });
-    });
-
-    document.getElementById('loadingSkipBtn').addEventListener('click', skipLoadingToBanner);
-    document.getElementById('bannerSkipBtn').addEventListener('click', scrollToContent);
-    document.getElementById('p2SkipBtn').addEventListener('click', skipP2Animation);
-    document.getElementById('brandTransitionSkipBtn').addEventListener('click', skipBrandTransitionAnimation);
-    document.getElementById('aiReconstructionSkipBtn').addEventListener('click', skipP4Animation);
-    document.getElementById('brandStorySkipBtn')?.addEventListener('click', skipBrandStoryAnimation);
-
     // =============================================================
     // 🎬 4. GSAP 開場與 Banner 時間軸控制
     // =============================================================
