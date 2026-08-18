@@ -1,13 +1,8 @@
 /* =============================================================
-   TYPOGRAPHY SYSTEM｜2026-08-17｜STEP 03
+   TYPOGRAPHY SYSTEM｜2026-08-17
    -------------------------------------------------------------
-   本檔集中管理 Typography 的前三層：
-   1. Font Family
-   2. Font Size
-   3. Font Weight
-
-   Line Height / Letter Spacing / Text Color 暫留各元件 CSS，
-   待本階段實機確認後再逐步集中，避免一次改動過多視覺參數。
+   文字大小只由本檔管理。既有 style.css / mobile-fixes.css 中的舊 font-size
+   先保留作為版面回溯依據，但由本檔最後載入並統一覆寫。
 
    Desktop > 1100px
    Tablet  769px–1100px
@@ -15,17 +10,6 @@
    ============================================================= */
 
 :root {
-  /* Font family */
-  --font-serif: "Noto Serif TC", "PingFang TC", "Microsoft JhengHei", serif;
-  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-
-  /* Font weight */
-  --weight-light: 300;
-  --weight-regular: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-
-  /* Font size｜Desktop */
   --font-display: 1.2rem;
   --font-heading: 1.06rem;
   --font-body: .86rem;
@@ -33,12 +17,6 @@
   --font-caption: .76rem;
   --font-meta: .68rem;
   --font-micro: .38rem;
-
-  /* Text color｜保留原網站層級 */
-  --text-primary: #E6E6E8;
-  --text-caption: rgba(230,230,232,.58);
-  --text-muted: rgba(230,230,232,.48);
-  --text-loading-note: rgba(230,230,232,.55);
 }
 
 @media (max-width: 1100px) {
@@ -63,9 +41,7 @@
   }
 }
 
-/* =============================================================
-   ① 主敘事
-   ============================================================= */
+/* ① 主敘事 */
 #openingHero .title-part1,
 #openingHero .title-part2,
 #heroSection .banner-question-part,
@@ -79,209 +55,76 @@
 #aiReconstructionSection .p4-header-line,
 #aiReconstructionSection .p4-footer-text,
 #messageEntrySection .p5-entry-line,
-.p5-outro-line,
+#messageCardSection .p5-outro-line,
 #brandStorySection .brand-story-line,
 #brandStorySection .brand-story-line-long,
 #brandStorySection .brand-story-final-copy,
 #brandStorySection .brand-story-final-line {
-  font-family: var(--font-serif) !important;
   font-size: var(--font-display) !important;
-  font-weight: var(--weight-regular) !important;
 }
 
-/* LP / P1 原設計使用較輕字重，保留其敘事語氣 */
-#openingHero .title-part1,
-#openingHero .title-part2,
-#heroSection .banner-question-part {
-  font-weight: var(--weight-light) !important;
-}
-
-/* =============================================================
-   ③ 標題
-   ============================================================= */
+/* ③ 標題 */
 #openingHero .lp-exhibition-title,
 #aiReconstructionSection .p4-card-title,
 #messageCardSection .p5-step-title,
-.p5-ai-loading h2,
+#messageCardSection .p5-ai-loading h2,
 #memoryWallSection .memory-wall-title {
-  font-family: var(--font-serif) !important;
   font-size: var(--font-heading) !important;
-  font-weight: var(--weight-regular) !important;
 }
 
-#openingHero .lp-exhibition-title {
-  font-weight: var(--weight-light) !important;
-}
-
-/* =============================================================
-   ④ 內文
-   ============================================================= */
+/* ④ 內文 */
 #aiReconstructionSection .p4-card-description,
 #messageCardSection .p5-custom-target-wrap input,
-#messageCardSection .p5-textarea-wrap textarea {
-  font-family: var(--font-sans) !important;
-  font-size: var(--font-body) !important;
-  font-weight: var(--weight-regular) !important;
-}
-
-/* 時光小卡與留言內容使用 Serif，維持展覽敘事感 */
-.p5-card-copy,
+#messageCardSection .p5-textarea-wrap textarea,
+#messageCardSection .p5-card-copy,
 #memoryWallSection .memory-wall-quote {
-  font-family: var(--font-serif) !important;
   font-size: var(--font-body) !important;
-  font-weight: var(--weight-regular) !important;
 }
 
-/* 輸入中的文字沿用原設計較輕字重 */
-#messageCardSection .p5-custom-target-wrap input,
-#messageCardSection .p5-textarea-wrap textarea {
-  font-weight: var(--weight-light) !important;
-}
-
-/* =============================================================
-   ⑤ 說明文字
-   ============================================================= */
+/* ⑤ 說明文字 */
 #messageEntrySection .p5-entry-option-copy small,
 #messageCardSection .p5-custom-target-wrap label,
 #messageCardSection .p5-custom-target-wrap input::placeholder,
 #messageCardSection .p5-textarea-wrap textarea::placeholder,
 #messageCardSection .p5-field-note,
 #messageCardSection .p5-validation-message,
-.p5-ai-loading p,
-.p5-send-status,
+#messageCardSection .p5-ai-loading p,
+#messageCardSection .p5-send-status,
 #memoryWallSection .memory-wall-loading,
 #memoryWallSection .memory-wall-empty,
 #memoryWallSection .memory-wall-error {
-  font-family: var(--font-sans) !important;
   font-size: var(--font-caption) !important;
-  font-weight: var(--weight-regular) !important;
 }
 
-/* =============================================================
-   ⑥ Meta／輔助資訊
-   ============================================================= */
+/* ⑥ Meta／輔助資訊 */
 #messageEntrySection .p5-entry-option-index,
 #messageCardSection .p5-step-number,
 #messageCardSection .p5-char-count,
 #messageCardSection .p5-tag-group-label,
-.p5-card-tags,
-.p5-card-bottomline,
+#messageCardSection .p5-card-tags,
+#messageCardSection .p5-card-bottomline,
+#messageCardSection .p5-card-stamp,
 #memoryWallSection .memory-wall-meta,
 #memoryWallSection .memory-wall-foot {
-  font-family: var(--font-sans) !important;
   font-size: var(--font-meta) !important;
-  font-weight: var(--weight-regular) !important;
 }
 
-#messageEntrySection .p5-entry-option-index,
-#messageCardSection .p5-step-number {
-  font-weight: var(--weight-medium) !important;
-}
-
-/* 洸限 Stamp 是 Meta，但保留 Serif 品牌語氣 */
-.p5-card-stamp {
-  font-family: var(--font-serif) !important;
-  font-size: var(--font-meta) !important;
-  font-weight: var(--weight-semibold) !important;
-}
-
-/* =============================================================
-   ⑧ Micro／極小資訊
-   ============================================================= */
-.p5-card-stamp small {
-  font-family: var(--font-sans) !important;
+/* ⑧ Micro／極小資訊 */
+#messageCardSection .p5-card-stamp small {
   font-size: var(--font-micro) !important;
-  font-weight: var(--weight-regular) !important;
 }
 
-/* =============================================================
-   ⑨ 操作按鈕／UI
-   純圖示箭頭（‹ ›、SVG）不納入文字 Typography。
-   ============================================================= */
+/* ⑨ 操作按鈕／UI
+   純圖示箭頭（‹ ›、SVG 箭頭）不納入文字 Typography，保留元件自己的 icon size。 */
 .skip-anim-btn,
-#messageCardSection .p5-pill,
-.p5-card-action,
-.p5-modal-close,
-#messageCardSection .p5-mobile-exit-nav button {
-  font-family: var(--font-sans) !important;
-  font-size: var(--font-ui) !important;
-  font-weight: var(--weight-regular) !important;
-}
-
-/* 具有品牌／敘事語氣的文字按鈕保留 Serif */
 #messageEntrySection .p5-entry-option-copy strong,
+#messageCardSection .p5-pill,
 #messageCardSection .p5-generate-btn,
-.p5-outro-btn,
+#messageCardSection .p5-card-action,
+#messageCardSection .p5-outro-btn,
+#messageCardSection .p5-modal-close,
+#messageCardSection .p5-mobile-exit-nav button,
 #memoryWallSection .memory-wall-continue,
 #brandStorySection .brand-story-nav-btn {
-  font-family: var(--font-serif) !important;
   font-size: var(--font-ui) !important;
-  font-weight: var(--weight-regular) !important;
-}
-
-#messageEntrySection .p5-entry-option-copy strong {
-  font-weight: var(--weight-medium) !important;
-}
-
-
-/* =============================================================
-   P5 / P6 / 洸語牆 精準修正｜2026-08-17 FIX 04
-   -------------------------------------------------------------
-   1. P5 選項說明恢復原本淡灰色。
-   2. 洸語牆中央 Loading / Empty / Error 恢復原本 muted 色。
-   3. P6 產生卡片前兩行維持主文字 / 淡灰的明確層次。
-   4. 時光小卡 Modal 直接以 #p5CardModal 鎖定 Typography，
-      不受 Modal 被移到 body 或其他父層影響。
-   ============================================================= */
-
-/* P5：選項下方說明文字 */
-#messageEntrySection .p5-entry-option-copy small {
-  color: var(--text-caption) !important;
-}
-
-/* 洸語牆：中央提示文字 */
-#memoryWallSection .memory-wall-loading,
-#memoryWallSection .memory-wall-empty,
-#memoryWallSection .memory-wall-error {
-  color: var(--text-muted) !important;
-}
-
-/* P6：產生卡片前 Loading 兩行文字 */
-#p5CardModal .p5-ai-loading h2 {
-  color: var(--text-primary) !important;
-}
-#p5CardModal .p5-ai-loading p {
-  color: var(--text-loading-note) !important;
-}
-
-/* P6：時光小卡 — 以 Modal 為根節點精準鎖定字級 */
-#p5CardModal .p5-card-tags {
-  font-family: var(--font-sans) !important;
-  font-size: var(--font-meta) !important;
-  font-weight: var(--weight-regular) !important;
-}
-#p5CardModal .p5-card-copy {
-  font-family: var(--font-serif) !important;
-  font-size: var(--font-body) !important;
-  font-weight: var(--weight-regular) !important;
-}
-#p5CardModal .p5-card-bottomline {
-  font-family: var(--font-sans) !important;
-  font-size: var(--font-meta) !important;
-  font-weight: var(--weight-regular) !important;
-}
-#p5CardModal .p5-card-stamp {
-  font-family: var(--font-serif) !important;
-  font-size: var(--font-meta) !important;
-  font-weight: var(--weight-semibold) !important;
-}
-#p5CardModal .p5-card-stamp small {
-  font-family: var(--font-sans) !important;
-  font-size: var(--font-micro) !important;
-  font-weight: var(--weight-regular) !important;
-}
-#p5CardModal .p5-card-action {
-  font-family: var(--font-sans) !important;
-  font-size: var(--font-ui) !important;
-  font-weight: var(--weight-regular) !important;
 }
