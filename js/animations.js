@@ -307,15 +307,13 @@
       const focusTop =
         Math.min(
           leftRect?.top ?? copyRect.top,
-          rightRect?.top ?? copyRect.top,
-          copyRect.top
+          rightRect?.top ?? copyRect.top
         );
 
       const focusBottom =
         Math.max(
           leftRect?.bottom ?? copyRect.bottom,
-          rightRect?.bottom ?? copyRect.bottom,
-          copyRect.bottom
+          rightRect?.bottom ?? copyRect.bottom
         );
 
       const left =
@@ -350,6 +348,75 @@
       page.style.setProperty(
         '--focus-height',
         `${Math.max(0, focusBottom - focusTop)}px`
+      );
+    }
+
+    function isPointerInsideBrandStoryBrackets(
+      event
+    ) {
+      const page =
+        document.getElementById(
+          'brandStorySection'
+        );
+
+      const finalCopy =
+        page?.querySelector(
+          '.brand-story-final-copy'
+        );
+
+      const leftBracket =
+        finalCopy?.querySelector(
+          '.brand-story-final-bracket-left'
+        );
+
+      const rightBracket =
+        finalCopy?.querySelector(
+          '.brand-story-final-bracket-right'
+        );
+
+      if (
+        !page ||
+        !leftBracket ||
+        !rightBracket
+      ) {
+        return false;
+      }
+
+      const leftRect =
+        leftBracket.getBoundingClientRect();
+
+      const rightRect =
+        rightBracket.getBoundingClientRect();
+
+      const left =
+        Math.min(
+          leftRect.left,
+          rightRect.left
+        );
+
+      const right =
+        Math.max(
+          leftRect.right,
+          rightRect.right
+        );
+
+      const top =
+        Math.min(
+          leftRect.top,
+          rightRect.top
+        );
+
+      const bottom =
+        Math.max(
+          leftRect.bottom,
+          rightRect.bottom
+        );
+
+      return (
+        event.clientX >= left &&
+        event.clientX <= right &&
+        event.clientY >= top &&
+        event.clientY <= bottom
       );
     }
 
@@ -423,11 +490,11 @@
 
       /*
         Desktop：
-        游標只要進入 ［ ］框內就啟用，
-        離開框內立即慢慢恢復。
+        不再使用寬達 86vw / 88vw / 90vw 的 finalCopy 當 Hover hit-area。
+        改由整個品牌頁的 pointermove 判斷游標是否真正落在左右［ ］內。
       */
-      finalCopy.addEventListener(
-        'pointerenter',
+      page.addEventListener(
+        'pointermove',
         event => {
           if (
             event.pointerType ===
@@ -436,12 +503,22 @@
             return;
           }
 
-          updateBrandStoryFocusBounds();
-          setBrandStoryFocusActive(true);
+          const inside =
+            isPointerInsideBrandStoryBrackets(
+              event
+            );
+
+          if (inside) {
+            updateBrandStoryFocusBounds();
+          }
+
+          setBrandStoryFocusActive(
+            inside
+          );
         }
       );
 
-      finalCopy.addEventListener(
+      page.addEventListener(
         'pointerleave',
         event => {
           if (
@@ -457,11 +534,9 @@
 
       /*
         Mobile / Tablet：
-        點一下 slogan 區域啟用柔焦。
-        約 2.8 秒後自動恢復，
-        避免 touch 裝置沒有 hover leave。
+        只有點在左右［ ］框出的區域內才啟用柔焦。
       */
-      finalCopy.addEventListener(
+      page.addEventListener(
         'pointerdown',
         event => {
           if (
@@ -469,6 +544,14 @@
               'touch' &&
             event.pointerType !==
               'pen'
+          ) {
+            return;
+          }
+
+          if (
+            !isPointerInsideBrandStoryBrackets(
+              event
+            )
           ) {
             return;
           }
