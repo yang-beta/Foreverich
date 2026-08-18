@@ -290,7 +290,7 @@
    4. 只使用 safe-area + overscroll 防止 Safari 貼頂 / 橡皮筋露頁。
    ============================================================= */
 
-@media (max-width: 768px) {
+@media (max-width: 768px){
 
   /*
     Safari 自由滑動時抑制頁面橡皮筋。
@@ -340,16 +340,9 @@
     只把「回憶 / 從這裡 / 開始」往下，
     避免文字壓到中心 Logo。
   */
-  #openingHero .interactive-area {
-    transform:
-      translateY(-22px)
-      !important;
-  }
+  
 
-  #openingHero .subtitle-wrapper-1,
-  #openingHero .subtitle-wrapper-2 {
-    margin-top: 7px;
-  }
+  
 
   #openingHero .scroll-arrow-btn {
     bottom:
@@ -996,89 +989,43 @@
 /* =============================================================
    LP UPDATE V1｜手機 / 平板
    ============================================================= */
-@media (max-width: 768px) {
+@media (max-width: 768px){
 
   /*
     Mobile logoBox = 300px，
     所以 margin-top = -150px，
     仍讓 Logo 中心保持在畫面約 1/3。
   */
-  #openingHero .lp-logo-lockup {
-    top: 33.333% !important;
-
-    margin-top:
-      -150px
-      !important;
-
-    margin-bottom:
-      0
-      !important;
-  }
+  
 
   /*
     手機 Logo 可視尺寸較小，
     展覽名稱放在 Logo 下方約 68px。
   */
-  #openingHero .lp-exhibition-title-wrap {
-    top:
-      calc(
-        33.333%
-        + 58px
-      );
+  
 
-    height: 34px;
-  }
-
-  #openingHero .lp-exhibition-title {
-    letter-spacing:
-      .24em;
-  }
+  
 
   /*
     舊三行文字放在畫面中段，
     與品牌 Logo 群分離。
   */
-  #openingHero .interactive-area {
-    top: 54% !important;
+  
 
-    transform:
-      none
-      !important;
-  }
+  
 
-  #openingHero .title-wrapper,
-  #openingHero .subtitle-wrapper-1,
-  #openingHero .subtitle-wrapper-2 {
-    height: 32px;
-  }
-
-  #openingHero .subtitle-wrapper-1,
-  #openingHero .subtitle-wrapper-2 {
-    margin-top:
-      7px
-      !important;
-  }
+  
 }
 
 
 /* 矮手機：稍微再收緊垂直距離 */
-@media (max-width: 768px) and (max-height: 700px) {
+@media (max-width: 768px) and (max-height: 700px){
 
-  #openingHero .lp-logo-lockup {
-    top: 31.5% !important;
-  }
+  
 
-  #openingHero .lp-exhibition-title-wrap {
-    top:
-      calc(
-        31.5%
-        + 56px
-      );
-  }
+  
 
-  #openingHero .interactive-area {
-    top: 53% !important;
-  }
+  
 }
 
 
@@ -1452,20 +1399,12 @@
 /* =============================================================
    2026-08-16｜LP / Brand Story V9 Mobile
    ============================================================= */
-@media (max-width: 768px) {
-  #openingHero .lp-side-word-guang,
-  #openingHero .lp-side-word-xian {
-    /* V8: 10.8px, 3.2vw, 15.6px × 1.3 */
-    width: clamp(14.04px, 4.16vw, 20.28px) !important;
-  }
+@media (max-width: 768px){
+  
 
-  #openingHero .lp-side-word-guang {
-    margin-right: -65px !important;
-  }
+  
 
-  #openingHero .lp-side-word-xian {
-    margin-left: -65px !important;
-  }
+  
 
   #brandStorySection .brand-story-final-bracket {
     width: 18px;
@@ -1564,7 +1503,7 @@
    2026-08-16｜LP / Brand Story V13｜Tablet / Mobile
    ============================================================= */
 
-@media (max-width: 768px) {
+@media (max-width: 768px){
 
   /*
     LP「洸／限」：
@@ -1572,29 +1511,12 @@
     手機依目前 V12 尺寸比例同步放大，
     但限制最大約 32px。
   */
-  #openingHero .lp-side-word-guang,
-  #openingHero .lp-side-word-xian {
-    width:
-      clamp(
-        22px,
-        6vw,
-        32px
-      )
-      !important;
-  }
+  
 
   /* V12 手機距離維持不變 */
-  #openingHero .lp-side-word-guang {
-    margin-right:
-      -65px
-      !important;
-  }
+  
 
-  #openingHero .lp-side-word-xian {
-    margin-left:
-      -65px
-      !important;
-  }
+  
 
   /*
     手機目前：
@@ -1605,17 +1527,7 @@
     39 × 1.10 ≈ 42.9px
     因此三行文字整組往下約 43px。
   */
-  #openingHero .interactive-area {
-    top:
-      calc(
-        54% + 43px
-      )
-      !important;
-
-    transform:
-      none
-      !important;
-  }
+  
 
   /*
     品牌故事按鈕：
@@ -1669,12 +1581,6 @@
 
 /* 矮手機沿用同一個「目前行距 +10%」概念，
    只以原本 53% 的定位基準往下 43px。 */
-@media (max-width: 768px) and (max-height: 700px) {
-  #openingHero .interactive-area {
-    top:
-      calc(
-        53% + 43px
-      )
-      !important;
-  }
+@media (max-width: 768px) and (max-height: 700px){
+  
 }

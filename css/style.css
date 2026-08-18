@@ -82,7 +82,7 @@
     }
 
     .ui-line-content {
-      font-family: 'Noto Serif TC', serif;
+      font-family: "Noto Serif TC", serif;
       font-weight: 400;
       letter-spacing: 0.18em;
       color: var(--text-main);
@@ -157,14 +157,7 @@
     /* =============================================================
        1. Loading Page (LP 頁)
        ============================================================= */
-    #openingHero {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background-color: var(--surface-bg);
-      z-index: 10;
-    }
+    
 
     #loadingCanvas {
       position: absolute;
@@ -177,98 +170,35 @@
       transition: opacity 1.2s ease;
     }
 
-    .lp-logo-lockup {
-      /*
-        LP 左右文字圖調整區
-        ---------------------------------------------------------
-        --lp-guang-width / --lp-xian-width：左右字圖大小
-        --lp-word-gap：字圖與中央 Logo 的基本距離
-        --lp-guang-inset / --lp-xian-inset：額外向 Logo 靠近的距離
+    
 
-        注意：
-        不使用 transform 位移，避免與 GSAP 的 scale 動畫互相覆蓋。
-      */
-      --lp-guang-width: clamp(39px, 4vw, 61px);
-      --lp-xian-width: clamp(39px, 4vw, 61px);
-      --lp-word-gap: clamp(0px, .08vw, 2px);
-      --lp-guang-inset: 26px;
-      --lp-xian-inset: 26px;
+    
 
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--lp-word-gap);
-      margin-bottom: -90px;
-      margin-top: -30px;
-    }
+    
 
-    .logo-container {
-      width: 750px;
-      height: 750px;
-      position: relative;
-      z-index: 2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      clip-path: circle(0% at 50% 50%);
-      transform: scale(0.7);
-      filter: blur(20px);
-      opacity: 0;
-      margin: 0;
-      will-change: clip-path, transform, filter, opacity;
-    }
+    
 
-    .lp-side-word {
-      height: auto;
-      flex: 0 0 auto;
-      opacity: 0;
-      transform: scale(.94);
-      filter: blur(8px) drop-shadow(0 0 14px rgba(255,255,255,.08));
-      will-change: opacity, transform, filter;
-    }
+    
 
-    .lp-side-word-guang {
-      width: var(--lp-guang-width);
-      margin-right: calc(var(--lp-guang-inset) * -1);
-    }
-
-    .lp-side-word-xian {
-      width: var(--lp-xian-width);
-      margin-left: calc(var(--lp-xian-inset) * -1);
-    }
-
-    .logo-container svg {
-      width: 100%;
-      height: 100%;
-      animation: coralGlowPulse 4.0s ease-in-out infinite alternate;
-    }
+    
 
     .st0 { fill: var(--coral-main); }
 
-    .interactive-area {
-      position: relative;
-      z-index: 3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
+    
 
-    .title-wrapper { height: 36px; }
-    .subtitle-wrapper-1 { height: 36px; margin-top: 10px; }
-    .subtitle-wrapper-2 { height: 36px; margin-top: 10px; }
+    
+    
+    
 
-    .text-line { color: var(--text-main); line-height: 1; }
+    
 
     /* 所有文字進場元素共用的初始狀態，由 GSAP 統一控制 */
     .ui-animate-text {
       opacity: 0;
       will-change: transform, opacity;
     }
-    .title-part1 { letter-spacing: 0.4em; font-weight: 300; }
-    .title-part2 { letter-spacing: 0.4em; font-weight: 300; opacity: 0.9; }
+    
+    
 
     @keyframes coralGlowPulse {
       0% { filter: drop-shadow(0 0 8px rgba(var(--coral-main-rgb), 0.4)); }
@@ -477,7 +407,7 @@
     .p4-header-line,
     .p4-footer-text {
       width: 100%;
-      font-family: 'Noto Serif TC', serif;
+      font-family: "Noto Serif TC", serif;
       text-align: center;
       color: var(--text-main);
       letter-spacing: .12em;
@@ -519,7 +449,7 @@
     }
 
     .p4-card-item::after {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0;
       pointer-events: none;
@@ -685,7 +615,7 @@
     }
 
     .p4-card-title {
-      font-family: 'Noto Serif TC', serif;
+      font-family: "Noto Serif TC", serif;
       letter-spacing: .12em;
       color: var(--coral-main);
       margin-bottom: 12px;
@@ -730,7 +660,7 @@
     /* =============================================================
        📱 手機版 (Mobile RWD) 統一渲染規範
        ============================================================= */
-    @media (max-width: 768px) {
+    @media (max-width: 768px){
       #text-container, .banner-questions-wrapper {
         width: 92% !important;
         max-width: 92% !important;
@@ -757,22 +687,9 @@
       }
 
 
-      .lp-logo-lockup {
-        --lp-guang-width: clamp(27px, 8vw, 39px);
-        --lp-xian-width: clamp(27px, 8vw, 39px);
-        --lp-word-gap: 1px;
-        --lp-guang-inset: 10px;
-        --lp-xian-inset: 10px;
+      
 
-        gap: var(--lp-word-gap) !important;
-        margin-bottom: -50px !important;
-      }
-
-      .logo-container {
-        width: 300px !important;
-        height: 300px !important;
-        margin: 0 !important;
-      }
+      
 
 
 
@@ -923,13 +840,6 @@
   will-change: transform;
 }
 
-/* 2026-08-18｜P5 喇叭背景整理
-   只移除長喇叭後方的外層 glow 圓弧。
-   short / full horn 本體與 reveal / drift 動畫保持原狀。 */
-.p5-entry-wave-bg .p5-horn-glow-layer {
-  display: none;
-}
-
 
 .p5-entry-wave-bg .p5-horn-full-left {
   animation: p5HornDriftLeft 11s ease-in-out infinite alternate;
@@ -962,9 +872,9 @@
 .p5-entry-options.is-ready { pointer-events:auto; }
 .p5-entry-option { min-height:116px; padding:20px 24px; border:1px solid rgba(230,230,232,.18); border-radius:22px; background:rgba(31,31,31,.62); color:var(--text-main); cursor:pointer; display:flex; align-items:center; gap:18px; text-align:left; transition:border-color .3s ease,box-shadow .3s ease,transform .3s ease,background .3s ease; }
 .p5-entry-option:hover { transform:translateY(-3px); border-color:rgba(var(--coral-main-rgb), .65); box-shadow:0 0 26px rgba(var(--coral-main-rgb), .12); background:rgba(var(--coral-main-rgb), .055); }
-.p5-entry-option-index { width:42px; height:42px; border:1px solid rgba(var(--coral-main-rgb), .55); border-radius:50%; display:grid; place-items:center; color:var(--coral-main); font-weight:500; font-family:'Noto Sans TC',sans-serif; flex:0 0 auto; }
+.p5-entry-option-index { width:42px; height:42px; border:1px solid rgba(var(--coral-main-rgb), .55); border-radius:50%; display:grid; place-items:center; color:var(--coral-main); font-weight:500; font-family:"Noto Sans TC",sans-serif; flex:0 0 auto; }
 .p5-entry-option-copy { display:flex; flex-direction:column; gap:7px; }
-.p5-entry-option-copy strong { font-weight:500; font-family:'Noto Serif TC',serif; letter-spacing:.12em; }
+.p5-entry-option-copy strong { font-weight:500; font-family:"Noto Serif TC",serif; letter-spacing:.12em; }
 .p5-entry-option-copy small { color:rgba(230,230,232,.58); line-height:1.65; letter-spacing:.08em; }
 
 
@@ -1038,10 +948,10 @@
   stroke-width:1.05;
 }
 
-.memory-tree-hills path:nth-child(3n+1) {
+.memory-tree-hills path:nth-child(3n/**/+1) {
   stroke:rgba(var(--coral-main-rgb), .13);
 }
-.memory-tree-hills path:nth-child(3n+2) {
+.memory-tree-hills path:nth-child(3n/**/+2) {
   stroke:rgba(201,190,177,.12);
 }
 .memory-tree-hills path:nth-child(3n) {
@@ -1267,10 +1177,10 @@
 }
 .memory-wall-card::before { content:""; position:absolute; left:0; top:18%; bottom:18%; width:2px; background:rgba(var(--coral-main-rgb), .65); }
 .memory-wall-meta { display:flex; justify-content:space-between; gap:8px; color:rgb(var(--coral-main-rgb)); letter-spacing:.06em; }
-.memory-wall-quote { margin:10px 0; color:rgba(230,230,232,.86); font-weight:400; font-family:'Noto Serif TC',serif; line-height:1.8; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+.memory-wall-quote { margin:10px 0; color:rgba(230,230,232,.86); font-weight:400; font-family:"Noto Serif TC",serif; line-height:1.8; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
 .memory-wall-foot { color:rgba(230,230,232,.42); letter-spacing:.06em; }
 .memory-wall-loading,.memory-wall-empty,.memory-wall-error { grid-column:1/-1; grid-row:1/-1; display:grid; place-items:center; color:rgba(230,230,232,.48); letter-spacing:.1em; }
-.memory-wall-continue { margin-top:18px; padding:9px 18px; border:1px solid rgba(var(--coral-main-rgb), .6); border-radius:999px; background:rgba(var(--coral-main-rgb), .06); color:var(--coral-glow); font-weight:400; font-family:'Noto Serif TC',serif; letter-spacing:.12em; cursor:pointer; transition:background .3s ease,box-shadow .3s ease,transform .3s ease; }
+.memory-wall-continue { margin-top:18px; padding:9px 18px; border:1px solid rgba(var(--coral-main-rgb), .6); border-radius:999px; background:rgba(var(--coral-main-rgb), .06); color:var(--coral-glow); font-weight:400; font-family:"Noto Serif TC",serif; letter-spacing:.12em; cursor:pointer; transition:background .3s ease,box-shadow .3s ease,transform .3s ease; }
 .memory-wall-continue:hover { transform:translateY(-2px); background:rgba(var(--coral-main-rgb), .12); box-shadow:0 0 20px rgba(var(--coral-main-rgb), .12); }
 @media (max-width:900px) {
   .p5-entry-options { grid-template-columns:1fr; }
@@ -1384,7 +1294,7 @@
   text-transform: uppercase;
 }
 .p5-step-title {
-  font-family: 'Noto Serif TC', serif;
+  font-family: "Noto Serif TC", serif;
   color: var(--p5-text);
   font-weight: 400;
   letter-spacing: .12em;
@@ -1399,7 +1309,7 @@
 .p5-step-number {
   flex: 0 0 auto;
   color: rgba(var(--coral-main-rgb), .82);
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: "Noto Sans TC", sans-serif;
   font-weight: 500;
   letter-spacing: .18em;
 }
@@ -1545,7 +1455,7 @@
 .p5-button-particles::after {
   position: absolute;
   inset: 0;
-  content: '';
+  content: "";
   pointer-events: none;
   background-image:
     radial-gradient(circle at 8% 55%, rgba(var(--coral-light-rgb), .72) 0 1px, transparent 1.5px),
@@ -1792,7 +1702,7 @@
 }
 
 .p5-card-recipient-icon::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -6px;
   border: 1px solid rgba(var(--coral-main-rgb), .13);
@@ -1925,7 +1835,7 @@
 }
 
 .p5-time-card::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 14px;
   border: 1px solid rgba(var(--coral-main-rgb), .1);
@@ -2206,13 +2116,12 @@
 }
 
 
-/* P5 最外圈：左右向外延伸約 30%，線寬不變 */
+/* P5 最外層灰白特例圈：移除。
+   只影響 full horn 的最後一個 base ellipse；
+   short horn 與品牌色 glow layer 完全保留。 */
 .p5-horn-full-left ellipse:last-child,
 .p5-horn-full-right ellipse:last-child {
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scaleX(1.3);
-  vector-effect: non-scaling-stroke;
+  display: none;
 }
 
 
@@ -2281,14 +2190,10 @@
 
 /* LP：三行文字整組向 Logo 靠近，避免與 bottom:15% 的共用箭頭交疊。
    只移動文字群，不改共用箭頭規則。 */
-#openingHero .interactive-area {
-  transform: translateY(-118px);
-}
 
-@media (max-width: 768px) {
-  #openingHero .interactive-area {
-    transform: translateY(-88px);
-  }
+
+@media (max-width: 768px){
+  
 }
 
 
@@ -2311,20 +2216,18 @@
 }
 
 
-#openingHero .interactive-area .banner-question-part {
-  margin-bottom: .12em;
-}
+
 
 .st0 { fill: var(--coral-main); }
 
 /* LP｜左右字靠近 Logo：不修改 GSAP transform */
 @media (min-width:769px){
-  .lp-side-word-guang{margin-right:clamp(-185px,-12vw,-125px)}
-  .lp-side-word-xian{margin-left:clamp(-185px,-12vw,-125px)}
+  
+  
 }
 @media (max-width:768px){
-  .lp-side-word-guang{margin-right:clamp(-88px,-16vw,-48px)}
-  .lp-side-word-xian{margin-left:clamp(-88px,-16vw,-48px)}
+  
+  
 }
 
 
@@ -2333,21 +2236,16 @@
    1) 左右「洸 / 限」再縮短約 2/3 視覺距離（保留約 1/3）
    2) 開場文字在 GSAP 初始化前先保持隱藏，避免載入時閃現約 1 秒
    ============================================================= */
-#openingHero #line1,
-#openingHero #line2,
-#openingHero #line3 {
-  opacity: 0;
-  transform: translateY(200%);
+
+
+@media (min-width: 769px){
+  
+  
 }
 
-@media (min-width: 769px) {
-  .lp-side-word-guang { margin-right: clamp(-300px, -19vw, -215px); }
-  .lp-side-word-xian  { margin-left:  clamp(-300px, -19vw, -215px); }
-}
-
-@media (max-width: 768px) {
-  .lp-side-word-guang { margin-right: clamp(-145px, -25vw, -82px); }
-  .lp-side-word-xian  { margin-left:  clamp(-145px, -25vw, -82px); }
+@media (max-width: 768px){
+  
+  
 }
 
 
@@ -2357,14 +2255,14 @@
    SVG 的 viewBox 本身左右有大量透明空間，所以不能把 flex gap
    當成肉眼看到的距離。這裡直接補償 SVG 留白，目標約 20–30px。
    ============================================================= */
-@media (min-width: 769px) {
-  .lp-side-word-guang { margin-right: -250px; }
-  .lp-side-word-xian  { margin-left:  -250px; }
+@media (min-width: 769px){
+  
+  
 }
 
-@media (max-width: 768px) {
-  .lp-side-word-guang { margin-right: -80px; }
-  .lp-side-word-xian  { margin-left:  -80px; }
+@media (max-width: 768px){
+  
+  
 }
 
 
@@ -2413,73 +2311,10 @@
 .p5-mobile-exit-nav {
   display: none;
 }
-#openingHero .lp-logo-lockup {
-  position: absolute !important;
 
-  top: 33.333% !important;
-  left: 0 !important;
-  right: 0 !important;
 
-  width: 100% !important;
 
-  margin-top: -375px !important;
-  margin-bottom: 0 !important;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 3;
-}
-#openingHero .lp-exhibition-title-wrap {
-  position: absolute;
-
-  top: calc(33.333% + 122px);
-  left: 0;
-  right: 0;
-
-  height: 40px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-
-  z-index: 4;
-
-  pointer-events: none;
-}
-#openingHero .lp-exhibition-title {
-  color: #FFB088;
-
-  font-family:
-    "Noto Serif TC",
-    serif;
-
-  font-weight: 300;
-
-  letter-spacing: .32em;
-
-  line-height: 1.6;
-
-  white-space: nowrap;
-
-  opacity: 0;
-}
-#openingHero .interactive-area {
-  position: absolute !important;
-
-  top: 57% !important;
-  left: 0 !important;
-  right: 0 !important;
-
-  width: 100%;
-
-  transform: none !important;
-
-  z-index: 4;
-}
 #memoryWallSection .memory-tree-base,
 #memoryWallSection .tree-leaves,
 #memoryWallSection .tree-roots,
@@ -3139,24 +2974,11 @@
    - 與中央 Logo 的實際距離增加約 60%
    - 以明確 gap 最終覆寫，避免舊 inset 計算干擾
    ============================================================= */
-#openingHero {
-  --lp-guang-width: clamp(10px, 1.6vw, 24.4px) !important;
-  --lp-xian-width: clamp(10px, 1.6vw, 24.4px) !important;
-  --lp-guang-gap-final: 45px;
-  --lp-xian-gap-final: 45px;
-}
 
-#openingHero .lp-side-word-guang {
-  width: var(--lp-guang-width) !important;
-  margin-right: var(--lp-guang-gap-final) !important;
-  margin-left: 0 !important;
-}
 
-#openingHero .lp-side-word-xian {
-  width: var(--lp-xian-width) !important;
-  margin-left: var(--lp-xian-gap-final) !important;
-  margin-right: 0 !important;
-}
+
+
+
 
 
 /* =============================================================
@@ -3177,42 +2999,24 @@
    原 width max 61px → 40% = 24.4px
    原 margin -250px → -235px，只往外增加約 15px
 */
-@media (min-width: 769px) {
-  #openingHero .lp-side-word-guang,
-  #openingHero .lp-side-word-xian {
-    width: clamp(15.6px, 1.6vw, 24.4px) !important;
-  }
+@media (min-width: 769px){
+  
 
-  #openingHero .lp-side-word-guang {
-    margin-right: -235px !important;
-    margin-left: 0 !important;
-  }
+  
 
-  #openingHero .lp-side-word-xian {
-    margin-left: -235px !important;
-    margin-right: 0 !important;
-  }
+  
 }
 
 /* 手機 / 平板：
    原 max 39px → 40% = 15.6px
    原 margin -80px → -65px，同樣往外增加約 15px
 */
-@media (max-width: 768px) {
-  #openingHero .lp-side-word-guang,
-  #openingHero .lp-side-word-xian {
-    width: clamp(10.8px, 3.2vw, 15.6px) !important;
-  }
+@media (max-width: 768px){
+  
 
-  #openingHero .lp-side-word-guang {
-    margin-right: -65px !important;
-    margin-left: 0 !important;
-  }
+  
 
-  #openingHero .lp-side-word-xian {
-    margin-left: -65px !important;
-    margin-right: 0 !important;
-  }
+  
 }
 
 
@@ -3223,20 +3027,12 @@
    距離完全不調整，仍維持 V8：
    Desktop -235px / Mobile -65px
    ============================================================= */
-@media (min-width: 769px) {
-  #openingHero .lp-side-word-guang,
-  #openingHero .lp-side-word-xian {
-    /* V8: 15.6px, 1.6vw, 24.4px × 1.3 */
-    width: clamp(20.28px, 2.08vw, 31.72px) !important;
-  }
+@media (min-width: 769px){
+  
 
-  #openingHero .lp-side-word-guang {
-    margin-right: -235px !important;
-  }
+  
 
-  #openingHero .lp-side-word-xian {
-    margin-left: -235px !important;
-  }
+  
 }
 
 /* =============================================================
@@ -3529,30 +3325,13 @@
    依使用者紅框示意，調整到約 50px 上限。
    與 Logo 的距離維持 V12，不做任何修改。
    ------------------------------------------------------------- */
-@media (min-width: 769px) {
-  #openingHero .lp-side-word-guang,
-  #openingHero .lp-side-word-xian {
-    width:
-      clamp(
-        32px,
-        3.2vw,
-        50px
-      )
-      !important;
-  }
+@media (min-width: 769px){
+  
 
   /* 明確保留 V12 距離 */
-  #openingHero .lp-side-word-guang {
-    margin-right:
-      -235px
-      !important;
-  }
+  
 
-  #openingHero .lp-side-word-xian {
-    margin-left:
-      -235px
-      !important;
-  }
+  
 
   /* -----------------------------------------------------------
      2. LP「回憶／從這裡／開始」整組往下
@@ -3565,13 +3344,7 @@
      46 × 1.10 ≈ 50.6px
      因此整組往下約 51px。
      ----------------------------------------------------------- */
-  #openingHero .interactive-area {
-    top:
-      calc(
-        57% + 51px
-      )
-      !important;
-  }
+  
 }
 
 /* -------------------------------------------------------------
@@ -3640,5 +3413,203 @@
   #memoryWallSection .memory-wall-title {
     opacity: 1;
     transform: none;
+  }
+}
+
+
+/* =============================================================
+   LP｜單一定位架構｜2026-08-18
+   -------------------------------------------------------------
+   維護原則：
+   1. 先設定 --lp-logo-center-y 決定 Logo 垂直位置。
+   2. 洸 / 限只依 Logo 中心、Logo 可視半寬與 --lp-logo-side-gap 定位。
+   3. 展覽名稱從 Logo 可視底部 + --lp-logo-title-gap 往下排列。
+   4. 「回憶／從這裡／開始」只用 --lp-title-start-gap 與 --lp-copy-line-gap。
+   5. 不再使用負 margin、translateY 補償或多層 !important。
+   6. LP 箭頭本輪不重構，仍沿用全站 .scroll-arrow-btn 規則。
+   ============================================================= */
+#openingHero {
+  --lp-logo-center-y: 33.333%;
+  --lp-logo-container-size: 750px;
+  --lp-logo-visual-half-width: 100px;
+  --lp-logo-visual-half-height: 100px;
+  --lp-logo-side-gap: 40px;
+  --lp-side-word-width: clamp(32px, 3.2vw, 50px);
+  --lp-logo-title-gap: 22px;
+  --lp-title-height: 40px;
+  --lp-title-start-gap: clamp(82px, 11vh, 102px);
+  --lp-copy-line-height: 36px;
+  --lp-copy-line-gap: 10px;
+
+  background-color: var(--surface-bg);
+  z-index: 10;
+}
+
+#openingHero .lp-logo-lockup {
+  position: absolute;
+  top: var(--lp-logo-center-y);
+  left: 0;
+  right: 0;
+  height: 0;
+  z-index: 3;
+}
+
+#openingHero .lp-logo-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--lp-logo-container-size);
+  height: var(--lp-logo-container-size);
+  transform: translate(-50%, -50%);
+}
+
+#openingHero .logo-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  clip-path: circle(0% at 50% 50%);
+  transform: scale(.7);
+  filter: blur(20px);
+  opacity: 0;
+  margin: 0;
+  will-change: clip-path, transform, filter, opacity;
+}
+
+#openingHero .logo-container svg {
+  width: 100%;
+  height: 100%;
+  animation: coralGlowPulse 4s ease-in-out infinite alternate;
+}
+
+#openingHero .lp-side-slot {
+  position: absolute;
+  top: 0;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  z-index: 4;
+}
+
+#openingHero .lp-side-slot-guang {
+  right: calc(50% + var(--lp-logo-visual-half-width) + var(--lp-logo-side-gap));
+}
+
+#openingHero .lp-side-slot-xian {
+  left: calc(50% + var(--lp-logo-visual-half-width) + var(--lp-logo-side-gap));
+}
+
+#openingHero .lp-side-word {
+  width: var(--lp-side-word-width);
+  height: auto;
+  display: block;
+  opacity: 0;
+  transform: scale(.94);
+  filter: blur(8px) drop-shadow(0 0 14px rgba(255,255,255,.08));
+  will-change: opacity, transform, filter;
+}
+
+#openingHero .lp-copy-stack {
+  position: absolute;
+  top: calc(
+    var(--lp-logo-center-y)
+    + var(--lp-logo-visual-half-height)
+    + var(--lp-logo-title-gap)
+  );
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
+#openingHero .lp-exhibition-title-wrap {
+  width: 100%;
+  height: var(--lp-title-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#openingHero .lp-exhibition-title {
+  color: var(--coral-main);
+  font-family: "Noto Serif TC", serif;
+  font-weight: 300;
+  letter-spacing: .32em;
+  line-height: 1.6;
+  white-space: nowrap;
+  opacity: 0;
+}
+
+#openingHero .interactive-area {
+  width: 100%;
+  margin-top: var(--lp-title-start-gap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--lp-copy-line-gap);
+  text-align: center;
+  pointer-events: auto;
+}
+
+#openingHero .title-wrapper,
+#openingHero .subtitle-wrapper-1,
+#openingHero .subtitle-wrapper-2 {
+  height: var(--lp-copy-line-height);
+  margin: 0;
+}
+
+#openingHero .text-line {
+  color: var(--text-main);
+  line-height: 1;
+}
+
+#openingHero .title-part1,
+#openingHero .title-part2 {
+  letter-spacing: .4em;
+  font-weight: 300;
+}
+
+#openingHero .title-part2 {
+  opacity: .9;
+}
+
+/* 防止 GSAP 初始化前文字短暫閃現。 */
+#openingHero #line1,
+#openingHero #line2,
+#openingHero #line3 {
+  opacity: 0;
+  transform: translateY(200%);
+}
+
+@media (max-width: 768px) {
+  #openingHero {
+    --lp-logo-center-y: 33.333%;
+    --lp-logo-container-size: 300px;
+    --lp-logo-visual-half-width: 60px;
+    --lp-logo-visual-half-height: 40px;
+    --lp-logo-side-gap: 25px;
+    --lp-side-word-width: clamp(22px, 6vw, 32px);
+    --lp-logo-title-gap: 18px;
+    --lp-title-height: 34px;
+    --lp-title-start-gap: clamp(88px, 12vh, 110px);
+    --lp-copy-line-height: 32px;
+    --lp-copy-line-gap: 7px;
+  }
+
+  #openingHero .lp-exhibition-title {
+    letter-spacing: .24em;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 700px) {
+  #openingHero {
+    --lp-logo-center-y: 31.5%;
+    --lp-title-start-gap: 84px;
   }
 }

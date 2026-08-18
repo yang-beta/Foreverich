@@ -46,6 +46,7 @@
 /* ① 主敘事 */
 #openingHero .title-part1,
 #openingHero .title-part2,
+#openingHero .lp-exhibition-title,
 #heroSection .banner-question-part,
 #audiovisualSection .story-line,
 #audiovisualSection #fPart1,
@@ -62,16 +63,15 @@
 #brandStorySection .brand-story-line-long,
 #brandStorySection .brand-story-final-copy,
 #brandStorySection .brand-story-final-line {
-  font-size: var(--font-display) !important;
+  font-size: var(--font-display);
 }
 
 /* ③ 標題 */
-#openingHero .lp-exhibition-title,
 #aiReconstructionSection .p4-card-title,
 #messageCardSection .p5-step-title,
 #messageCardSection .p5-ai-loading h2,
 #memoryWallSection .memory-wall-title {
-  font-size: var(--font-heading) !important;
+  font-size: var(--font-heading);
 }
 
 /* ④ 內文 */
@@ -80,7 +80,7 @@
 #messageCardSection .p5-textarea-wrap textarea,
 #messageCardSection .p5-card-copy,
 #memoryWallSection .memory-wall-quote {
-  font-size: var(--font-body) !important;
+  font-size: var(--font-body);
 }
 
 /* ⑤ 說明文字 */
@@ -95,7 +95,7 @@
 #memoryWallSection .memory-wall-loading,
 #memoryWallSection .memory-wall-empty,
 #memoryWallSection .memory-wall-error {
-  font-size: var(--font-caption) !important;
+  font-size: var(--font-caption);
 }
 
 /* ⑥ Meta／輔助資訊 */
@@ -108,12 +108,12 @@
 #messageCardSection .p5-card-stamp,
 #memoryWallSection .memory-wall-meta,
 #memoryWallSection .memory-wall-foot {
-  font-size: var(--font-meta) !important;
+  font-size: var(--font-meta);
 }
 
 /* ⑧ Micro／極小資訊 */
 #messageCardSection .p5-card-stamp small {
-  font-size: var(--font-micro) !important;
+  font-size: var(--font-micro);
 }
 
 /* ⑨ 操作按鈕／UI
@@ -129,14 +129,14 @@
 #messageCardSection .p5-mobile-exit-btn,
 #memoryWallSection .memory-wall-continue,
 #brandStorySection .brand-story-nav-btn {
-  font-size: var(--font-ui) !important;
+  font-size: var(--font-ui);
 }
 
 /* 時光小卡品牌章｜裝飾性字級
    不調整全站 Meta / Micro Token，只縮小右下品牌章本身。 */
 #messageCardSection .p5-card-stamp {
-  font-size: .54rem !important;
+  font-size: .54rem;
 }
 #messageCardSection .p5-card-stamp small {
-  font-size: .30rem !important;
+  font-size: .30rem;
 }
