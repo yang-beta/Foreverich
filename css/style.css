@@ -24,6 +24,9 @@
   /* 非品牌色：保留既有中性色 */
   --surface-bg: #1a1a1a;
   --text-main: #E6E6E8;
+
+  /* Page UI｜全站下一頁 V 箭頭 */
+  --ui-next-arrow-bottom: 15%;
 }
 
 /* =============================================================
@@ -119,7 +122,7 @@
        ============================================================= */
     .scroll-arrow-btn {
       position: absolute;
-      bottom: 15%;             /* 固定距螢幕底部 15%，確保全站跨頁一致對齊 */
+      bottom: var(--ui-next-arrow-bottom); /* 全站位置只由 Token 控制 */
       left: 50%;
       margin-left: -24px;     /* 寬度 48px 的一半，精準水平置中且不依賴 transform */
       width: 48px;
@@ -153,6 +156,16 @@
       filter: drop-shadow(0px 0px 6px rgba(230, 230, 232, 0.5));
       transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
+
+@media (max-width: 768px) {
+  :root {
+    --ui-next-arrow-bottom:
+      max(
+        5%,
+        calc(env(safe-area-inset-bottom, 0px) + 22px)
+      );
+  }
+}
 
     /* =============================================================
        1. Loading Page (LP 頁)
@@ -698,12 +711,7 @@
         right: 20px !important;
         padding: 6px 12px !important;
         }
-
-      .scroll-arrow-btn {
-        bottom: 5% !important;
-      }
-
-      .p3-copy {
+.p3-copy {
         bottom: 12%;
         width: 92%;
         gap: 8px;
@@ -3540,8 +3548,8 @@
   color: var(--coral-main);
   font-family: "Noto Serif TC", serif;
   font-weight: 300;
-  letter-spacing: .4em;
-  line-height: 1;
+  letter-spacing: .32em;
+  line-height: 1.6;
   white-space: nowrap;
   opacity: 0;
 }
@@ -3565,6 +3573,7 @@
 }
 
 #openingHero .text-line {
+  color: var(--text-main);
   line-height: 1;
 }
 
@@ -3599,6 +3608,10 @@
     --lp-title-start-gap: clamp(88px, 12vh, 110px);
     --lp-copy-line-height: 32px;
     --lp-copy-line-gap: 7px;
+  }
+
+  #openingHero .lp-exhibition-title {
+    letter-spacing: .24em;
   }
 }
 

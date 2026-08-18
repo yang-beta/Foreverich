@@ -340,21 +340,6 @@
     只把「回憶 / 從這裡 / 開始」往下，
     避免文字壓到中心 Logo。
   */
-  
-
-  
-
-  #openingHero .scroll-arrow-btn {
-    bottom:
-      max(
-        5%,
-        calc(
-          env(safe-area-inset-bottom, 0px)
-          + 22px
-        )
-      )
-      !important;
-  }
 }
 
 
