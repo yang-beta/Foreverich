@@ -914,8 +914,9 @@
   transform-origin: 800px 450px;
 }
 .p5-entry-wave-bg .p5-horn-short {
-  opacity: .68;
-  stroke: rgba(230, 230, 232, .58);
+  /* 2026-08-18：移除外層喇叭後方兩組短喇叭圓環。
+     僅隱藏 short groups；full horns / glow / reveal / drift 動畫完全保留。 */
+  display: none;
 }
 .p5-entry-wave-bg .p5-horn-full {
   opacity: .92;
@@ -1952,11 +1953,16 @@
 .p5-card-copy {
   margin: auto 0;
   border: 0;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
   font-weight:400; font-family:"Noto Serif TC",serif;
-  line-height: 2.15;
-  letter-spacing: .1em;
+  line-height: 1.95;
+  letter-spacing: .08em;
   text-align: left;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .p5-card-bottomline {
   display: flex;
@@ -1970,16 +1976,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 62px;
-  height: 62px;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
   border: 1px solid rgba(var(--coral-main-rgb), .55);
   border-radius: 50%;
   color: rgba(var(--coral-light-rgb), .82);
   font-weight:600; font-family:"Noto Serif TC",serif;
-  letter-spacing: .16em;
+  letter-spacing: .1em;
+  line-height: 1.05;
   transform: rotate(-8deg);
 }
-.p5-card-stamp small { margin-top: 2px; font-weight:400; font-family:"Noto Sans TC",sans-serif; letter-spacing: .06em; }
+.p5-card-stamp small {
+  margin-top: 2px;
+  font-weight:400;
+  font-family:"Noto Sans TC",sans-serif;
+  letter-spacing: .02em;
+  line-height: 1;
+  white-space: nowrap;
+}
 
 .p5-card-actions,
 .p5-outro-actions {
@@ -3585,4 +3600,39 @@
 
   white-space:
     nowrap;
+}
+
+/* =============================================================
+   2026-08-18｜桌機洸語牆垂直置中修正
+   -------------------------------------------------------------
+   舊 final patch 使用 92vh 並再加上下 padding，會讓 3×4 卡片區
+   視覺上貼近上緣。桌機改為較合理的整體高度並由 section 真正置中。
+   平板／手機沿用 mobile-fixes.css，不受此規則影響。
+   ============================================================= */
+@media (min-width: 1101px) {
+  #memoryWallSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #memoryWallSection .memory-wall-shell {
+    width: min(1420px, 86vw) !important;
+    height: min(88vh, 760px) !important;
+    box-sizing: border-box;
+    margin: auto !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  #memoryWallSection .memory-wall-header {
+    margin-bottom: clamp(10px, 1.6vh, 16px) !important;
+  }
+
+  /* memory-wall-title 使用共用 ui-line-content 結構，但本頁沒有文字滑入 timeline；
+     直接固定為可見狀態，避免標題保留初始 opacity/translateY。 */
+  #memoryWallSection .memory-wall-title {
+    opacity: 1;
+    transform: none;
+  }
 }

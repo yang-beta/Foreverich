@@ -131,3 +131,12 @@
 #brandStorySection .brand-story-nav-btn {
   font-size: var(--font-ui) !important;
 }
+
+/* 時光小卡品牌章｜裝飾性字級
+   不調整全站 Meta / Micro Token，只縮小右下品牌章本身。 */
+#messageCardSection .p5-card-stamp {
+  font-size: .54rem !important;
+}
+#messageCardSection .p5-card-stamp small {
+  font-size: .30rem !important;
+}
