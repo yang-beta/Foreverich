@@ -914,14 +914,20 @@
   transform-origin: 800px 450px;
 }
 .p5-entry-wave-bg .p5-horn-short {
-  /* 2026-08-18：移除外層喇叭後方兩組短喇叭圓環。
-     僅隱藏 short groups；full horns / glow / reveal / drift 動畫完全保留。 */
-  display: none;
+  opacity: .68;
+  stroke: rgba(230, 230, 232, .58);
 }
 .p5-entry-wave-bg .p5-horn-full {
   opacity: .92;
   stroke: rgba(230, 230, 232, .62);
   will-change: transform;
+}
+
+/* 2026-08-18｜P5 喇叭背景整理
+   只移除長喇叭後方的外層 glow 圓弧。
+   short / full horn 本體與 reveal / drift 動畫保持原狀。 */
+.p5-entry-wave-bg .p5-horn-glow-layer {
+  display: none;
 }
 
 
