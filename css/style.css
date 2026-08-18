@@ -3571,12 +3571,13 @@
 }
 
 #openingHero .text-line {
-  color: var(--text-main);
+ 
   line-height: 1;
 }
 
 #openingHero .title-part1,
 #openingHero .title-part2 {
+  color: var(--text-main);
   letter-spacing: .4em;
   font-weight: 300;
 }
