@@ -43,6 +43,15 @@
   }
 }
 
+
+/* -------------------------------------------------------------
+   P6 時光小卡 Modal scope
+   -------------------------------------------------------------
+   #p5CardModal 在開啟時會由 JS 移到 document.body，
+   因此 Modal 內文字不可使用 #messageCardSection 作為祖先 selector。
+   所有 Modal Typography 統一以 #p5CardModal 為 scope。
+   ------------------------------------------------------------- */
+
 /* ① 主敘事 */
 #openingHero .title-part1,
 #openingHero .title-part2,
@@ -58,7 +67,7 @@
 #aiReconstructionSection .p4-header-line,
 #aiReconstructionSection .p4-footer-text,
 #messageEntrySection .p5-entry-line,
-#messageCardSection .p5-outro-line,
+#p5CardModal .p5-outro-line,
 #brandStorySection .brand-story-line,
 #brandStorySection .brand-story-line-long,
 #brandStorySection .brand-story-final-copy,
@@ -69,7 +78,7 @@
 /* ③ 標題 */
 #aiReconstructionSection .p4-card-title,
 #messageCardSection .p5-step-title,
-#messageCardSection .p5-ai-loading h2,
+#p5CardModal .p5-ai-loading h2,
 #memoryWallSection .memory-wall-title {
   font-size: var(--font-heading);
 }
@@ -78,7 +87,7 @@
 #aiReconstructionSection .p4-card-description,
 #messageCardSection .p5-custom-target-wrap input,
 #messageCardSection .p5-textarea-wrap textarea,
-#messageCardSection .p5-card-copy,
+#p5CardModal .p5-card-copy,
 #memoryWallSection .memory-wall-quote {
   font-size: var(--font-body);
 }
@@ -90,8 +99,8 @@
 #messageCardSection .p5-textarea-wrap textarea::placeholder,
 #messageCardSection .p5-field-note,
 #messageCardSection .p5-validation-message,
-#messageCardSection .p5-ai-loading p,
-#messageCardSection .p5-send-status,
+#p5CardModal .p5-ai-loading p,
+#p5CardModal .p5-send-status,
 #memoryWallSection .memory-wall-loading,
 #memoryWallSection .memory-wall-empty,
 #memoryWallSection .memory-wall-error {
@@ -103,16 +112,16 @@
 #messageCardSection .p5-step-number,
 #messageCardSection .p5-char-count,
 #messageCardSection .p5-tag-group-label,
-#messageCardSection .p5-card-tags,
-#messageCardSection .p5-card-bottomline,
-#messageCardSection .p5-card-stamp,
+#p5CardModal .p5-card-tags,
+#p5CardModal .p5-card-bottomline,
+#p5CardModal .p5-card-stamp,
 #memoryWallSection .memory-wall-meta,
 #memoryWallSection .memory-wall-foot {
   font-size: var(--font-meta);
 }
 
 /* ⑧ Micro／極小資訊 */
-#messageCardSection .p5-card-stamp small {
+#p5CardModal .p5-card-stamp small {
   font-size: var(--font-micro);
 }
 
@@ -122,9 +131,9 @@
 #messageEntrySection .p5-entry-option-copy strong,
 #messageCardSection .p5-pill,
 #messageCardSection .p5-generate-btn,
-#messageCardSection .p5-card-action,
-#messageCardSection .p5-outro-btn,
-#messageCardSection .p5-modal-close,
+#p5CardModal .p5-card-action,
+#p5CardModal .p5-outro-btn,
+#p5CardModal .p5-modal-close,
 #messageCardSection .p5-mobile-exit-nav button,
 #messageCardSection .p5-mobile-exit-btn,
 #memoryWallSection .memory-wall-continue,
@@ -132,11 +141,3 @@
   font-size: var(--font-ui);
 }
 
-/* 時光小卡品牌章｜裝飾性字級
-   不調整全站 Meta / Micro Token，只縮小右下品牌章本身。 */
-#messageCardSection .p5-card-stamp {
-  font-size: .54rem;
-}
-#messageCardSection .p5-card-stamp small {
-  font-size: .30rem;
-}

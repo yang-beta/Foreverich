@@ -3545,6 +3545,7 @@
 }
 
 #openingHero .lp-exhibition-title {
+  /* 字級不在此設定：與 P1 主敘事共用 typography.css 的 --font-display。 */
   color: var(--coral-main);
   font-family: "Noto Serif TC", serif;
   font-weight: 300;
