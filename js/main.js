@@ -737,18 +737,24 @@
       /*
         洸語牆左右延伸卡片
         -------------------------------------------------------------
-        不再使用假文字。
-        中央區域顯示最新 12 筆；
-        左右延伸區另外查詢資料庫最舊 6 筆：
-        - 左側 3 筆
-        - 右側 3 筆
-
-        卡片 DOM 格式與真實留言一致，但：
+        固定使用 6 張不可讀的假留言作為純視覺延伸：
+        - 左側 3 張
+        - 右側 3 張
+        - 不依賴 Supabase 筆數或最舊資料查詢
         - aria-hidden=true
         - 不設定 tabIndex / role
         - 不掛 click / keydown
-        因此純視覺展示，不能點擊開卡。
+        因此永遠只作為背景延伸，不會混入真實留言。
       */
+      const GHOST_WALL_ITEMS = [
+        {text:'[ႵႠႪႨ] ႫႤႱႠႾႱႭႥႰႤႡႠ ႨႱႤႥ ႠჂႡႰႳႬႣႤႡႠ (ႢႠႭႵႪႨႫႨ · ႣႰႭႨႱ ႼႤႰႨႪႨ)'},
+        {text:'[ᚨᚾᛞᚨ] ᛗᛁᚾᚾᛁᚾᚷ ᛚᛁᚷᚷᛖᚱ ᛁ ᛚᛃᚢᛋᛖᛏ (ᚷᚨᚢᚲᛚᛁᛗᛁ · ᛏᛁᛞᛋᛗᛁᚾᚾᛖ)'},
+        {text:'[Արեւ] յիշողութիւնը մեղմօրէն կը վերադառնայ (լոյս · ժամանակի նամակ)'},
+        {text:'[ႫႦႤ] ႱႨႧႡႭ ႿႤႰ ႩႨႣႤႥ ႠႵ ႰႹႤႡႠ (ႢႠႭႵႪႨႫႨ · ႣႰႭႨႱ ႼႤႰႨႪႨ)'},
+        {text:'[ᛚᛃᚢᛋ] ᛖᛏᛏ ᛋᛈᛟᚱ ᚨᚡ ᛏᛁᛞ ᚠᛁᚾᚾᛋ ᚲᚡᚨᚱ (ᚷᚨᚢᚲᛚᛁᛗᛁ · ᛏᛁᛞᛋᛗᛁᚾᚾᛖ)'},
+        {text:'[Լոյս] ջերմութիւնը դեռ կը մնայ յիշողութեան մէջ (լոյս · ժամանակի նամակ)'}
+      ];
+
       function resolveWallTheme(targetText=''){
         const raw=String(targetText||'');
         if(/長輩|祖父|祖母|阿公|阿嬤|爺爺|奶奶|外公|外婆/.test(raw)) return 'elder';
@@ -804,9 +810,7 @@
         return card;
       }
 
-      function ensureGhostWallColumns(
-        oldestItems=[]
-      ){
+      function ensureGhostWallColumns(){
         const carousel=
           grid.closest(
             '.memory-wall-carousel'
@@ -822,8 +826,6 @@
             el=>el.remove()
           );
 
-        if(!oldestItems?.length) return;
-
         const left=
           document.createElement('div');
 
@@ -836,7 +838,7 @@
         right.className=
           'memory-wall-ghost-column memory-wall-ghost-right';
 
-        oldestItems
+        GHOST_WALL_ITEMS
           .slice(0,3)
           .forEach(
             item=>
@@ -845,7 +847,7 @@
               )
           );
 
-        oldestItems
+        GHOST_WALL_ITEMS
           .slice(3,6)
           .forEach(
             item=>
@@ -913,58 +915,24 @@
           const client=window.getRemembranceSupabaseClient?.();
           if(!client) throw new Error('SUPABASE_CLIENT_UNAVAILABLE');
 
-          /*
-            同時取得：
-            1. 最新 12 筆 → 中央真實留言
-            2. 最舊 6 筆 → 左右視覺延伸卡片
-          */
-          const [
-            latestResult,
-            oldestResult
-          ]=await Promise.all([
-            client
-              .from('remembrance-db')
-              .select('*')
-              .order(
-                'created_at',
-                {ascending:false}
-              )
-              .limit(12),
-
-            client
-              .from('remembrance-db')
-              .select('*')
-              .order(
-                'created_at',
-                {ascending:true}
-              )
-              .limit(6)
-          ]);
+          /* 中央區域只查詢最新 12 筆真實留言；左右假留言固定由前端產生。 */
+          const latestResult=await client
+            .from('remembrance-db')
+            .select('*')
+            .order(
+              'created_at',
+              {ascending:false}
+            )
+            .limit(12);
 
           if(latestResult.error){
             throw latestResult.error;
-          }
-
-          if(oldestResult.error){
-            /*
-              左右延伸卡片失敗不應讓整面牆一起失效。
-              中央最新 12 筆仍正常顯示。
-            */
-            console.warn(
-              '洸語牆最舊 6 筆讀取失敗:',
-              oldestResult.error
-            );
           }
 
           if(token!==fetchToken) return;
 
           const data=
             latestResult.data||[];
-
-          const oldestData=
-            oldestResult.error
-              ?[]
-              :(oldestResult.data||[]);
 
           grid.replaceChildren();
 
@@ -977,7 +945,7 @@
                 '牆上還沒有思念，等待第一道微光。'
               );
             grid.appendChild(el);
-            ensureGhostWallColumns(oldestData);
+            ensureGhostWallColumns();
             return;
           }
 
@@ -992,9 +960,7 @@
 
           grid.scrollLeft=0;
 
-          ensureGhostWallColumns(
-            oldestData
-          );
+          ensureGhostWallColumns();
 
           requestAnimationFrame(
             updateWallNav

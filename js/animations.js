@@ -271,20 +271,64 @@
       const pageRect =
         page.getBoundingClientRect();
 
-      const rect =
+      const leftBracket =
+        finalCopy.querySelector(
+          '.brand-story-final-bracket-left'
+        );
+
+      const rightBracket =
+        finalCopy.querySelector(
+          '.brand-story-final-bracket-right'
+        );
+
+      const leftRect =
+        leftBracket?.getBoundingClientRect();
+
+      const rightRect =
+        rightBracket?.getBoundingClientRect();
+
+      const copyRect =
         finalCopy.getBoundingClientRect();
+
+      /*
+        清晰對焦區改以左右［ ］的實際外緣計算，
+        不再使用 final-copy 的 86vw 寬容器。
+      */
+      const focusLeft =
+        leftRect
+          ?leftRect.left
+          :copyRect.left;
+
+      const focusRight =
+        rightRect
+          ?rightRect.right
+          :copyRect.right;
+
+      const focusTop =
+        Math.min(
+          leftRect?.top ?? copyRect.top,
+          rightRect?.top ?? copyRect.top,
+          copyRect.top
+        );
+
+      const focusBottom =
+        Math.max(
+          leftRect?.bottom ?? copyRect.bottom,
+          rightRect?.bottom ?? copyRect.bottom,
+          copyRect.bottom
+        );
 
       const left =
         Math.max(
           0,
-          rect.left -
+          focusLeft -
           pageRect.left
         );
 
       const top =
         Math.max(
           0,
-          rect.top -
+          focusTop -
           pageRect.top
         );
 
@@ -300,12 +344,12 @@
 
       page.style.setProperty(
         '--focus-width',
-        `${rect.width}px`
+        `${Math.max(0, focusRight - focusLeft)}px`
       );
 
       page.style.setProperty(
         '--focus-height',
-        `${rect.height}px`
+        `${Math.max(0, focusBottom - focusTop)}px`
       );
     }
 
