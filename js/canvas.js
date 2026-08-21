@@ -827,6 +827,11 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           mobileWidth: 280, 
           particleGap: 2.0 
           },
+        'lost.png': {
+          desktopWidth: 500,
+          mobileWidth: 280,
+          particleGap: 2.0
+        },
       'left.png': {
           desktopWidth: 500,
           mobileWidth: 300,
