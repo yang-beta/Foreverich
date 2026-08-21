@@ -778,7 +778,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       sandCanvas.height = window.innerHeight * DPR;
     }
 
-    // P2 沙畫圖片順序固定；四張圖片仍使用隨機位置配置。
+    // P2 前四張故事圖順序固定，且只會出現在畫面四周，不再使用中央位置。
     const P2_IMAGE_SEQUENCE = [
       './img/teaching.png',
       './img/helping.png',
@@ -789,18 +789,24 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // 四張圖分別與四組故事文字同步開始。
     const P2_IMAGE_START_TIMES = [1.5, 7.1, 12.7, 18.3];
 
-    const PLUM_POSITIONS = [
+    const P2_STORY_POSITIONS = [
       { xRatio: 0.25, yRatio: 0.30 },
       { xRatio: 0.75, yRatio: 0.30 },
       { xRatio: 0.25, yRatio: 0.70 },
-      { xRatio: 0.75, yRatio: 0.70 },
-      { xRatio: 0.50, yRatio: 0.50 }
+      { xRatio: 0.75, yRatio: 0.70 }
+    ];
+
+    // 結尾金句開始於 23.9 秒；左右兩張點點圖會與文字同步形成。
+    const P2_FINAL_IMAGE_START_TIME = 23.9;
+    const P2_FINAL_IMAGES = [
+      { src: './img/left.png', xRatio: 0.16, yRatio: 0.50 },
+      { src: './img/right.png', xRatio: 0.84, yRatio: 0.50 }
     ];
 
     let floatingDustParticles = [];
     let sandImageParticleGroups = [];
     let sandGlobalProgress = { t: 0 };
-    let totalAnimationDuration = 26.3;
+    let totalAnimationDuration = 29.3;
     let isSandAssetsReady = false;
     let sandAssetsPromise = null;
     let p2TextTimeline = null;
@@ -1009,7 +1015,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     }
 
     function shuffleP2Positions() {
-      return [...PLUM_POSITIONS]
+      return [...P2_STORY_POSITIONS]
         .sort(() => Math.random() - 0.5)
         .slice(0, P2_IMAGE_SEQUENCE.length);
     }
@@ -1019,19 +1025,33 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
       sandAssetsPromise = (async () => {
         floatingDustParticles = Array.from({ length: 45 }, () => new FloatingDust());
-        const positions = shuffleP2Positions();
+        const storyPositions = shuffleP2Positions();
+        const imageItems = [
+          ...P2_IMAGE_SEQUENCE.map((src, index) => ({
+            src,
+            startTime: P2_IMAGE_START_TIMES[index],
+            ...storyPositions[index]
+          })),
+          ...P2_FINAL_IMAGES.map((item) => ({
+            ...item,
+            startTime: P2_FINAL_IMAGE_START_TIME,
+            isFinalSideImage: true
+          }))
+        ];
 
-        const loadPromises = P2_IMAGE_SEQUENCE.map((src, index) => new Promise((resolve) => {
+        const loadPromises = imageItems.map((item) => new Promise((resolve) => {
           const img = new Image();
-          img.src = src;
+          img.src = item.src;
           img.onload = () => {
             const isMobile = window.innerWidth <= 768;
-            const targetWidth = (isMobile ? 260 : 420) * DPR;
+            const targetWidth = (item.isFinalSideImage
+              ? (isMobile ? 150 : 300)
+              : (isMobile ? 260 : 420)) * DPR;
             const scale = targetWidth / img.width;
             const imgW = img.width * scale;
             const imgH = img.height * scale;
-            const finalX = positions[index].xRatio * sandCanvas.width;
-            const finalY = positions[index].yRatio * sandCanvas.height;
+            const finalX = item.xRatio * sandCanvas.width;
+            const finalY = item.yRatio * sandCanvas.height;
 
             const offscreen = document.createElement('canvas');
             offscreen.width = sandCanvas.width;
@@ -1049,14 +1069,14 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
                 const alpha = data[pixelIndex + 3];
                 const brightness = (data[pixelIndex] + data[pixelIndex + 1] + data[pixelIndex + 2]) / 3;
                 if (alpha > 50 && brightness < 230) {
-                  particles.push(new SandParticle(x, y, P2_IMAGE_START_TIMES[index]));
+                  particles.push(new SandParticle(x, y, item.startTime));
                 }
               }
             }
             resolve(particles);
           };
           img.onerror = () => {
-            console.error(`P2 沙畫圖片載入失敗：${src}`);
+            console.error(`P2 沙畫圖片載入失敗：${item.src}`);
             resolve([]);
           };
         }));
