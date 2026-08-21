@@ -3416,6 +3416,11 @@
     margin-bottom: clamp(10px, 1.6vh, 16px) !important;
   }
 
+  /* 卡片 hover 會向上浮起 3px；允許超出 grid，避免第一排頂部被裁切。 */
+  #memoryWallSection .memory-wall-grid {
+    overflow: visible !important;
+  }
+
   /* memory-wall-title 使用共用 ui-line-content 結構，但本頁沒有文字滑入 timeline；
      直接固定為可見狀態，避免標題保留初始 opacity/translateY。 */
   #memoryWallSection .memory-wall-title {
