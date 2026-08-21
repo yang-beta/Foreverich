@@ -781,7 +781,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // P2 前四張故事圖順序固定，且只會出現在畫面四周，不再使用中央位置。
     const P2_IMAGE_SEQUENCE = [
       './img/teaching.png',
-      './img/helping.png',
+      './img/hi5.png',
       './img/gathering.png',
       './img/lost.png'
     ];
@@ -812,12 +812,12 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // desktopWidth / mobileWidth：數字越大，圖形越大。
     // particleGap：數字越小，沙點越密；建議使用 2～3，低於 2 可能明顯增加負擔。
     const P2_IMAGE_RENDER_DEFAULTS = {
-      story: { desktopWidth: 420, mobileWidth: 260, particleGap: 3 },
+      story: { desktopWidth: 420, mobileWidth: 260, particleGap: 2 },
       finalSide: { desktopWidth: 300, mobileWidth: 150, particleGap: 3 }
     };
 
     const P2_IMAGE_RENDER_OVERRIDES = {
-      'gathering.png': { desktopWidth: 600, mobileWidth: 340, particleGap: 2 }
+      'gathering.png': { desktopWidth: 600, mobileWidth: 340, particleGap: 2.5 }
       // 範例：
       // 'another-image.png': { desktopWidth: 520, mobileWidth: 300, particleGap: 2.5 }
     };
