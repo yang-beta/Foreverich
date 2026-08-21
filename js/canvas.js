@@ -1029,7 +1029,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       if (sandAssetsPromise) return sandAssetsPromise;
 
       sandAssetsPromise = (async () => {
-        floatingDustParticles = Array.from({ length: 45 }, () => new FloatingDust());
+        floatingDustParticles = Array.from({ length: 65 }, () => new FloatingDust());
         const storyPositions = shuffleP2Positions();
         const imageItems = [
           ...P2_IMAGE_SEQUENCE.map((src, index) => ({
@@ -1066,7 +1066,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
             const data = offCtx.getImageData(0, 0, sandCanvas.width, sandCanvas.height).data;
             const particles = [];
-            const gap = Math.round(3 * DPR);
+            const gap = Math.round(2 * DPR);
 
             for (let y = 0; y < sandCanvas.height; y += gap) {
               for (let x = 0; x < sandCanvas.width; x += gap) {
