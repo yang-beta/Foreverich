@@ -839,10 +839,11 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     }
 
     class SandParticle {
-      constructor(targetX, targetY, delay) {
+      constructor(targetX, targetY, delay, stayVisible = false) {
         this.targetX = targetX;
         this.targetY = targetY;
         this.delay = delay;
+        this.stayVisible = stayVisible;
         this.startX = -Math.random() * sandCanvas.width * 0.4 - 50;
         this.startY = targetY + (Math.random() - 0.5) * 200 * DPR;
         this.endX = sandCanvas.width + Math.random() * sandCanvas.width * 0.4 + 50;
@@ -857,7 +858,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       }
       update(totalElapsedSec) {
         const localTime = totalElapsedSec - this.delay;
-        if (localTime < 0 || localTime > 7.5) { this.alpha = 0; return; }
+        if (localTime < 0 || (!this.stayVisible && localTime > 7.5)) { this.alpha = 0; return; }
         const progress = localTime / 7.5;
 
         if (progress < 0.25) {
@@ -865,9 +866,13 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           this.x = this.startX + (this.targetX - this.startX) * (1 - Math.pow(1 - p, 2));
           this.y = this.startY + (this.targetY - this.startY) * (1 - Math.pow(1 - p, 2));
           this.alpha = Math.min(1, p * 1.5) * this.baseAlpha;
-        } else if (progress <= 0.70) {
-          this.x = this.targetX + Math.sin(Date.now() * 0.003 + this.targetY) * this.noiseX;
-          this.y = this.targetY + Math.cos(Date.now() * 0.003 + this.targetX) * this.noiseY;
+        } else if (this.stayVisible || progress <= 0.70) {
+          this.x = this.stayVisible
+            ? this.targetX
+            : this.targetX + Math.sin(Date.now() * 0.003 + this.targetY) * this.noiseX;
+          this.y = this.stayVisible
+            ? this.targetY
+            : this.targetY + Math.cos(Date.now() * 0.003 + this.targetX) * this.noiseY;
           this.alpha = this.baseAlpha;
         } else {
           const p = (progress - 0.70) / 0.30;
@@ -1069,7 +1074,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
                 const alpha = data[pixelIndex + 3];
                 const brightness = (data[pixelIndex] + data[pixelIndex + 1] + data[pixelIndex + 2]) / 3;
                 if (alpha > 50 && brightness < 230) {
-                  particles.push(new SandParticle(x, y, item.startTime));
+                  particles.push(new SandParticle(x, y, item.startTime, item.isFinalSideImage));
                 }
               }
             }
