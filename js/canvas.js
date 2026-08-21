@@ -782,7 +782,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     const P2_IMAGE_SEQUENCE = [
       './img/teaching.png',
       './img/hi5.png',
-      './img/forever.png',
+      './img/gathering.png',
       './img/lost.png'
     ];
 
