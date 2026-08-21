@@ -813,24 +813,24 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // particleGap：數字越小，沙點越密；建議使用 2～3，低於 2 可能明顯增加負擔。
     const P2_IMAGE_RENDER_DEFAULTS = {
       story: { desktopWidth: 420, mobileWidth: 260, particleGap: 2 },
-      finalSide: { desktopWidth: 300, mobileWidth: 150, particleGap: 3 }
+      finalSide: { desktopWidth: 300, mobileWidth: 150, particleGap: 2 }
     };
 
     const P2_IMAGE_RENDER_OVERRIDES = {
       'gathering.png': { 
           desktopWidth: 600, 
           mobileWidth: 340, 
-          particleGap: 2.5 
+          particleGap: 2.0 
           },
       'left.png': {
-          desktopWidth: 340,
-          mobileWidth: 170,
-          particleGap: 2
+          desktopWidth: 500,
+          mobileWidth: 300,
+          particleGap: 2.0
         },
         'right.png': {
-          desktopWidth: 340,
-          mobileWidth: 170,
-          particleGap: 2
+          desktopWidth: 600,
+          mobileWidth: 300,
+          particleGap: 2.0
         }
       // 範例：
       // 'another-image.png': { desktopWidth: 520, mobileWidth: 300, particleGap: 2.5 }
