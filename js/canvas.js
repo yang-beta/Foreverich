@@ -817,7 +817,21 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     };
 
     const P2_IMAGE_RENDER_OVERRIDES = {
-      'gathering.png': { desktopWidth: 600, mobileWidth: 340, particleGap: 2.5 }
+      'gathering.png': { 
+          desktopWidth: 600, 
+          mobileWidth: 340, 
+          particleGap: 2.5 
+          },
+      'left.png': {
+          desktopWidth: 340,
+          mobileWidth: 170,
+          particleGap: 2
+        },
+        'right.png': {
+          desktopWidth: 340,
+          mobileWidth: 170,
+          particleGap: 2
+        }
       // 範例：
       // 'another-image.png': { desktopWidth: 520, mobileWidth: 300, particleGap: 2.5 }
     };
