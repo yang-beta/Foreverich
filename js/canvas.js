@@ -781,7 +781,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // P2 前四張故事圖順序固定，且只會出現在畫面四周，不再使用中央位置。
     const P2_IMAGE_SEQUENCE = [
       './img/teaching.png',
-      './img/hi5.png',
+      './img/helping.png',
       './img/gathering.png',
       './img/lost.png'
     ];
@@ -802,6 +802,33 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       { src: './img/left.png', xRatio: 0.16, yRatio: 0.50 },
       { src: './img/right.png', xRatio: 0.84, yRatio: 0.50 }
     ];
+
+    // =============================================================
+    // P2 單張沙畫圖片尺寸／密度設定
+    // -------------------------------------------------------------
+    // 未列在 P2_IMAGE_RENDER_OVERRIDES 的圖片，會自動使用 DEFAULTS。
+    // 新增調整時只需照 gathering.png 的格式增加一行：
+    // '檔名.png': { desktopWidth: 桌機寬度, mobileWidth: 手機寬度, particleGap: 取樣間距 }
+    // desktopWidth / mobileWidth：數字越大，圖形越大。
+    // particleGap：數字越小，沙點越密；建議使用 2～3，低於 2 可能明顯增加負擔。
+    const P2_IMAGE_RENDER_DEFAULTS = {
+      story: { desktopWidth: 420, mobileWidth: 260, particleGap: 3 },
+      finalSide: { desktopWidth: 300, mobileWidth: 150, particleGap: 3 }
+    };
+
+    const P2_IMAGE_RENDER_OVERRIDES = {
+      'gathering.png': { desktopWidth: 600, mobileWidth: 340, particleGap: 2 }
+      // 範例：
+      // 'another-image.png': { desktopWidth: 520, mobileWidth: 300, particleGap: 2.5 }
+    };
+
+    function getP2ImageRenderSettings(item) {
+      const fileName = item.src.split('/').pop().split('?')[0];
+      const defaults = item.isFinalSideImage
+        ? P2_IMAGE_RENDER_DEFAULTS.finalSide
+        : P2_IMAGE_RENDER_DEFAULTS.story;
+      return { ...defaults, ...(P2_IMAGE_RENDER_OVERRIDES[fileName] || {}) };
+    }
 
     let floatingDustParticles = [];
     let sandImageParticleGroups = [];
@@ -1029,7 +1056,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
       if (sandAssetsPromise) return sandAssetsPromise;
 
       sandAssetsPromise = (async () => {
-        floatingDustParticles = Array.from({ length: 65 }, () => new FloatingDust());
+        floatingDustParticles = Array.from({ length: 45 }, () => new FloatingDust());
         const storyPositions = shuffleP2Positions();
         const imageItems = [
           ...P2_IMAGE_SEQUENCE.map((src, index) => ({
@@ -1049,9 +1076,10 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
           img.src = item.src;
           img.onload = () => {
             const isMobile = window.innerWidth <= 768;
-            const targetWidth = (item.isFinalSideImage
-              ? (isMobile ? 150 : 300)
-              : (isMobile ? 260 : 420)) * DPR;
+            const renderSettings = getP2ImageRenderSettings(item);
+            const targetWidth = (isMobile
+              ? renderSettings.mobileWidth
+              : renderSettings.desktopWidth) * DPR;
             const scale = targetWidth / img.width;
             const imgW = img.width * scale;
             const imgH = img.height * scale;
@@ -1066,7 +1094,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
             const data = offCtx.getImageData(0, 0, sandCanvas.width, sandCanvas.height).data;
             const particles = [];
-            const gap = Math.round(2 * DPR);
+            const gap = Math.max(1, Math.round(renderSettings.particleGap * DPR));
 
             for (let y = 0; y < sandCanvas.height; y += gap) {
               for (let x = 0; x < sandCanvas.width; x += gap) {
