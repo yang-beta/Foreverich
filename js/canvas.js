@@ -780,10 +780,10 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
 
     // P2 沙畫圖片順序固定；四張圖片仍使用隨機位置配置。
     const P2_IMAGE_SEQUENCE = [
-      './img/lovers-l.png',
-      './img/fistBump.png',
-      './img/grandmom-l.png',
-      './img/dog-l.png'
+      './img/teaching.png',
+      './img/helping.png',
+      './img/forever.png',
+      './img/lost.png'
     ];
 
     // 四張圖分別與四組故事文字同步開始。
