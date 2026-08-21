@@ -781,7 +781,7 @@ const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     // P2 前四張故事圖順序固定，且只會出現在畫面四周，不再使用中央位置。
     const P2_IMAGE_SEQUENCE = [
       './img/teaching.png',
-      './img/helping.png',
+      './img/hi5.png',
       './img/forever.png',
       './img/lost.png'
     ];
